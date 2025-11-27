@@ -413,9 +413,9 @@ MIT License - 详见 [LICENSE](LICENSE)
 
 ## 📞 联系方式
 
-- 📧 Email: [your-email@example.com]
-- 🐙 GitHub: [your-github-url]
-- 💬 讨论: [GitHub Discussions]
+- 📧 Email: 1339731209@qq.com
+- 🐙 GitHub: https://github.com/ardss/fastapi-easy
+- 💬 讨论: https://github.com/ardss/fastapi-easy/discussions
 
 ---
 
