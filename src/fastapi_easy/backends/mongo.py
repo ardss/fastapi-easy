@@ -6,10 +6,13 @@ from ..core.errors import ConflictError, AppError, ErrorCode
 
 try:
     from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorCollection
-    from pymongo.errors import DuplicateKeyError
 except ImportError:
     AsyncIOMotorDatabase = Any  # type: ignore
     AsyncIOMotorCollection = Any  # type: ignore
+
+try:
+    from pymongo.errors import DuplicateKeyError
+except ImportError:
     DuplicateKeyError = Exception  # type: ignore
 
 
