@@ -23,7 +23,7 @@
 | 核心模块 | 16 个 |
 | 测试覆盖率 | 94% |
 | 文档行数 | 4000+ 行 |
-| ORM 支持 | SQLAlchemy + Tortoise |
+| ORM 支持 | SQLAlchemy, Tortoise, MongoDB, SQLModel (4 种) |
 | 功能数量 | 23 个 |
 
 ---
@@ -112,6 +112,8 @@ fastapi-easy/
 │   ├── backends/                       # ORM 后端
 │   │   ├── sqlalchemy.py               # SQLAlchemy 适配器
 │   │   ├── tortoise.py                 # Tortoise 适配器
+│   │   ├── mongo.py                    # MongoDB 适配器
+│   │   ├── sqlmodel.py                 # SQLModel 适配器
 │   │   └── __init__.py
 │   ├── middleware/                     # 中间件系统
 │   │   ├── base.py
