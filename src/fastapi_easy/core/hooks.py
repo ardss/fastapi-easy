@@ -1,6 +1,6 @@
 """Hook system for FastAPI-Easy"""
 
-from typing import Callable, Dict, List, Any
+from typing import Callable, Dict, List, Any, Optional
 from dataclasses import dataclass, field
 
 
@@ -106,6 +106,14 @@ class HookRegistry:
             List of callbacks
         """
         return self.hooks.get(event, [])
+    
+    def get_all(self) -> Dict[str, List[Callable]]:
+        """Get all hooks
+        
+        Returns:
+            Dictionary of all hooks
+        """
+        return self.hooks.copy()
     
     def clear(self, event: Optional[str] = None) -> None:
         """Clear hooks
