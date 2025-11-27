@@ -104,30 +104,43 @@ class SQLAlchemyAdapter(BaseORMAdapter):
         Returns:
             List of items
         """
-        async with self.session_factory() as session:
-            query = select(self.model)
-            
-            # Apply filters (using extracted method)
-            query = self._apply_filters(query, filters)
-            
-            # Apply sorting
-            for field_name, direction in sorts.items():
-                field = getattr(self.model, field_name, None)
-                if field is None:
-                    continue
+        try:
+            async with self.session_factory() as session:
+                query = select(self.model)
                 
-                if direction == "desc":
-                    query = query.order_by(field.desc())
-                else:
-                    query = query.order_by(field.asc())
-            
-            # Apply pagination
-            skip = pagination.get("skip", 0)
-            limit = pagination.get("limit", 10)
-            query = query.offset(skip).limit(limit)
-            
-            result = await session.execute(query)
-            return result.scalars().all()
+                # Apply filters (using extracted method)
+                query = self._apply_filters(query, filters)
+                
+                # Apply sorting
+                for field_name, direction in sorts.items():
+                    field = getattr(self.model, field_name, None)
+                    if field is None:
+                        continue
+                    
+                    if direction == "desc":
+                        query = query.order_by(field.desc())
+                    else:
+                        query = query.order_by(field.asc())
+                
+                # Apply pagination
+                skip = pagination.get("skip", 0)
+                limit = pagination.get("limit", 10)
+                query = query.offset(skip).limit(limit)
+                
+                result = await session.execute(query)
+                return result.scalars().all()
+        except ValueError as e:
+            raise AppError(
+                code=ErrorCode.INTERNAL_ERROR,
+                status_code=500,
+                message=f"Database error: {str(e)}"
+            )
+        except SQLAlchemyError as e:
+            raise AppError(
+                code=ErrorCode.INTERNAL_ERROR,
+                status_code=500,
+                message=f"Database error: {str(e)}"
+            )
     
     async def get_one(self, id: Any) -> Optional[Any]:
         """Get single item by id
@@ -295,11 +308,24 @@ class SQLAlchemyAdapter(BaseORMAdapter):
         Returns:
             Total count
         """
-        async with self.session_factory() as session:
-            query = select(func.count()).select_from(self.model)
-            
-            # Apply filters (using extracted method - DRY!)
-            query = self._apply_filters(query, filters)
-            
-            result = await session.execute(query)
-            return result.scalar()
+        try:
+            async with self.session_factory() as session:
+                query = select(func.count()).select_from(self.model)
+                
+                # Apply filters (using extracted method - DRY!)
+                query = self._apply_filters(query, filters)
+                
+                result = await session.execute(query)
+                return result.scalar()
+        except ValueError as e:
+            raise AppError(
+                code=ErrorCode.INTERNAL_ERROR,
+                status_code=500,
+                message=f"Database error: {str(e)}"
+            )
+        except SQLAlchemyError as e:
+            raise AppError(
+                code=ErrorCode.INTERNAL_ERROR,
+                status_code=500,
+                message=f"Database error: {str(e)}"
+            )
