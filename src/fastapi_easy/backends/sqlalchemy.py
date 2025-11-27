@@ -156,22 +156,37 @@ class SQLAlchemyAdapter(BaseORMAdapter):
             
         Returns:
             Updated item
+            
+        Raises:
+            ConflictError: If unique constraint violation
+            AppError: For other database errors
         """
         async with self.session_factory() as session:
-            pk_field = getattr(self.model, self.pk_field)
-            query = select(self.model).where(pk_field == id)
-            result = await session.execute(query)
-            item = result.scalar_one_or_none()
-            
-            if item is None:
-                return None
-            
-            for key, value in data.items():
-                setattr(item, key, value)
-            
-            await session.commit()
-            await session.refresh(item)
-            return item
+            try:
+                pk_field = getattr(self.model, self.pk_field)
+                query = select(self.model).where(pk_field == id)
+                result = await session.execute(query)
+                item = result.scalar_one_or_none()
+                
+                if item is None:
+                    return None
+                
+                for key, value in data.items():
+                    setattr(item, key, value)
+                
+                await session.commit()
+                await session.refresh(item)
+                return item
+            except IntegrityError as e:
+                await session.rollback()
+                raise ConflictError(f"Update conflict: {str(e)}")
+            except SQLAlchemyError as e:
+                await session.rollback()
+                raise AppError(
+                    code=ErrorCode.INTERNAL_ERROR,
+                    status_code=500,
+                    message=f"Database error: {str(e)}"
+                )
     
     async def delete_one(self, id: Any) -> Any:
         """Delete single item
@@ -181,38 +196,60 @@ class SQLAlchemyAdapter(BaseORMAdapter):
             
         Returns:
             Deleted item
+            
+        Raises:
+            AppError: For database errors
         """
         async with self.session_factory() as session:
-            pk_field = getattr(self.model, self.pk_field)
-            query = select(self.model).where(pk_field == id)
-            result = await session.execute(query)
-            item = result.scalar_one_or_none()
-            
-            if item is None:
-                return None
-            
-            await session.delete(item)
-            await session.commit()
-            return item
+            try:
+                pk_field = getattr(self.model, self.pk_field)
+                query = select(self.model).where(pk_field == id)
+                result = await session.execute(query)
+                item = result.scalar_one_or_none()
+                
+                if item is None:
+                    return None
+                
+                await session.delete(item)
+                await session.commit()
+                return item
+            except SQLAlchemyError as e:
+                await session.rollback()
+                raise AppError(
+                    code=ErrorCode.INTERNAL_ERROR,
+                    status_code=500,
+                    message=f"Database error: {str(e)}"
+                )
     
     async def delete_all(self) -> List[Any]:
         """Delete all items
         
         Returns:
             List of deleted items
+            
+        Raises:
+            AppError: For database errors
         """
         async with self.session_factory() as session:
-            # Get all items first
-            query = select(self.model)
-            result = await session.execute(query)
-            items = result.scalars().all()
-            
-            # Delete all
-            delete_query = delete(self.model)
-            await session.execute(delete_query)
-            await session.commit()
-            
-            return items
+            try:
+                # Get all items first
+                query = select(self.model)
+                result = await session.execute(query)
+                items = result.scalars().all()
+                
+                # Delete all
+                delete_query = delete(self.model)
+                await session.execute(delete_query)
+                await session.commit()
+                
+                return items
+            except SQLAlchemyError as e:
+                await session.rollback()
+                raise AppError(
+                    code=ErrorCode.INTERNAL_ERROR,
+                    status_code=500,
+                    message=f"Database error: {str(e)}"
+                )
     
     async def count(self, filters: Dict[str, Any]) -> int:
         """Count items
