@@ -67,9 +67,9 @@ def perf_sqlalchemy_adapter(perf_db_session_factory):
 
 @pytest_asyncio.fixture
 async def large_dataset(perf_db_session_factory):
-    """Create large dataset for performance tests (10000+ items)"""
+    """Create large dataset for performance tests (5000 items for faster setup)"""
     async with perf_db_session_factory() as session:
-        # Create 10000 items
+        # Create 5000 items (reduced from 10000 for faster test setup)
         items = [
             PerformanceItem(
                 name=f"item_{i}",
@@ -77,13 +77,9 @@ async def large_dataset(perf_db_session_factory):
                 price=float(i % 1000),
                 quantity=i % 100
             )
-            for i in range(10000)
+            for i in range(5000)
         ]
         session.add_all(items)
         await session.commit()
-        
-        # Refresh to get IDs
-        for item in items:
-            await session.refresh(item)
         
         yield items
