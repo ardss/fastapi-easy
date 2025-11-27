@@ -26,6 +26,19 @@ class Item(Base):
         return f"<Item(id={self.id}, name={self.name}, price={self.price})>"
 
 
+class TransactionItem(Base):
+    """Test item model for transaction tests"""
+    __tablename__ = "transaction_items"
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False, unique=True)
+    price = Column(Float, nullable=False)
+    quantity = Column(Integer, default=0)
+    
+    def __repr__(self):
+        return f"<TransactionItem(id={self.id}, name={self.name}, price={self.price}, quantity={self.quantity})>"
+
+
 @pytest_asyncio.fixture
 async def db_engine():
     """Create test database engine"""
@@ -73,6 +86,35 @@ async def sample_items(db_session_factory):
             Item(name="orange", price=8.0),
             Item(name="grape", price=15.0),
             Item(name="mango", price=12.0),
+        ]
+        session.add_all(items)
+        await session.commit()
+        
+        # Refresh to get IDs
+        for item in items:
+            await session.refresh(item)
+        
+        yield items
+
+
+@pytest.fixture
+def transaction_adapter(db_session_factory):
+    """Create SQLAlchemy adapter for transaction tests"""
+    return SQLAlchemyAdapter(
+        model=TransactionItem,
+        session_factory=db_session_factory,
+        pk_field="id",
+    )
+
+
+@pytest_asyncio.fixture
+async def transaction_sample_data(db_session_factory):
+    """Create sample data for transaction tests"""
+    async with db_session_factory() as session:
+        items = [
+            TransactionItem(name="item1", price=10.0, quantity=100),
+            TransactionItem(name="item2", price=20.0, quantity=50),
+            TransactionItem(name="item3", price=30.0, quantity=75),
         ]
         session.add_all(items)
         await session.commit()
