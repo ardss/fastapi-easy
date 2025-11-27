@@ -111,14 +111,19 @@ class {model}Schema(BaseModel):
         # Generate router code
         router_code = f"""from fastapi import APIRouter
 from fastapi_easy import CRUDRouter
-from sqlalchemy.orm import Session
+from fastapi_easy.backends import SQLAlchemyAdapter
 
 from .models import {model}
 from .schemas import {model}Schema
+from .database import get_db
 
+# Create backend adapter
+backend = SQLAlchemyAdapter({model}, get_db)
+
+# Create CRUD router
 router = CRUDRouter(
-    model={model},
     schema={model}Schema,
+    backend=backend,
     prefix="/{model.lower()}s",
     tags=["{model}"],
 )

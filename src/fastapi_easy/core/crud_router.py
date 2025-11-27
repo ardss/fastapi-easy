@@ -50,6 +50,16 @@ class CRUDRouter(APIRouter):
         self.config.validate()
         self.id_type = id_type
         
+        # Validate adapter is provided
+        if self.adapter is None:
+            import warnings
+            warnings.warn(
+                "No adapter provided to CRUDRouter. Routes will return empty results. "
+                "Please provide a backend adapter (e.g., SQLAlchemyAdapter) to enable database operations.",
+                UserWarning,
+                stacklevel=2
+            )
+        
         # Initialize registries
         self.hooks = HookRegistry()
         
