@@ -1,114 +1,60 @@
-"""Caching support for FastAPI-Easy"""
+"""Simple in-memory cache for query results"""
 
-from typing import Any, Dict, Optional, Protocol
-from abc import ABC, abstractmethod
-import time
+import asyncio
+import hashlib
+import json
+from typing import Any, Dict, Optional, Callable
 from datetime import datetime, timedelta
 
 
 class CacheEntry:
     """Cache entry with TTL support"""
     
-    def __init__(self, value: Any, ttl: Optional[int] = None):
+    def __init__(self, value: Any, ttl: int = 300):
         """Initialize cache entry
         
         Args:
             value: Cached value
-            ttl: Time to live in seconds
+            ttl: Time to live in seconds (default: 5 minutes)
         """
         self.value = value
-        self.created_at = time.time()
         self.ttl = ttl
+        self.created_at = datetime.now()
     
     def is_expired(self) -> bool:
-        """Check if entry is expired
-        
-        Returns:
-            True if expired
-        """
-        if self.ttl is None:
-            return False
-        
-        return time.time() - self.created_at > self.ttl
-    
-    def get(self) -> Optional[Any]:
-        """Get value if not expired
-        
-        Returns:
-            Value or None if expired
-        """
-        if self.is_expired():
-            return None
-        
-        return self.value
+        """Check if cache entry is expired"""
+        return datetime.now() - self.created_at > timedelta(seconds=self.ttl)
 
 
-class BaseCache(ABC):
-    """Base cache class"""
+class QueryCache:
+    """Simple query result cache with TTL support"""
     
-    @abstractmethod
-    async def get(self, key: str) -> Optional[Any]:
-        """Get value from cache
+    def __init__(self, max_size: int = 1000, default_ttl: int = 300):
+        """Initialize query cache
         
         Args:
-            key: Cache key
+            max_size: Maximum number of cached entries
+            default_ttl: Default time to live in seconds
+        """
+        self._cache: Dict[str, CacheEntry] = {}
+        self._max_size = max_size
+        self._default_ttl = default_ttl
+        self._lock = asyncio.Lock()
+    
+    def _generate_key(self, prefix: str, **kwargs) -> str:
+        """Generate cache key from parameters
+        
+        Args:
+            prefix: Cache key prefix
+            **kwargs: Parameters to include in key
             
         Returns:
-            Cached value or None
+            Cache key
         """
-        pass
-    
-    @abstractmethod
-    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
-        """Set value in cache
-        
-        Args:
-            key: Cache key
-            value: Value to cache
-            ttl: Time to live in seconds
-        """
-        pass
-    
-    @abstractmethod
-    async def delete(self, key: str) -> None:
-        """Delete value from cache
-        
-        Args:
-            key: Cache key
-        """
-        pass
-    
-    @abstractmethod
-    async def clear(self) -> None:
-        """Clear all cache"""
-        pass
-    
-    @abstractmethod
-    async def exists(self, key: str) -> bool:
-        """Check if key exists in cache
-        
-        Args:
-            key: Cache key
-            
-        Returns:
-            True if key exists
-        """
-        pass
-
-
-class MemoryCache(BaseCache):
-    """In-memory cache implementation"""
-    
-    def __init__(self, max_size: int = 1000):
-        """Initialize memory cache
-        
-        Args:
-            max_size: Maximum cache size
-        """
-        self.cache: Dict[str, CacheEntry] = {}
-        self.max_size = max_size
-        self.hits = 0
-        self.misses = 0
+        # Sort kwargs for consistent key generation
+        sorted_items = sorted(kwargs.items())
+        key_str = f"{prefix}:{json.dumps(sorted_items, sort_keys=True, default=str)}"
+        return hashlib.md5(key_str.encode()).hexdigest()
     
     async def get(self, key: str) -> Optional[Any]:
         """Get value from cache
@@ -117,22 +63,18 @@ class MemoryCache(BaseCache):
             key: Cache key
             
         Returns:
-            Cached value or None
+            Cached value or None if not found/expired
         """
-        if key not in self.cache:
-            self.misses += 1
-            return None
-        
-        entry = self.cache[key]
-        value = entry.get()
-        
-        if value is None:
-            del self.cache[key]
-            self.misses += 1
-            return None
-        
-        self.hits += 1
-        return value
+        async with self._lock:
+            if key not in self._cache:
+                return None
+            
+            entry = self._cache[key]
+            if entry.is_expired():
+                del self._cache[key]
+                return None
+            
+            return entry.value
     
     async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
         """Set value in cache
@@ -140,14 +82,18 @@ class MemoryCache(BaseCache):
         Args:
             key: Cache key
             value: Value to cache
-            ttl: Time to live in seconds
+            ttl: Time to live in seconds (uses default if None)
         """
-        # Evict oldest entry if cache is full
-        if len(self.cache) >= self.max_size and key not in self.cache:
-            oldest_key = min(self.cache.keys(), key=lambda k: self.cache[k].created_at)
-            del self.cache[oldest_key]
-        
-        self.cache[key] = CacheEntry(value, ttl)
+        async with self._lock:
+            # Evict oldest entry if cache is full
+            if len(self._cache) >= self._max_size:
+                oldest_key = min(
+                    self._cache.keys(),
+                    key=lambda k: self._cache[k].created_at
+                )
+                del self._cache[oldest_key]
+            
+            self._cache[key] = CacheEntry(value, ttl or self._default_ttl)
     
     async def delete(self, key: str) -> None:
         """Delete value from cache
@@ -155,255 +101,64 @@ class MemoryCache(BaseCache):
         Args:
             key: Cache key
         """
-        if key in self.cache:
-            del self.cache[key]
+        async with self._lock:
+            if key in self._cache:
+                del self._cache[key]
     
     async def clear(self) -> None:
-        """Clear all cache"""
-        self.cache.clear()
-        self.hits = 0
-        self.misses = 0
+        """Clear all cache entries"""
+        async with self._lock:
+            self._cache.clear()
     
-    async def exists(self, key: str) -> bool:
-        """Check if key exists in cache
+    async def cleanup_expired(self) -> int:
+        """Remove expired entries from cache
         
-        Args:
-            key: Cache key
-            
         Returns:
-            True if key exists
+            Number of entries removed
         """
-        if key not in self.cache:
-            return False
-        
-        entry = self.cache[key]
-        return entry.get() is not None
+        async with self._lock:
+            expired_keys = [
+                key for key, entry in self._cache.items()
+                if entry.is_expired()
+            ]
+            for key in expired_keys:
+                del self._cache[key]
+            return len(expired_keys)
     
     def get_stats(self) -> Dict[str, Any]:
         """Get cache statistics
         
         Returns:
-            Statistics dictionary
+            Cache statistics
         """
-        total = self.hits + self.misses
-        hit_rate = (self.hits / total * 100) if total > 0 else 0
-        
         return {
-            "size": len(self.cache),
-            "max_size": self.max_size,
-            "hits": self.hits,
-            "misses": self.misses,
-            "hit_rate": hit_rate,
+            "size": len(self._cache),
+            "max_size": self._max_size,
+            "usage_percent": (len(self._cache) / self._max_size) * 100,
+            "default_ttl": self._default_ttl,
         }
 
 
-class NoCache(BaseCache):
-    """No-op cache implementation"""
-    
-    async def get(self, key: str) -> Optional[Any]:
-        """Get value from cache (always returns None)
-        
-        Args:
-            key: Cache key
-            
-        Returns:
-            None
-        """
-        return None
-    
-    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
-        """Set value in cache (no-op)
-        
-        Args:
-            key: Cache key
-            value: Value to cache
-            ttl: Time to live in seconds
-        """
-        pass
-    
-    async def delete(self, key: str) -> None:
-        """Delete value from cache (no-op)
-        
-        Args:
-            key: Cache key
-        """
-        pass
-    
-    async def clear(self) -> None:
-        """Clear all cache (no-op)"""
-        pass
-    
-    async def exists(self, key: str) -> bool:
-        """Check if key exists in cache (always returns False)
-        
-        Args:
-            key: Cache key
-            
-        Returns:
-            False
-        """
-        return False
-
-
-class CacheKey:
-    """Cache key builder"""
-    
-    @staticmethod
-    def build(prefix: str, *args: Any, **kwargs: Any) -> str:
-        """Build cache key
-        
-        Args:
-            prefix: Key prefix
-            *args: Positional arguments
-            **kwargs: Keyword arguments
-            
-        Returns:
-            Cache key
-        """
-        parts = [prefix]
-        
-        for arg in args:
-            parts.append(str(arg))
-        
-        for key, value in sorted(kwargs.items()):
-            parts.append(f"{key}={value}")
-        
-        return ":".join(parts)
-
-
-class CachedOperation:
-    """Decorator for caching operation results"""
-    
-    def __init__(self, cache: BaseCache, ttl: Optional[int] = None, prefix: str = ""):
-        """Initialize cached operation
-        
-        Args:
-            cache: Cache instance
-            ttl: Time to live in seconds
-            prefix: Cache key prefix
-        """
-        self.cache = cache
-        self.ttl = ttl
-        self.prefix = prefix
-    
-    def __call__(self, func):
-        """Decorate function
-        
-        Args:
-            func: Function to decorate
-            
-        Returns:
-            Decorated function
-        """
-        import asyncio
-        import inspect
-        
-        if inspect.iscoroutinefunction(func):
-            async def async_wrapper(*args, **kwargs):
-                # Build cache key
-                cache_key = CacheKey.build(self.prefix or func.__name__, *args, **kwargs)
-                
-                # Try to get from cache
-                cached_value = await self.cache.get(cache_key)
-                if cached_value is not None:
-                    return cached_value
-                
-                # Execute function
-                result = await func(*args, **kwargs)
-                
-                # Store in cache
-                await self.cache.set(cache_key, result, self.ttl)
-                
-                return result
-            
-            return async_wrapper
-        else:
-            def sync_wrapper(*args, **kwargs):
-                # Build cache key
-                cache_key = CacheKey.build(self.prefix or func.__name__, *args, **kwargs)
-                
-                # Try to get from cache
-                # For sync functions, we need to run async cache operations in event loop
-                loop = asyncio.new_event_loop()
-                try:
-                    cached_value = loop.run_until_complete(self.cache.get(cache_key))
-                    if cached_value is not None:
-                        return cached_value
-                    
-                    # Execute function
-                    result = func(*args, **kwargs)
-                    
-                    # Store in cache
-                    loop.run_until_complete(self.cache.set(cache_key, result, self.ttl))
-                    
-                    return result
-                finally:
-                    loop.close()
-            
-            return sync_wrapper
-
-
-class CacheConfig:
-    """Configuration for caching"""
-    
-    def __init__(
-        self,
-        enabled: bool = True,
-        backend: str = "memory",
-        ttl: Optional[int] = 3600,
-        max_size: int = 1000,
-    ):
-        """Initialize cache configuration
-        
-        Args:
-            enabled: Enable caching
-            backend: Cache backend ("memory", "none")
-            ttl: Default time to live in seconds
-            max_size: Maximum cache size
-        """
-        self.enabled = enabled
-        self.backend = backend
-        self.ttl = ttl
-        self.max_size = max_size
-
-
-def create_cache(config: CacheConfig) -> BaseCache:
-    """Create cache instance based on configuration
-    
-    Args:
-        config: Cache configuration
-        
-    Returns:
-        Cache instance
-    """
-    if not config.enabled:
-        return NoCache()
-    
-    if config.backend == "memory":
-        return MemoryCache(max_size=config.max_size)
-    
-    return NoCache()
-
-
 # Global cache instance
-_cache: Optional[BaseCache] = None
+_query_cache: Optional[QueryCache] = None
 
 
-def get_cache(config: Optional[CacheConfig] = None) -> BaseCache:
-    """Get global cache instance
+def get_query_cache() -> QueryCache:
+    """Get or create global query cache instance"""
+    global _query_cache
+    if _query_cache is None:
+        _query_cache = QueryCache()
+    return _query_cache
+
+
+def create_query_cache(max_size: int = 1000, default_ttl: int = 300) -> QueryCache:
+    """Create a new query cache instance
     
     Args:
-        config: Cache configuration
+        max_size: Maximum number of cached entries
+        default_ttl: Default time to live in seconds
         
     Returns:
-        Cache instance
+        Query cache instance
     """
-    global _cache
-    
-    if _cache is None:
-        if config is None:
-            config = CacheConfig()
-        
-        _cache = create_cache(config)
-    
-    return _cache
+    return QueryCache(max_size, default_ttl)
