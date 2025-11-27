@@ -2,7 +2,7 @@
 
 ## 概述
 
-fastapi-easy 支持 6 种 ORM 和数据库，涵盖同步和异步场景。
+fastapi-easy 支持 4 种 ORM 和数据库，涵盖同步和异步场景：SQLAlchemy、Tortoise、MongoDB、SQLModel。
 
 ---
 

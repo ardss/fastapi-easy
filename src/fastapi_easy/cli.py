@@ -145,7 +145,9 @@ def version():
     click.echo("CRUD Router Framework for FastAPI")
     click.echo("\nSupported ORMs:")
     click.echo("  - SQLAlchemy")
-    click.echo("  - Tortoise ORM")
+    click.echo("  - Tortoise")
+    click.echo("  - MongoDB")
+    click.echo("  - SQLModel")
 
 
 @cli.command()
@@ -156,7 +158,7 @@ FastAPI-Easy - CRUD Router Framework for FastAPI
 
 Features:
   ✅ Automatic CRUD operations
-  ✅ Multiple ORM support (SQLAlchemy, Tortoise)
+  ✅ Multiple ORM support (SQLAlchemy, Tortoise, MongoDB, SQLModel)
   ✅ Advanced filtering and sorting
   ✅ Pagination support
   ✅ Soft delete support
@@ -168,8 +170,8 @@ Features:
   ✅ Middleware system
   ✅ Response formatters
 
-Documentation: https://github.com/your-repo/fastapi-easy
-GitHub: https://github.com/your-repo/fastapi-easy
+Documentation: https://github.com/ardss/fastapi-easy/tree/master/docs
+GitHub: https://github.com/ardss/fastapi-easy
 """
     click.echo(info_text)
 
@@ -183,13 +185,14 @@ def status(format: str):
         "status": "production",
         "tests": "309 passed",
         "coverage": "95%+",
-        "orms": ["SQLAlchemy", "Tortoise ORM"],
+        "orms": ["SQLAlchemy", "Tortoise", "MongoDB", "SQLModel"],
         "features": [
             "CRUD operations",
             "Filtering",
             "Sorting",
-            "Pagination",
-            "Soft delete",
+            "GraphQL support",
+            "WebSocket support",
+            "CLI tools",
             "Batch operations",
             "Permissions",
             "Audit logging",
