@@ -102,12 +102,11 @@ class WebSocketConnectionManager:
             
             try:
                 await websocket.send_json(message.to_dict())
-            except (RuntimeError, ConnectionError, Exception) as e:
+            except (RuntimeError, ConnectionError) as e:
                 # Handle disconnected clients
-                # Log the error if needed
-                if hasattr(self, 'logger'):
-                    self.logger.debug(f"Failed to send message to {client_id}: {e}")
-                pass
+                logger = getattr(self, 'logger', None)
+                if logger:
+                    logger.debug(f"Failed to send message to {client_id}: {e}")
     
     def register_handler(self, message_type: str, handler: Callable) -> None:
         """Register message handler

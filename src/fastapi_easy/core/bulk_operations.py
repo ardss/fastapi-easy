@@ -120,6 +120,7 @@ class BulkOperationAdapter:
                         if hasattr(item, key):
                             setattr(item, key, value)
                     
+                    session.add(item)
                     result.success_count += 1
                 except Exception as e:
                     result.failure_count += 1
@@ -163,7 +164,7 @@ class BulkOperationAdapter:
                     if item is None:
                         raise ValueError(f"Item with {id_field}={item_id} not found")
                     
-                    await session.delete(item)
+                    session.delete(item)
                     result.success_count += 1
                 except Exception as e:
                     result.failure_count += 1
