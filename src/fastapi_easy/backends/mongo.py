@@ -203,16 +203,15 @@ class MongoAdapter(BaseORMAdapter):
     async def delete_all(self) -> List[Any]:
         """Delete all items"""
         try:
-            # Get all items first (warning: could be large)
-            # For safety, maybe we shouldn't return all items if there are too many?
-            # But the interface says return List[Any].
-            # Let's limit to a reasonable number or just return empty if too many?
-            # The base implementation implies returning them.
+            # Get all items first with a reasonable limit to avoid memory issues
+            # Default limit of 10000 items to prevent memory overflow
+            MAX_DELETE_ITEMS = 10000
+            items = await self.collection.find().to_list(length=MAX_DELETE_ITEMS)
             
-            # Actually, for delete_all, usually we just want to wipe.
-            # But if we need to return them, we must fetch them.
-            # Let's fetch all.
-            items = await self.collection.find().to_list(length=None)
+            # If there are more items than the limit, log a warning
+            if len(items) >= MAX_DELETE_ITEMS:
+                if hasattr(self, 'logger'):
+                    self.logger.warning(f"delete_all returned {MAX_DELETE_ITEMS} items (limit reached)")
             
             await self.collection.delete_many({})
             return items

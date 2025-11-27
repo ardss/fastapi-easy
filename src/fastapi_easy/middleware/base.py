@@ -1,7 +1,8 @@
-"""Base middleware classes for FastAPI-Easy"""
+"""Base middleware system for FastAPI-Easy"""
 
-from typing import Any, Callable, Dict, Optional
+import asyncio
 from abc import ABC, abstractmethod
+from typing import Any, Callable, Dict, Optional
 
 
 class BaseMiddleware(ABC):
@@ -112,7 +113,10 @@ class ErrorHandlingMiddleware(BaseMiddleware):
         
         if error_type in self.error_handlers:
             handler = self.error_handlers[error_type]
-            return await handler(error) if hasattr(handler, "__await__") else handler(error)
+            if asyncio.iscoroutinefunction(handler):
+                return await handler(error)
+            else:
+                return handler(error)
         
         return error
     
