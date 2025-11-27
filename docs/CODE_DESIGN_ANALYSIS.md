@@ -108,8 +108,18 @@
 
 虽然当前版本已经非常完善，但仍有进一步提升的空间：
 
-1. **更多 ORM 支持**: 目前仅支持 SQLAlchemy 和 Tortoise，可以考虑添加 SQLModel, Peewee 等支持
-2. **更多数据库支持**: 添加 MongoDB (Motor) 等 NoSQL 支持
+1. **扩展 ORM 支持**:
+   - **SQLModel**: 结合 Pydantic 和 SQLAlchemy 的现代 ORM，非常适合 FastAPI。
+   - **Peewee**: 轻量级 ORM，适合小型项目。
+   - **Piccolo**: 异步优先的 ORM/Query Builder。
+
+2. **NoSQL 数据库支持**:
+   - **MongoDB (Motor)**: 异步 MongoDB 驱动支持。
+   - **Redis**: 用于缓存和简单键值存储的支持。
+   - **Cassandra**: 针对高吞吐量场景的支持。
+
+3. **图数据库支持**:
+   - **Neo4j**: 添加对图数据库的基本支持。
 3. **自动文档增强**: 为生成的路由添加更详细的 OpenAPI 文档说明
 4. **性能基准测试**: 添加与其他框架的性能对比测试
 
