@@ -1,7 +1,8 @@
-"""SQLAlchemy adapter performance benchmarks"""
+"""SQLAlchemy adapter performance tests"""
 
 import pytest
 import pytest_asyncio
+import time
 from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
@@ -79,78 +80,57 @@ async def perf_sample_data(perf_db_session_factory):
 
 @pytest.mark.asyncio
 class TestSQLAlchemyPerformance:
-    """Performance benchmarks for SQLAlchemy adapter"""
+    """Performance tests for SQLAlchemy adapter"""
     
-    async def test_create_single_item(self, benchmark, perf_adapter):
-        """Benchmark creating a single item"""
-        async def create_item():
-            return await perf_adapter.create({"name": "test", "price": 10.0})
-        
-        result = benchmark(lambda: pytest.asyncio.run(create_item()))
+    async def test_create_single_item(self, perf_adapter):
+        """Test creating a single item"""
+        result = await perf_adapter.create({"name": "test", "price": 10.0})
         assert result is not None
+        assert result.name == "test"
     
-    async def test_get_all_items(self, benchmark, perf_adapter, perf_sample_data):
-        """Benchmark getting all items"""
-        async def get_all():
-            return await perf_adapter.get_all(
-                filters={},
-                sorts={},
-                pagination={"skip": 0, "limit": 100},
-            )
-        
-        result = benchmark(lambda: pytest.asyncio.run(get_all()))
+    async def test_get_all_items(self, perf_adapter, perf_sample_data):
+        """Test getting all items"""
+        result = await perf_adapter.get_all(
+            filters={},
+            sorts={},
+            pagination={"skip": 0, "limit": 100},
+        )
         assert len(result) == 100
     
-    async def test_get_one_item(self, benchmark, perf_adapter, perf_sample_data):
-        """Benchmark getting a single item"""
+    async def test_get_one_item(self, perf_adapter, perf_sample_data):
+        """Test getting a single item"""
         item_id = perf_sample_data[0].id
-        
-        async def get_one():
-            return await perf_adapter.get_one(item_id)
-        
-        result = benchmark(lambda: pytest.asyncio.run(get_one()))
+        result = await perf_adapter.get_one(item_id)
         assert result is not None
+        assert result.id == item_id
     
-    async def test_update_item(self, benchmark, perf_adapter, perf_sample_data):
-        """Benchmark updating an item"""
+    async def test_update_item(self, perf_adapter, perf_sample_data):
+        """Test updating an item"""
         item_id = perf_sample_data[0].id
-        
-        async def update():
-            return await perf_adapter.update(item_id, {"name": "updated"})
-        
-        result = benchmark(lambda: pytest.asyncio.run(update()))
+        result = await perf_adapter.update(item_id, {"name": "updated"})
         assert result is not None
+        assert result.name == "updated"
     
-    async def test_delete_item(self, benchmark, perf_adapter, perf_sample_data):
-        """Benchmark deleting an item"""
+    async def test_delete_item(self, perf_adapter, perf_sample_data):
+        """Test deleting an item"""
         item_id = perf_sample_data[-1].id
-        
-        async def delete():
-            return await perf_adapter.delete_one(item_id)
-        
-        result = benchmark(lambda: pytest.asyncio.run(delete()))
+        result = await perf_adapter.delete_one(item_id)
         assert result is not None
+        assert result.id == item_id
     
-    async def test_count_items(self, benchmark, perf_adapter, perf_sample_data):
-        """Benchmark counting items"""
-        async def count():
-            return await perf_adapter.count({})
-        
-        result = benchmark(lambda: pytest.asyncio.run(count()))
+    async def test_count_items(self, perf_adapter, perf_sample_data):
+        """Test counting items"""
+        result = await perf_adapter.count({})
         assert result == 100
     
-    async def test_filter_items(self, benchmark, perf_adapter, perf_sample_data):
-        """Benchmark filtering items"""
+    async def test_filter_items(self, perf_adapter, perf_sample_data):
+        """Test filtering items"""
         filters = {
             "price__gt": {"field": "price", "operator": "gt", "value": 500}
         }
-        
-        async def filter_items():
-            return await perf_adapter.get_all(
-                filters=filters,
-                sorts={},
-                pagination={"skip": 0, "limit": 100},
-            )
-        
-        result = benchmark(lambda: pytest.asyncio.run(filter_items()))
+        result = await perf_adapter.get_all(
+            filters=filters,
+            sorts={},
+            pagination={"skip": 0, "limit": 100},
+        )
         assert len(result) > 0
