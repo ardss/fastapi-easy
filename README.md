@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-green)](https://fastapi.tiangolo.com/)
 [![Pydantic](https://img.shields.io/badge/Pydantic-2.0%2B-orange)](https://docs.pydantic.dev/)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+[![License](https://img.shields.io/badge/License-AGPL3.0-red)](LICENSE)
 
 ---
 
@@ -17,7 +17,7 @@
 
 ## 📌 简介
 
-**FastAPI-Easy** 是一个基于改进的 fastapi-crudrouter 的现代化 CRUD 路由生成框架。
+**FastAPI-Easy** 是一个现代化的 FastAPI CRUD 路由生成框架。
 
 只需要 **10 行代码**，就能自动生成完整的增删改查 API，支持搜索、排序、分页、软删除等高级功能。
 
@@ -401,13 +401,9 @@ aiomysql>=0.1            # MySQL 异步驱动
 
 ## 📝 许可证
 
-MIT License - 详见 [LICENSE](LICENSE)
+AGPL-3.0 License - 详见 [LICENSE](LICENSE)
 
----
-
-## 🙏 致谢
-
-感谢 [fastapi-crudrouter](https://github.com/awtkns/fastapi-crudrouter) 项目的启发和贡献。
+**注意**: 本项目采用 AGPL-3.0 许可证，不可用于商业用途。
 
 ---
 
