@@ -112,14 +112,21 @@ class CRUDRouter(APIRouter):
             await self.hooks.trigger("before_get_all", context)
             
             # Execute adapter method
+            result = []
             if self.adapter:
-                result = await self.adapter.get_all(
-                    filters=context.filters,
-                    sorts=context.sorts,
-                    pagination=context.pagination,
-                )
-            else:
-                result = []
+                try:
+                    result = await self.adapter.get_all(
+                        filters=context.filters,
+                        sorts=context.sorts,
+                        pagination=context.pagination,
+                    )
+                    if result is None:
+                        result = []
+                except Exception as e:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Error in get_all: {str(e)}", exc_info=True)
+                    raise
             
             # Trigger hooks
             context.result = result
@@ -138,6 +145,8 @@ class CRUDRouter(APIRouter):
     
     def _add_get_one_route(self) -> None:
         """Add GET single item route"""
+        from fastapi import HTTPException
+        
         async def get_one(
             request: Request,
             id: self.id_type = Path(..., description="Item ID"),
@@ -154,10 +163,22 @@ class CRUDRouter(APIRouter):
             await self.hooks.trigger("before_get_one", context)
             
             # Execute adapter method
+            result = None
             if self.adapter:
-                result = await self.adapter.get_one(id)
-            else:
-                result = None
+                try:
+                    result = await self.adapter.get_one(id)
+                except Exception as e:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Error in get_one: {str(e)}", exc_info=True)
+                    raise
+            
+            # Return 404 if not found
+            if result is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"{self.schema.__name__} with id {id} not found"
+                )
             
             # Trigger hooks
             context.result = result
@@ -293,10 +314,19 @@ class CRUDRouter(APIRouter):
     
     def _add_delete_all_route(self) -> None:
         """Add DELETE all items route"""
+        from fastapi import HTTPException
+        
         async def delete_all(
             request: Request,
         ) -> List[self.schema]:
             """Delete all items"""
+            # Check if delete_all is enabled
+            if not self.config.enable_delete_all:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Delete all operation is disabled for safety. Enable it in config if needed."
+                )
+            
             context = ExecutionContext(
                 schema=self.schema,
                 adapter=self.adapter,
@@ -307,10 +337,15 @@ class CRUDRouter(APIRouter):
             await self.hooks.trigger("before_delete", context)
             
             # Execute adapter method
+            result = []
             if self.adapter:
-                result = await self.adapter.delete_all()
-            else:
-                result = []
+                try:
+                    result = await self.adapter.delete_all()
+                except Exception as e:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.error(f"Error in delete_all: {str(e)}", exc_info=True)
+                    raise
             
             # Trigger hooks
             context.result = result

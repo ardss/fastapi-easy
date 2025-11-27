@@ -37,6 +37,9 @@ class CRUDConfig:
     include_error_details: bool = True
     log_errors: bool = True
     
+    # Safety settings
+    enable_delete_all: bool = False  # Disabled by default for safety
+    
     # Additional metadata
     metadata: Dict[str, Any] = field(default_factory=dict)
     
