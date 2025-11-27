@@ -4,7 +4,22 @@
 
 ---
 
-## 📁 项目结构
+## 📁 项目结构分析
+
+### ✅ 当前结构的合理之处
+
+1. **清晰的模块划分** - core/、backends/、operations/、utils/ 职责分离
+2. **可扩展的架构** - 易于添加新 ORM、新操作、新工具
+3. **测试友好的设计** - 依赖注入、接口抽象、易于 mock
+
+### ⚠️ 需要改进的地方
+
+1. **缺少类型定义** - 需要添加 `types.py` 定义类型别名和协议
+2. **缺少验证器** - `utils/validators.py` 需要实现字段级验证
+3. **缺少响应格式化器** - 需要添加 `formatters.py` 支持自定义响应格式
+4. **缺少中间件** - 需要添加 `middleware/` 目录支持错误处理、日志、监控
+
+### 改进后的项目结构
 
 ```
 fastapi-easy/
@@ -98,6 +113,65 @@ fastapi-easy/
 
 ---
 
+## 🧪 测试框架设计
+
+### 测试隔离策略
+
+#### 1. **单元测试隔离**（无外部依赖）
+- `test_core/`: 核心模块测试（config、errors、hooks、operations）
+- `test_utils/`: 工具函数测试（pagination、filters、sorters）
+- 使用 mock 和 patch 隔离依赖
+
+#### 2. **集成测试隔离**（使用真实数据库）
+- `test_sqlalchemy/`: SQLAlchemy 适配器集成测试
+- `test_tortoise/`: Tortoise ORM 集成测试
+- 使用内存数据库（SQLite）和事务回滚隔离
+
+#### 3. **端到端测试隔离**（完整 API 流程）
+- `test_end_to_end/`: 完整 API 流程测试
+- 测试完整的请求-响应周期
+
+### 测试隔离技术
+
+**Fixture 隔离**
+```python
+@pytest.fixture
+def mock_adapter():
+    adapter = AsyncMock(spec=ORMAdapter)
+    return adapter
+
+@pytest.fixture
+async def db_session():
+    # 使用内存数据库
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    # 创建表、返回 session、清理
+```
+
+**事务隔离**
+- 每个测试在事务中运行
+- 测试完成后自动回滚
+- 确保测试间数据隔离
+
+### 测试覆盖目标
+
+| 模块 | 目标覆盖率 | 优先级 |
+|------|----------|------|
+| core/ | 95% | P0 |
+| utils/ | 90% | P0 |
+| backends/ | 85% | P1 |
+| operations/ | 90% | P1 |
+
+### 同步开发策略
+
+**每个功能的开发步骤**：
+1. 编写单元测试（测试失败）
+2. 实现功能（测试通过）
+3. 编写集成测试
+4. 代码审查
+5. 提交代码
+
+---
+
 ## 🎯 项目阶段
 
 ### 第 1 阶段：核心框架（当前）✅ 文档完成
@@ -137,61 +211,54 @@ fastapi-easy/
 
 ### 优先级 P0（必做）
 
-#### 核心架构
-- [ ] 创建 `src/fastapi_easy/core/crud_router.py`
-  - [ ] CRUDRouter 主类
-  - [ ] 路由生成逻辑
-  - [ ] 配置管理
+#### Phase 1: 核心架构 ✅ 已完成
+- [x] CRUDRouter 主类
+- [x] Operation 基类和 OperationRegistry
+- [x] ORMAdapter 基类
+- [x] HookRegistry 和钩子系统
+- [x] AppError 和错误处理
+- [x] CRUDConfig 配置系统
+- [x] 工具函数（pagination、filters、sorters）
 
-- [ ] 创建 `src/fastapi_easy/core/operations.py`
-  - [ ] Operation 基类
-  - [ ] OperationRegistry
-  - [ ] 内置操作（GetAll、GetOne、Create、Update、DeleteOne、DeleteAll）
+#### Phase 2: 基础功能和测试
 
-- [ ] 创建 `src/fastapi_easy/core/adapters.py`
-  - [ ] ORMAdapter 基类
-  - [ ] 统一的 ORM 接口
+**测试框架**
+- [ ] 创建 `tests/conftest.py`
+  - [ ] 全局 fixture 定义
+  - [ ] Mock adapter fixture
+  - [ ] 配置 fixture
 
-- [ ] 创建 `src/fastapi_easy/core/hooks.py`
-  - [ ] HookRegistry
-  - [ ] 钩子事件定义
+- [ ] 创建 `tests/unit/test_core/`
+  - [ ] test_config.py - 配置测试
+  - [ ] test_errors.py - 错误处理测试
+  - [ ] test_hooks.py - 钩子系统测试
+  - [ ] test_operations.py - 操作系统测试（mock）
+  - [ ] test_crud_router.py - 路由测试（mock）
 
-- [ ] 创建 `src/fastapi_easy/core/errors.py`
-  - [ ] AppError 基类
-  - [ ] ErrorCode 枚举
-  - [ ] 错误中间件
+- [ ] 创建 `tests/unit/test_utils/`
+  - [ ] test_pagination.py - 分页测试
+  - [ ] test_filters.py - 过滤器测试
+  - [ ] test_sorters.py - 排序器测试
 
-- [ ] 创建 `src/fastapi_easy/core/config.py`
-  - [ ] CRUDConfig 配置类
-  - [ ] 配置验证
-
-#### ORM 适配器
-- [ ] 创建 `src/fastapi_easy/backends/base.py`
-  - [ ] ORMAdapter 基类实现
-
+**ORM 适配器**
 - [ ] 创建 `src/fastapi_easy/backends/sqlalchemy.py`
   - [ ] SQLAlchemy 异步适配器
   - [ ] 支持 SQLAlchemy 2.0
+  - [ ] 集成测试 `tests/integration/test_sqlalchemy/`
 
 - [ ] 创建 `src/fastapi_easy/backends/tortoise.py`
   - [ ] Tortoise ORM 适配器
+  - [ ] 集成测试 `tests/integration/test_tortoise/`
 
-- [ ] 创建其他 ORM 适配器
-  - [ ] Gino
-  - [ ] Ormar
-  - [ ] Databases
-
-#### 工具函数
-- [ ] 创建 `src/fastapi_easy/utils/filters.py`
-  - [ ] 过滤器解析
-  - [ ] 支持 9 种操作符
-
-- [ ] 创建 `src/fastapi_easy/utils/sorters.py`
-  - [ ] 排序器解析
-  - [ ] 多字段排序
-
-- [ ] 创建 `src/fastapi_easy/utils/pagination.py`
-  - [ ] 分页逻辑
+**内置操作**
+- [ ] 创建 `src/fastapi_easy/operations/`
+  - [ ] GetAll 操作
+  - [ ] GetOne 操作
+  - [ ] Create 操作
+  - [ ] Update 操作
+  - [ ] DeleteOne 操作
+  - [ ] DeleteAll 操作
+  - [ ] 每个操作的单元测试
 
 ### 优先级 P1（重要）
 
