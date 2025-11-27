@@ -6,13 +6,11 @@ from ..core.errors import ConflictError, AppError, ErrorCode
 
 try:
     from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorCollection
-    from pymongo.errors import DuplicateKeyError, OperationFailure, PyMongoError
+    from pymongo.errors import DuplicateKeyError
 except ImportError:
     AsyncIOMotorDatabase = Any  # type: ignore
     AsyncIOMotorCollection = Any  # type: ignore
     DuplicateKeyError = Exception  # type: ignore
-    OperationFailure = Exception  # type: ignore
-    PyMongoError = Exception  # type: ignore
 
 
 class MongoAdapter(BaseORMAdapter):
@@ -125,7 +123,7 @@ class MongoAdapter(BaseORMAdapter):
             # Usually Pydantic models handle _id -> id mapping if configured.
             return items
             
-        except (OperationFailure, PyMongoError) as e:
+        except Exception as e:
             raise AppError(
                 code=ErrorCode.INTERNAL_ERROR,
                 status_code=500,
@@ -138,7 +136,7 @@ class MongoAdapter(BaseORMAdapter):
             # Note: User is responsible for converting id to ObjectId if needed
             # or we could try to auto-detect. For now, pass as is.
             return await self.collection.find_one({self.pk_field: id})
-        except (OperationFailure, PyMongoError) as e:
+        except Exception as e:
             raise AppError(
                 code=ErrorCode.INTERNAL_ERROR,
                 status_code=500,
@@ -154,7 +152,7 @@ class MongoAdapter(BaseORMAdapter):
             return created_item
         except DuplicateKeyError as e:
             raise ConflictError(f"Item already exists: {str(e)}")
-        except (OperationFailure, PyMongoError) as e:
+        except Exception as e:
             raise AppError(
                 code=ErrorCode.INTERNAL_ERROR,
                 status_code=500,
@@ -179,7 +177,7 @@ class MongoAdapter(BaseORMAdapter):
             return await self.collection.find_one({self.pk_field: id})
         except DuplicateKeyError as e:
             raise ConflictError(f"Update conflict: {str(e)}")
-        except (OperationFailure, PyMongoError) as e:
+        except Exception as e:
             raise AppError(
                 code=ErrorCode.INTERNAL_ERROR,
                 status_code=500,
@@ -195,7 +193,7 @@ class MongoAdapter(BaseORMAdapter):
                 
             await self.collection.delete_one({self.pk_field: id})
             return item
-        except (OperationFailure, PyMongoError) as e:
+        except Exception as e:
             raise AppError(
                 code=ErrorCode.INTERNAL_ERROR,
                 status_code=500,
@@ -217,7 +215,7 @@ class MongoAdapter(BaseORMAdapter):
             
             await self.collection.delete_many({})
             return items
-        except (OperationFailure, PyMongoError) as e:
+        except Exception as e:
             raise AppError(
                 code=ErrorCode.INTERNAL_ERROR,
                 status_code=500,
@@ -229,7 +227,7 @@ class MongoAdapter(BaseORMAdapter):
         try:
             query = self._apply_filters(filters)
             return await self.collection.count_documents(query)
-        except (OperationFailure, PyMongoError) as e:
+        except Exception as e:
             raise AppError(
                 code=ErrorCode.INTERNAL_ERROR,
                 status_code=500,
