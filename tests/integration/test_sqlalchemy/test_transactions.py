@@ -8,13 +8,7 @@ import pytest
 from sqlalchemy import select
 
 from fastapi_easy.core.errors import ConflictError
-
-# Import TransactionItem from conftest
-try:
-    from .conftest import TransactionItem
-except ImportError:
-    # Fallback for when conftest is not available
-    TransactionItem = None
+from .conftest import TransactionItem
 
 
 @pytest.mark.asyncio
@@ -166,7 +160,7 @@ class TestConcurrentTransactions:
 class TestDeadlockHandling:
     """Test deadlock detection and handling"""
     
-    async def test_deadlock_detection(self, transaction_adapter, transaction_sample_data, db_session_factory):
+    async def test_deadlock_detection(self, transaction_adapter, transaction_sample_data):
         """Test deadlock detection in concurrent updates"""
         item1_id = transaction_sample_data[0].id
         item2_id = transaction_sample_data[1].id
@@ -394,7 +388,3 @@ class TestTransactionErrorHandling:
         # Verify both items exist
         all_items = await transaction_adapter.get_all({}, {}, {"skip": 0, "limit": 100})
         assert len(all_items) == 2
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
