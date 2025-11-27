@@ -1,5 +1,18 @@
-"""ORM backends for FastAPI-Easy"""
+"""FastAPI-Easy backends"""
 
 from .base import BaseORMAdapter
+from .sqlalchemy import SQLAlchemyAdapter
 
-__all__ = ["BaseORMAdapter"]
+# Tortoise is optional
+try:
+    from .tortoise import TortoiseAdapter
+    __all__ = [
+        "BaseORMAdapter",
+        "SQLAlchemyAdapter",
+        "TortoiseAdapter",
+    ]
+except ImportError:
+    __all__ = [
+        "BaseORMAdapter",
+        "SQLAlchemyAdapter",
+    ]
