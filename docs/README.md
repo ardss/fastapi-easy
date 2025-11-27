@@ -7,14 +7,30 @@
 ```
 docs/
 ├── README.md                    # 本文件
-└── usage/                       # 使用指南
-    ├── README.md                # 使用指南索引
+├── FEATURES.md                  # 功能清单
+├── DEVELOPMENT.md               # 开发指南
+└── usage/                       # 使用指南（20 份文档）
+    ├── INDEX.md                 # 使用指南完整索引
+    ├── README.md                # 使用指南导航
     ├── 01-quick-start.md        # 快速开始
     ├── 02-databases.md          # 支持的数据库
     ├── 03-data-flow.md          # 数据到 API 的流程
     ├── 04-filters.md            # 搜索和过滤
     ├── 05-sorting.md            # 排序功能
-    └── 06-complete-example.md   # 完整示例
+    ├── 06-complete-example.md   # 完整示例
+    ├── 07-architecture.md       # 架构设计
+    ├── 09-error-handling.md     # 错误处理
+    ├── 10-soft-delete.md        # 软删除
+    ├── 11-batch-operations.md   # 批量操作
+    ├── 12-permissions.md        # 权限控制
+    ├── 13-audit-logging.md      # 审计日志
+    ├── 14-configuration.md      # 配置管理
+    ├── 15-testing.md            # 测试指南
+    ├── 16-best-practices.md     # 最佳实践
+    ├── 17-troubleshooting.md    # 故障排除
+    ├── 18-graphql.md            # GraphQL 支持
+    ├── 19-websocket.md          # WebSocket 支持
+    └── 20-cli.md                # CLI 工具
 ```
 
 ## 🎯 快速导航
@@ -73,7 +89,8 @@ class Item(BaseModel):
 app = FastAPI()
 
 # 一行代码生成完整的 CRUD API
-router = CRUDRouter(schema=Item)
+# 注意：需要配置 backend（数据库适配器）
+router = CRUDRouter(schema=Item, backend=backend)
 app.include_router(router)
 ```
 
@@ -92,7 +109,7 @@ app.include_router(router)
 自动生成 CRUD 路由的核心类。
 
 ### Backend
-数据库适配器，支持多种 ORM（SQLAlchemy、Tortoise、Gino、Ormar、Databases）。
+数据库适配器，支持多种 ORM（SQLAlchemy、Tortoise、MongoDB、SQLModel）。
 
 ### Schema
 Pydantic 数据模型，定义 API 的请求和响应格式。
@@ -119,12 +136,10 @@ Pydantic 数据模型，定义 API 的请求和响应格式。
 
 | ORM | 数据库 | 类型 |
 |-----|--------|------|
-| **SQLAlchemy** | PostgreSQL、MySQL、SQLite、Oracle | 异步 |
+| **SQLAlchemy** | PostgreSQL、MySQL、SQLite、Oracle、SQL Server | 异步 |
 | **Tortoise** | PostgreSQL、MySQL、SQLite | 异步 |
-| **Gino** | PostgreSQL | 异步 |
-| **Ormar** | PostgreSQL、MySQL、SQLite | 异步 |
-| **Databases** | 多种数据库 | 异步 |
-| **内存** | 无 | 同步 |
+| **MongoDB** | MongoDB | 异步 |
+| **SQLModel** | PostgreSQL、MySQL、SQLite、Oracle | 异步 |
 
 ---
 
@@ -175,7 +190,7 @@ A: 有，详见 [完整示例](usage/06-complete-example.md)
 
 | 指标 | 数值 |
 |------|------|
-| 总文档数 | 7 份 |
+| 总文档数 | 20 份 |
 | 总行数 | ~2500 行 |
 | 代码示例 | 40+ 个 |
 | 图表 | 5+ 个 |
