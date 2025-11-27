@@ -247,12 +247,12 @@ router = CRUDRouter(
 - ↕️ [排序功能](docs/usage/05-sorting.md) - 排序功能详解
 - 🎁 [完整示例](docs/usage/06-complete-example.md) - 电商 API 示例
 
-### 项目分析
+### 高级功能
 
-- 📊 [项目分析总结](ANALYSIS_SUMMARY.md) - 快速了解项目
-- 📈 [详细分析](FASTAPI_CRUDROUTER_ANALYSIS.md) - 深度分析
-- 🛣️ [实现路线图](IMPLEMENTATION_ROADMAP.md) - 开发计划
-- ⚡ [对比分析](BEFORE_AFTER_COMPARISON.md) - 改进前后对比
+- 🔐 [权限控制](docs/usage/11-permissions.md) - 灵活的权限配置
+- 📝 [审计日志](docs/usage/12-audit-logging.md) - 操作追踪
+- 🗑️ [软删除](docs/usage/09-soft-delete.md) - 逻辑删除
+- 📦 [批量操作](docs/usage/10-batch-operations.md) - 批量 CRUD
 
 ---
 
@@ -419,9 +419,9 @@ AGPL-3.0 License - 详见 [LICENSE](LICENSE)
 
 - [完整文档](docs/)
 - [快速开始](docs/usage/01-quick-start.md)
-- [API 参考](docs/usage/)
-- [项目分析](ANALYSIS_SUMMARY.md)
-- [实现路线图](IMPLEMENTATION_ROADMAP.md)
+- [使用指南](docs/usage/INDEX.md)
+- [架构设计](docs/usage/07-architecture.md)
+- [开发指南](docs/DEVELOPMENT.md)
 
 ---
 

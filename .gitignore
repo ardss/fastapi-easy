@@ -66,6 +66,9 @@ dmypy.json
 # References (参考资料，不需要提交)
 references/
 
+# Archived documentation (过时文档，不需要提交)
+docs/archive/
+
 # Temporary files
 *.tmp
 *.bak
