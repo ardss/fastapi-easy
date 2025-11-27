@@ -59,5 +59,5 @@ uvicorn main:app --reload
 ## 下一步
 
 - 了解[支持的数据库](02-databases.md)
-- 学习[搜索和过滤](03-filters.md)
-- 查看[完整示例](05-complete-example.md)
+- 学习[搜索和过滤](04-filters.md)
+- 查看[完整示例](06-complete-example.md)
