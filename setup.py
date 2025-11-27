@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="fastapi-easy",
-    version="0.1.0",
+    version="0.1.3",
     author="FastAPI-Easy Team",
     description="A modern CRUD framework for FastAPI",
     long_description=long_description,
@@ -32,6 +32,8 @@ setup(
     extras_require={
         "sqlalchemy": ["sqlalchemy>=2.0.0"],
         "tortoise": ["tortoise-orm>=0.19.0"],
+        "sqlmodel": ["sqlmodel>=0.0.8"],
+        "mongo": ["motor>=3.3.0"],
         "dev": [
             "pytest>=7.4.0",
             "pytest-asyncio>=0.21.0",

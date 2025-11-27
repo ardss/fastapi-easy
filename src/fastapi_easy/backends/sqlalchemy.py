@@ -16,6 +16,9 @@ class SQLAlchemyAdapter(BaseORMAdapter):
     Supports SQLAlchemy 2.0+ with async/await.
     """
     
+    # Supported filter operators
+    SUPPORTED_OPERATORS = {"exact", "ne", "gt", "gte", "lt", "lte", "in", "like", "ilike"}
+    
     def __init__(
         self,
         model: Type[DeclarativeBase],
@@ -31,6 +34,59 @@ class SQLAlchemyAdapter(BaseORMAdapter):
         """
         super().__init__(model, session_factory)
         self.pk_field = pk_field
+    
+    def _apply_filters(self, query, filters: Dict[str, Any]):
+        """Apply filter conditions to query (DRY principle)
+        
+        Args:
+            query: SQLAlchemy query object
+            filters: Filter conditions
+            
+        Returns:
+            Query with filters applied
+            
+        Raises:
+            ValueError: If filter parameters are invalid
+        """
+        for filter_key, filter_value in filters.items():
+            if not isinstance(filter_value, dict):
+                continue
+            
+            # Validate and extract filter parameters
+            field_name = filter_value.get("field")
+            if not field_name or not isinstance(field_name, str):
+                raise ValueError(f"Invalid field name: {field_name}")
+            
+            operator = filter_value.get("operator", "exact")
+            if operator not in self.SUPPORTED_OPERATORS:
+                raise ValueError(f"Unsupported operator: {operator}. Supported: {self.SUPPORTED_OPERATORS}")
+            
+            value = filter_value.get("value")
+            if value is None:
+                raise ValueError(f"Filter value cannot be None for field: {field_name}")
+            
+            # Get model field
+            field = getattr(self.model, field_name, None)
+            if field is None:
+                raise ValueError(f"Field not found on model: {field_name}")
+            
+            # Apply filter using operator mapping
+            operator_map = {
+                "exact": lambda f, v: f == v,
+                "ne": lambda f, v: f != v,
+                "gt": lambda f, v: f > v,
+                "gte": lambda f, v: f >= v,
+                "lt": lambda f, v: f < v,
+                "lte": lambda f, v: f <= v,
+                "in": lambda f, v: f.in_(v.split(",") if isinstance(v, str) else v),
+                "like": lambda f, v: f.like(v),
+                "ilike": lambda f, v: f.ilike(v),
+            }
+            
+            if operator in operator_map:
+                query = query.where(operator_map[operator](field, value))
+        
+        return query
     
     async def get_all(
         self,
@@ -51,36 +107,8 @@ class SQLAlchemyAdapter(BaseORMAdapter):
         async with self.session_factory() as session:
             query = select(self.model)
             
-            # Apply filters
-            for filter_key, filter_value in filters.items():
-                if isinstance(filter_value, dict):
-                    field_name = filter_value.get("field")
-                    operator = filter_value.get("operator", "exact")
-                    value = filter_value.get("value")
-                    
-                    field = getattr(self.model, field_name, None)
-                    if field is None:
-                        continue
-                    
-                    if operator == "exact":
-                        query = query.where(field == value)
-                    elif operator == "ne":
-                        query = query.where(field != value)
-                    elif operator == "gt":
-                        query = query.where(field > value)
-                    elif operator == "gte":
-                        query = query.where(field >= value)
-                    elif operator == "lt":
-                        query = query.where(field < value)
-                    elif operator == "lte":
-                        query = query.where(field <= value)
-                    elif operator == "in":
-                        values = value.split(",") if isinstance(value, str) else value
-                        query = query.where(field.in_(values))
-                    elif operator == "like":
-                        query = query.where(field.like(value))
-                    elif operator == "ilike":
-                        query = query.where(field.ilike(value))
+            # Apply filters (using extracted method)
+            query = self._apply_filters(query, filters)
             
             # Apply sorting
             for field_name, direction in sorts.items():
@@ -111,10 +139,17 @@ class SQLAlchemyAdapter(BaseORMAdapter):
             Item or None
         """
         async with self.session_factory() as session:
-            pk_field = getattr(self.model, self.pk_field)
-            query = select(self.model).where(pk_field == id)
-            result = await session.execute(query)
-            return result.scalar_one_or_none()
+            try:
+                pk_field = getattr(self.model, self.pk_field)
+                query = select(self.model).where(pk_field == id)
+                result = await session.execute(query)
+                return result.scalar_one_or_none()
+            except SQLAlchemyError as e:
+                raise AppError(
+                    code=ErrorCode.INTERNAL_ERROR,
+                    status_code=500,
+                    message=f"Database error: {str(e)}"
+                )
     
     async def create(self, data: Dict[str, Any]) -> Any:
         """Create new item
@@ -263,36 +298,8 @@ class SQLAlchemyAdapter(BaseORMAdapter):
         async with self.session_factory() as session:
             query = select(func.count()).select_from(self.model)
             
-            # Apply filters
-            for filter_key, filter_value in filters.items():
-                if isinstance(filter_value, dict):
-                    field_name = filter_value.get("field")
-                    operator = filter_value.get("operator", "exact")
-                    value = filter_value.get("value")
-                    
-                    field = getattr(self.model, field_name, None)
-                    if field is None:
-                        continue
-                    
-                    if operator == "exact":
-                        query = query.where(field == value)
-                    elif operator == "ne":
-                        query = query.where(field != value)
-                    elif operator == "gt":
-                        query = query.where(field > value)
-                    elif operator == "gte":
-                        query = query.where(field >= value)
-                    elif operator == "lt":
-                        query = query.where(field < value)
-                    elif operator == "lte":
-                        query = query.where(field <= value)
-                    elif operator == "in":
-                        values = value.split(",") if isinstance(value, str) else value
-                        query = query.where(field.in_(values))
-                    elif operator == "like":
-                        query = query.where(field.like(value))
-                    elif operator == "ilike":
-                        query = query.where(field.ilike(value))
+            # Apply filters (using extracted method - DRY!)
+            query = self._apply_filters(query, filters)
             
             result = await session.execute(query)
             return result.scalar()

@@ -1,6 +1,6 @@
 """Tortoise ORM adapter"""
 
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Tuple
 from tortoise import Model
 from tortoise.exceptions import IntegrityError, DoesNotExist
 
@@ -13,6 +13,9 @@ class TortoiseAdapter(BaseORMAdapter):
     
     Supports Tortoise ORM with async/await.
     """
+    
+    # Supported filter operators
+    SUPPORTED_OPERATORS = {"exact", "ne", "gt", "gte", "lt", "lte", "in", "like", "ilike"}
     
     def __init__(
         self,
@@ -29,6 +32,61 @@ class TortoiseAdapter(BaseORMAdapter):
         """
         super().__init__(model, session_factory)
         self.pk_field = pk_field
+    
+    def _apply_filters(self, query, filters: Dict[str, Any]) -> Tuple[Any, Dict[str, Any]]:
+        """Apply filter conditions to query (DRY principle)
+        
+        Args:
+            query: Tortoise query object
+            filters: Filter conditions
+            
+        Returns:
+            Tuple of (query, filter_kwargs)
+            
+        Raises:
+            ValueError: If filter parameters are invalid
+        """
+        filter_kwargs = {}
+        
+        for filter_key, filter_value in filters.items():
+            if not isinstance(filter_value, dict):
+                continue
+            
+            # Validate and extract filter parameters
+            field_name = filter_value.get("field")
+            if not field_name or not isinstance(field_name, str):
+                raise ValueError(f"Invalid field name: {field_name}")
+            
+            operator = filter_value.get("operator", "exact")
+            if operator not in self.SUPPORTED_OPERATORS:
+                raise ValueError(f"Unsupported operator: {operator}. Supported: {self.SUPPORTED_OPERATORS}")
+            
+            value = filter_value.get("value")
+            if value is None:
+                raise ValueError(f"Filter value cannot be None for field: {field_name}")
+            
+            # Apply filter using operator mapping
+            if operator == "exact":
+                filter_kwargs[field_name] = value
+            elif operator == "ne":
+                # Tortoise doesn't support != directly, use exclude
+                query = query.exclude(**{field_name: value})
+            elif operator == "gt":
+                filter_kwargs[f"{field_name}__gt"] = value
+            elif operator == "gte":
+                filter_kwargs[f"{field_name}__gte"] = value
+            elif operator == "lt":
+                filter_kwargs[f"{field_name}__lt"] = value
+            elif operator == "lte":
+                filter_kwargs[f"{field_name}__lte"] = value
+            elif operator == "in":
+                values = value.split(",") if isinstance(value, str) else value
+                filter_kwargs[f"{field_name}__in"] = values
+            elif operator in ("like", "ilike"):
+                # Tortoise uses icontains for case-insensitive contains
+                filter_kwargs[f"{field_name}__icontains"] = value
+        
+        return query, filter_kwargs
     
     async def get_all(
         self,
@@ -49,35 +107,8 @@ class TortoiseAdapter(BaseORMAdapter):
         try:
             query = self.model.all()
             
-            # Apply filters
-            filter_kwargs = {}
-            for filter_key, filter_value in filters.items():
-                if isinstance(filter_value, dict):
-                    field_name = filter_value.get("field")
-                    operator = filter_value.get("operator", "exact")
-                    value = filter_value.get("value")
-                    
-                    if operator == "exact":
-                        filter_kwargs[field_name] = value
-                    elif operator == "ne":
-                        # Tortoise doesn't support != directly, use exclude
-                        query = query.exclude(**{field_name: value})
-                    elif operator == "gt":
-                        filter_kwargs[f"{field_name}__gt"] = value
-                    elif operator == "gte":
-                        filter_kwargs[f"{field_name}__gte"] = value
-                    elif operator == "lt":
-                        filter_kwargs[f"{field_name}__lt"] = value
-                    elif operator == "lte":
-                        filter_kwargs[f"{field_name}__lte"] = value
-                    elif operator == "in":
-                        values = value.split(",") if isinstance(value, str) else value
-                        filter_kwargs[f"{field_name}__in"] = values
-                    elif operator == "like":
-                        filter_kwargs[f"{field_name}__icontains"] = value
-                    elif operator == "ilike":
-                        filter_kwargs[f"{field_name}__icontains"] = value
-            
+            # Apply filters (using extracted method)
+            query, filter_kwargs = self._apply_filters(query, filters)
             if filter_kwargs:
                 query = query.filter(**filter_kwargs)
             
@@ -246,34 +277,8 @@ class TortoiseAdapter(BaseORMAdapter):
         try:
             query = self.model.all()
             
-            # Apply filters
-            filter_kwargs = {}
-            for filter_key, filter_value in filters.items():
-                if isinstance(filter_value, dict):
-                    field_name = filter_value.get("field")
-                    operator = filter_value.get("operator", "exact")
-                    value = filter_value.get("value")
-                    
-                    if operator == "exact":
-                        filter_kwargs[field_name] = value
-                    elif operator == "ne":
-                        query = query.exclude(**{field_name: value})
-                    elif operator == "gt":
-                        filter_kwargs[f"{field_name}__gt"] = value
-                    elif operator == "gte":
-                        filter_kwargs[f"{field_name}__gte"] = value
-                    elif operator == "lt":
-                        filter_kwargs[f"{field_name}__lt"] = value
-                    elif operator == "lte":
-                        filter_kwargs[f"{field_name}__lte"] = value
-                    elif operator == "in":
-                        values = value.split(",") if isinstance(value, str) else value
-                        filter_kwargs[f"{field_name}__in"] = values
-                    elif operator == "like":
-                        filter_kwargs[f"{field_name}__icontains"] = value
-                    elif operator == "ilike":
-                        filter_kwargs[f"{field_name}__icontains"] = value
-            
+            # Apply filters (using extracted method - DRY!)
+            query, filter_kwargs = self._apply_filters(query, filters)
             if filter_kwargs:
                 query = query.filter(**filter_kwargs)
             

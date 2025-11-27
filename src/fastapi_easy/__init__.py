@@ -10,7 +10,6 @@ __author__ = "FastAPI-Easy Team"
 __license__ = "MIT"
 
 from .core.crud_router import CRUDRouter
-from .core.operations import Operation, OperationRegistry
 from .core.adapters import ORMAdapter
 from .core.hooks import HookRegistry
 from .core.errors import AppError, ErrorCode
@@ -18,8 +17,6 @@ from .core.config import CRUDConfig
 
 __all__ = [
     "CRUDRouter",
-    "Operation",
-    "OperationRegistry",
     "ORMAdapter",
     "HookRegistry",
     "AppError",
