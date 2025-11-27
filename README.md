@@ -34,7 +34,7 @@
 - ✅ **关系处理** - 自动处理关联数据，避免 N+1 查询
 - ✅ **Pydantic v2 兼容** - 完全支持 Pydantic v2
 - ✅ **异步统一** - 所有 ORM 都支持 async/await
-- ✅ **多 ORM 支持** - SQLAlchemy、Tortoise、Gino、Ormar、Databases
+- ✅ **多 ORM 支持** - SQLAlchemy、Tortoise、MongoDB、SQLModel（4 种）
 
 ---
 
@@ -61,7 +61,8 @@ class Item(BaseModel):
 app = FastAPI()
 
 # 一行代码生成完整的 CRUD API
-router = CRUDRouter(schema=Item)
+# 注意：需要配置 backend（数据库适配器）
+router = CRUDRouter(schema=Item, backend=backend)
 app.include_router(router)
 
 # 自动生成的 API：
