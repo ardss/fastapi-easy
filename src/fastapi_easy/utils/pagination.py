@@ -13,17 +13,21 @@ class PaginationParams:
     skip: int = 0
     limit: int = 10
     
-    def validate(self, max_limit: int = 100) -> None:
+    def validate(self, max_limit: int = 100, max_skip: int = 1000000) -> None:
         """Validate pagination parameters
         
         Args:
             max_limit: Maximum allowed limit
+            max_skip: Maximum allowed skip value
             
         Raises:
             ValueError: If parameters are invalid
         """
         if self.skip < 0:
             raise ValueError("skip must be >= 0")
+        
+        if self.skip > max_skip:
+            raise ValueError(f"skip must be <= {max_skip}")
         
         if self.limit <= 0:
             raise ValueError("limit must be > 0")

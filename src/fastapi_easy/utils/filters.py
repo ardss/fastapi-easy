@@ -60,7 +60,7 @@ class FilterParser:
                 if operator in cls.OPERATORS:
                     filters[key] = {
                         "field": field,
-                        "operator": operator,
+                        "operator": operator,  # Use the operator key, not the mapped value
                         "value": value,
                     }
                 else:

@@ -44,7 +44,11 @@ class CRUDConfig:
     metadata: Dict[str, Any] = field(default_factory=dict)
     
     def validate(self) -> None:
-        """Validate configuration"""
+        """Validate configuration
+        
+        Raises:
+            ValueError: If configuration is invalid
+        """
         if self.default_limit <= 0:
             raise ValueError("default_limit must be greater than 0")
         
@@ -53,3 +57,12 @@ class CRUDConfig:
         
         if self.default_limit > self.max_limit:
             raise ValueError("default_limit cannot be greater than max_limit")
+        
+        if self.filter_fields is not None and not isinstance(self.filter_fields, list):
+            raise ValueError("filter_fields must be a list or None")
+        
+        if self.sort_fields is not None and not isinstance(self.sort_fields, list):
+            raise ValueError("sort_fields must be a list or None")
+        
+        if not isinstance(self.deleted_at_field, str) or not self.deleted_at_field:
+            raise ValueError("deleted_at_field must be a non-empty string")
