@@ -126,4 +126,4 @@ class TestSQLAlchemyCRUD:
         
         count = await sqlalchemy_adapter.count(filters)
         
-        assert count == 3  # apple (10), grape (15), mango (12)
+        assert count == 2  # grape (15), mango (12) - price > 10

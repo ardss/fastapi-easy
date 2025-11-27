@@ -1,7 +1,8 @@
 """SQLAlchemy integration test fixtures"""
 
 import pytest
-from sqlalchemy import Column, Integer, String, Float, create_engine
+import pytest_asyncio
+from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 
@@ -25,30 +26,24 @@ class Item(Base):
         return f"<Item(id={self.id}, name={self.name}, price={self.price})>"
 
 
-@pytest.fixture
-def db_engine():
+@pytest_asyncio.fixture
+async def db_engine():
     """Create test database engine"""
-    import asyncio
-    
     engine = create_async_engine(
         "sqlite+aiosqlite:///:memory:",
         echo=False,
     )
     
-    async def setup():
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
     
-    async def teardown():
-        await engine.dispose()
-    
-    asyncio.run(setup())
     yield engine
-    asyncio.run(teardown())
+    
+    await engine.dispose()
 
 
-@pytest.fixture
-def db_session_factory(db_engine):
+@pytest_asyncio.fixture
+async def db_session_factory(db_engine):
     """Create async session factory"""
     async_session = async_sessionmaker(
         db_engine,
@@ -68,7 +63,7 @@ def sqlalchemy_adapter(db_session_factory):
     )
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def sample_items(db_session_factory):
     """Create sample items"""
     async with db_session_factory() as session:
