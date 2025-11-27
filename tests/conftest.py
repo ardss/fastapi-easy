@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import AsyncMock
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from fastapi_easy.core.adapters import ORMAdapter
 from fastapi_easy.core.config import CRUDConfig
@@ -15,22 +15,20 @@ from fastapi_easy.core.crud_router import CRUDRouter
 
 class ItemSchema(BaseModel):
     """Test item schema"""
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
     name: str
     price: float
-    
-    class Config:
-        from_attributes = True
 
 
 class UserSchema(BaseModel):
     """Test user schema"""
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
     username: str
     email: str
-    
-    class Config:
-        from_attributes = True
 
 
 # ============================================================================

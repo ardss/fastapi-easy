@@ -4,8 +4,10 @@ from typing import Any, Dict, List, Optional, Type
 from sqlalchemy import select, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from .base import BaseORMAdapter
+from ..core.errors import ConflictError, AppError, ErrorCode
 
 
 class SQLAlchemyAdapter(BaseORMAdapter):
@@ -122,13 +124,28 @@ class SQLAlchemyAdapter(BaseORMAdapter):
             
         Returns:
             Created item
+            
+        Raises:
+            ConflictError: If item already exists (unique constraint violation)
+            AppError: For other database errors
         """
         async with self.session_factory() as session:
-            item = self.model(**data)
-            session.add(item)
-            await session.commit()
-            await session.refresh(item)
-            return item
+            try:
+                item = self.model(**data)
+                session.add(item)
+                await session.commit()
+                await session.refresh(item)
+                return item
+            except IntegrityError as e:
+                await session.rollback()
+                raise ConflictError(f"Item already exists: {str(e)}")
+            except SQLAlchemyError as e:
+                await session.rollback()
+                raise AppError(
+                    code=ErrorCode.INTERNAL_ERROR,
+                    status_code=500,
+                    message=f"Database error: {str(e)}"
+                )
     
     async def update(self, id: Any, data: Dict[str, Any]) -> Any:
         """Update item
