@@ -51,27 +51,53 @@ pip install fastapi-easy
 ```python
 from fastapi import FastAPI
 from fastapi_easy import CRUDRouter
+from fastapi_easy.backends import SQLAlchemyAsyncBackend
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy import Column, Integer, String, Float
 from pydantic import BaseModel
 
+# 1. 定义 ORM 模型
+Base = declarative_base()
+
+class ItemDB(Base):
+    __tablename__ = "items"
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    price = Column(Float)
+
+# 2. 定义 Pydantic Schema
 class Item(BaseModel):
     id: int
     name: str
     price: float
+    
+    class Config:
+        from_attributes = True
 
+# 3. 配置数据库
+DATABASE_URL = "sqlite+aiosqlite:///./test.db"
+engine = create_async_engine(DATABASE_URL)
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session
+
+# 4. 创建应用和路由
 app = FastAPI()
 
-# 一行代码生成完整的 CRUD API
-# 注意：需要配置 backend（数据库适配器）
+backend = SQLAlchemyAsyncBackend(ItemDB, get_db)
 router = CRUDRouter(schema=Item, backend=backend)
 app.include_router(router)
 
 # 自动生成的 API：
-# GET    /item              - 获取所有项目
-# GET    /item/{item_id}    - 获取单个项目
-# POST   /item              - 创建项目
-# PUT    /item/{item_id}    - 更新项目
-# DELETE /item/{item_id}    - 删除项目
-# DELETE /item              - 删除所有项目
+# GET    /itemdb              - 获取所有项目
+# GET    /itemdb/{item_id}    - 获取单个项目
+# POST   /itemdb              - 创建项目
+# PUT    /itemdb/{item_id}    - 更新项目
+# DELETE /itemdb/{item_id}    - 删除项目
+# DELETE /itemdb              - 删除所有项目
 ```
 
 ### 运行
@@ -109,12 +135,10 @@ uvicorn main:app --reload
 
 | ORM | 支持数据库 | 类型 |
 |-----|---------|------|
-| **SQLAlchemy** | PostgreSQL、MySQL、SQLite、Oracle | 异步 |
+| **SQLAlchemy** | PostgreSQL、MySQL、SQLite、Oracle、SQL Server | 异步 |
 | **Tortoise** | PostgreSQL、MySQL、SQLite | 异步 |
-| **Gino** | PostgreSQL | 异步 |
-| **Ormar** | PostgreSQL、MySQL、SQLite | 异步 |
-| **Databases** | 多种数据库 | 异步 |
-| **内存存储** | 无 | 同步 |
+| **MongoDB** | MongoDB | 异步 |
+| **SQLModel** | PostgreSQL、MySQL、SQLite、Oracle | 异步 |
 
 ### 安装可选依赖
 
@@ -124,6 +148,12 @@ pip install fastapi-easy[sqlalchemy]
 
 # Tortoise ORM
 pip install fastapi-easy[tortoise]
+
+# MongoDB 支持
+pip install fastapi-easy[mongodb]
+
+# SQLModel 支持
+pip install fastapi-easy[sqlmodel]
 
 # 所有 ORM
 pip install fastapi-easy[all]
