@@ -122,26 +122,30 @@ class MySQLLockProvider(LockProvider):
         self.engine = engine
         self.lock_name = lock_name
         self.acquired = False
+        self._connection = None
 
     async def acquire(self, timeout: int = 30) -> bool:
         """使用 GET_LOCK 获取锁"""
         try:
-            with self.engine.connect() as conn:
-                result = conn.execute(
-                    text(f"SELECT GET_LOCK('{self.lock_name}', {timeout})")
-                )
-                locked = result.scalar()
+            conn = self.engine.connect()
+            result = conn.execute(
+                text(f"SELECT GET_LOCK('{self.lock_name}', {timeout})")
+            )
+            locked = result.scalar()
 
-                if locked == 1:
-                    self.acquired = True
-                    logger.info(f"✅ MySQL lock acquired ({self.lock_name})")
-                    return True
-                elif locked == 0:
-                    logger.warning(f"Timeout acquiring MySQL lock")
-                    return False
-                else:
-                    logger.error(f"Error acquiring MySQL lock: {locked}")
-                    return False
+            if locked == 1:
+                self.acquired = True
+                self._connection = conn  # 保存连接以保持锁
+                logger.info(f"✅ MySQL lock acquired ({self.lock_name})")
+                return True
+            elif locked == 0:
+                logger.warning("Timeout acquiring MySQL lock")
+                conn.close()
+                return False
+            else:
+                logger.error(f"Error acquiring MySQL lock: {locked}")
+                conn.close()
+                return False
 
         except Exception as e:
             logger.error(f"Error acquiring MySQL lock: {e}")
@@ -149,27 +153,30 @@ class MySQLLockProvider(LockProvider):
 
     async def release(self) -> bool:
         """释放 MySQL 锁"""
-        if not self.acquired:
+        if not self.acquired or not self._connection:
             return False
 
         try:
-            with self.engine.connect() as conn:
-                result = conn.execute(
-                    text(f"SELECT RELEASE_LOCK('{self.lock_name}')")
-                )
-                released = result.scalar()
+            result = self._connection.execute(
+                text(f"SELECT RELEASE_LOCK('{self.lock_name}')")
+            )
+            released = result.scalar()
 
-                if released == 1:
-                    self.acquired = False
-                    logger.info(f"🔓 MySQL lock released ({self.lock_name})")
-                    return True
-                else:
-                    logger.warning(f"Failed to release MySQL lock")
-                    return False
+            if released == 1:
+                self.acquired = False
+                logger.info(f"🔓 MySQL lock released ({self.lock_name})")
+                return True
+            else:
+                logger.warning("Failed to release MySQL lock")
+                return False
 
         except Exception as e:
             logger.error(f"Error releasing MySQL lock: {e}")
             return False
+        finally:
+            if self._connection:
+                self._connection.close()
+                self._connection = None
 
     async def is_locked(self) -> bool:
         """检查锁状态"""

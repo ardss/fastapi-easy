@@ -11,6 +11,7 @@ Schema 哈希缓存系统
 import hashlib
 import json
 import logging
+import threading
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
@@ -226,6 +227,7 @@ class SchemaCacheManager:
         else:
             self.provider = FileSchemaCacheProvider()
 
+        self.stats_lock = threading.Lock()
         self.stats = {
             "hits": 0,
             "misses": 0,
@@ -242,12 +244,13 @@ class SchemaCacheManager:
         )
         cached = await self.provider.get(cache_key)
 
-        if cached:
-            self.stats["hits"] += 1
-            logger.debug(f"Schema cache hit: {schema_name}")
-        else:
-            self.stats["misses"] += 1
-            logger.debug(f"Schema cache miss: {schema_name}")
+        with self.stats_lock:
+            if cached:
+                self.stats["hits"] += 1
+                logger.debug(f"Schema cache hit: {schema_name}")
+            else:
+                self.stats["misses"] += 1
+                logger.debug(f"Schema cache miss: {schema_name}")
 
         return cached
 
@@ -269,7 +272,8 @@ class SchemaCacheManager:
 
         success = await self.provider.set(cache_key, cache_data)
         if success:
-            self.stats["writes"] += 1
+            with self.stats_lock:
+                self.stats["writes"] += 1
             logger.debug(f"Schema cached: {schema_name}")
         return success
 
@@ -282,7 +286,8 @@ class SchemaCacheManager:
         )
         success = await self.provider.delete(cache_key)
         if success:
-            self.stats["deletes"] += 1
+            with self.stats_lock:
+                self.stats["deletes"] += 1
             logger.debug(f"Schema cache invalidated: {schema_name}")
         return success
 
