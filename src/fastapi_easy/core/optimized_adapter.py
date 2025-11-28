@@ -32,6 +32,7 @@ class OptimizedSQLAlchemyAdapter:
         enable_async: bool = True,
         cache_config: Optional[Dict[str, Any]] = None,
         async_config: Optional[Dict[str, Any]] = None,
+        query_timeout: float = 30.0,
     ):
         """Initialize optimized adapter
         
@@ -41,10 +42,12 @@ class OptimizedSQLAlchemyAdapter:
             enable_async: Enable async batch processing
             cache_config: Cache configuration
             async_config: Async configuration
+            query_timeout: Query timeout in seconds (default: 30)
         """
         self.base_adapter = base_adapter
         self.enable_cache = enable_cache
         self.enable_async = enable_async
+        self.query_timeout = query_timeout
         
         # Initialize cache
         if enable_cache:
@@ -72,6 +75,25 @@ class OptimizedSQLAlchemyAdapter:
         
         # Track model for cache invalidation
         self.model = base_adapter.model
+    
+    async def _execute_with_timeout(self, coro, operation: str) -> Any:
+        """Execute async operation with timeout
+        
+        Args:
+            coro: Coroutine to execute
+            operation: Operation name for logging
+            
+        Returns:
+            Operation result
+            
+        Raises:
+            asyncio.TimeoutError: If operation exceeds timeout
+        """
+        try:
+            return await asyncio.wait_for(coro, timeout=self.query_timeout)
+        except asyncio.TimeoutError:
+            logger.error(f"Operation {operation} exceeded timeout of {self.query_timeout}s")
+            raise
     
     def _get_cache_key(self, operation: str, **kwargs) -> str:
         """Generate cache key for operation
@@ -115,8 +137,11 @@ class OptimizedSQLAlchemyAdapter:
             if cached is not None:
                 return cached
         
-        # Execute query
-        result = await self.base_adapter.get_all(filters, sorts, pagination)
+        # Execute query with timeout
+        result = await self._execute_with_timeout(
+            self.base_adapter.get_all(filters, sorts, pagination),
+            "get_all"
+        )
         
         # Cache result
         if self.enable_cache:
