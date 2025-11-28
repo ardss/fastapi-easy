@@ -187,13 +187,13 @@ class AdvancedRiskAssessor:
 
     def _assess_add_column(self, change: SchemaChange) -> RiskLevel:
         """评估添加列的风险"""
-        if not hasattr(change, "column_obj") or not change.column_obj:
+        if not hasattr(change, "column_obj") or change.column_obj is None:
             return RiskLevel.MEDIUM
 
         column = change.column_obj
 
         # 可空列是安全的
-        if column.nullable:
+        if column.nullable is True:
             return RiskLevel.SAFE
 
         # 有默认值的列是中等风险

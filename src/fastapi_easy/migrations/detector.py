@@ -42,7 +42,16 @@ class SchemaDetector:
             # Drop Column
             for col_name in db_columns:
                 if col_name not in orm_columns:
-                    risk = self.risk_assessor.assess("drop_column")
+                    # 先创建临时 SchemaChange 对象用于风险评估
+                    temp_change = SchemaChange(
+                        type="drop_column",
+                        table=table_name,
+                        column=col_name,
+                        risk_level=RiskLevel.SAFE,  # 临时值
+                        description="",
+                        column_obj=table.columns.get(col_name)
+                    )
+                    risk = self.risk_assessor.assess(temp_change)
                     changes.append(SchemaChange(
                         type="drop_column",
                         table=table_name,
@@ -50,7 +59,7 @@ class SchemaDetector:
                         risk_level=risk,
                         description=f"Drop column '{table_name}.{col_name}'",
                         warning="Data in this column will be lost permanently.",
-                        column_obj=table.columns.get(col_name) # Might be None if dropped from ORM
+                        column_obj=table.columns.get(col_name)
                     ))
             
             # Modify Column (Type/Nullable)
@@ -63,7 +72,15 @@ class SchemaDetector:
         return changes
 
     def _create_table_change(self, table_name: str) -> SchemaChange:
-        risk = self.risk_assessor.assess("create_table")
+        # 先创建临时 SchemaChange 对象用于风险评估
+        temp_change = SchemaChange(
+            type="create_table",
+            table=table_name,
+            risk_level=RiskLevel.SAFE,  # 临时值
+            description="",
+            column_obj=self.metadata.tables[table_name]
+        )
+        risk = self.risk_assessor.assess(temp_change)
         return SchemaChange(
             type="create_table",
             table=table_name,
@@ -74,11 +91,20 @@ class SchemaDetector:
 
     def _analyze_add_column(self, table_name: str, column: Column) -> SchemaChange:
         """Analyze risk of adding a column"""
-        risk = self.risk_assessor.assess("add_column", column=column)
-        
+        # 先创建临时 SchemaChange 对象用于风险评估
+        temp_change = SchemaChange(
+            type="add_column",
+            table=table_name,
+            column=column.name,
+            risk_level=RiskLevel.SAFE,  # 临时值
+            description="",
+            column_obj=column
+        )
+        risk = self.risk_assessor.assess(temp_change)
+
         description = f"Add column '{table_name}.{column.name}'"
         warning = None
-        
+
         if risk == RiskLevel.SAFE:
             description = f"Add nullable column '{table_name}.{column.name}'"
         elif risk == RiskLevel.MEDIUM:
@@ -86,7 +112,7 @@ class SchemaDetector:
         else:
             description = f"Add NOT NULL column '{table_name}.{column.name}' without default"
             warning = "This will fail if table has existing data."
-            
+
         return SchemaChange(
             type="add_column",
             table=table_name,
@@ -109,8 +135,19 @@ class SchemaDetector:
         if "VARCHAR" in orm_type and "VARCHAR" in db_type:
             pass # Ignore length diffs for now
         elif orm_type != db_type:
-             if orm_type.split("(")[0] != db_type.split("(")[0]:
-                risk = self.risk_assessor.assess("change_column", old_type=db_type, new_type=orm_type)
+            if orm_type.split("(")[0] != db_type.split("(")[0]:
+                # 先创建临时 SchemaChange 对象用于风险评估
+                temp_change = SchemaChange(
+                    type="change_column",
+                    table=table_name,
+                    column=orm_col.name,
+                    old_type=db_type,
+                    new_type=orm_type,
+                    risk_level=RiskLevel.SAFE,  # 临时值
+                    description="",
+                    column_obj=orm_col
+                )
+                risk = self.risk_assessor.assess(temp_change)
                 changes.append(SchemaChange(
                     type="change_column",
                     table=table_name,
