@@ -1,8 +1,11 @@
 import logging
+import time
 from datetime import datetime
 from typing import List, Optional
+
+from sqlalchemy import Column, DateTime, Integer, MetaData, String, Table, text
 from sqlalchemy.engine import Engine
-from sqlalchemy import text, Table, Column, Integer, String, DateTime, MetaData
+from sqlalchemy.exc import IntegrityError
 
 logger = logging.getLogger(__name__)
 
@@ -28,24 +31,46 @@ class MigrationStorage:
             Column('status', String(20), default='applied'),
         )
     
-    def initialize(self):
+    def initialize(self, max_retries: int = 3):
         """Create migration history table if it doesn't exist"""
-        try:
-            self.metadata.create_all(self.engine, checkfirst=True)
-            logger.debug(f"✅ Migration history table '{self.TABLE_NAME}' ready")
-        except Exception as e:
-            logger.error(f"Failed to initialize migration storage: {e}")
-            raise
-    
-    def record_migration(self, version: str, description: str, rollback_sql: str, risk_level: str):
+        for attempt in range(max_retries):
+            try:
+                self.metadata.create_all(self.engine, checkfirst=True)
+                logger.debug(
+                    f"✅ Migration history table '{self.TABLE_NAME}' ready"
+                )
+                return
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    logger.warning(
+                        f"Failed to initialize storage "
+                        f"(attempt {attempt + 1}/{max_retries}): {e}"
+                    )
+                    time.sleep(1)
+                else:
+                    logger.error(
+                        f"Failed to initialize storage after "
+                        f"{max_retries} attempts: {e}"
+                    )
+                    raise
+
+    def record_migration(
+        self,
+        version: str,
+        description: str,
+        rollback_sql: str,
+        risk_level: str
+    ):
         """Record a successful migration"""
         try:
             with self.engine.begin() as conn:
                 conn.execute(
                     text(f"""
-                        INSERT INTO {self.TABLE_NAME} 
-                        (version, description, applied_at, rollback_sql, risk_level, status)
-                        VALUES (:version, :description, :applied_at, :rollback_sql, :risk_level, 'applied')
+                        INSERT INTO {self.TABLE_NAME}
+                        (version, description, applied_at,
+                         rollback_sql, risk_level, status)
+                        VALUES (:version, :description, :applied_at,
+                                :rollback_sql, :risk_level, 'applied')
                     """),
                     {
                         "version": version,
@@ -55,9 +80,16 @@ class MigrationStorage:
                         "risk_level": risk_level,
                     }
                 )
-            logger.debug(f"📝 Recorded migration: {version}")
+            logger.info(f"📝 Recorded migration: {version}")
+        except IntegrityError as e:
+            logger.error(
+                f"Migration {version} already recorded: {e}",
+                exc_info=True
+            )
+            raise
         except Exception as e:
             logger.error(f"Failed to record migration {version}: {e}")
+            raise
             # Don't raise - recording failure shouldn't block migration
     
     def get_applied_versions(self) -> List[str]:

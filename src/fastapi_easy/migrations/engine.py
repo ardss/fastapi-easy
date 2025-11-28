@@ -22,6 +22,31 @@ class MigrationEngine:
         mode: str = "safe",
         auto_backup: bool = False
     ):
+        # 验证 mode 参数
+        valid_modes = {"safe", "auto", "aggressive", "dry_run"}
+        if mode not in valid_modes:
+            raise ValueError(
+                f"Invalid mode '{mode}'. "
+                f"Must be one of {valid_modes}"
+            )
+        
+        # 验证 engine 连接
+        try:
+            from sqlalchemy import text
+            with engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+        except Exception as e:
+            raise RuntimeError(
+                f"Cannot connect to database: {e}"
+            )
+        
+        # 验证 metadata
+        if not metadata or not metadata.tables:
+            logger.warning(
+                "Metadata has no tables. "
+                "This might indicate a configuration issue."
+            )
+        
         self.engine = engine
         self.metadata = metadata
         self.mode = mode
@@ -86,7 +111,14 @@ class MigrationEngine:
         finally:
             # 7. Release Lock
             logger.info("🔓 Releasing migration lock...")
-            await self.lock.release()
+            try:
+                await self.lock.release()
+            except Exception as e:
+                logger.error(
+                    f"Failed to release lock: {e}. "
+                    f"You may need to manually clean up the lock.",
+                    exc_info=True
+                )
     
     def get_history(self, limit: int = 10):
         """Get migration history"""
