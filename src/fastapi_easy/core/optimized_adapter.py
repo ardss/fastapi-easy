@@ -388,12 +388,20 @@ class OptimizedSQLAlchemyAdapter:
                 # Cache each item
                 count = 0
                 for item in items:
-                    # Try to get ID from item
-                    item_id = getattr(item, "id", None) or item.get("id")
-                    if item_id:
-                        cache_key = self._get_cache_key("get_one", id=item_id)
-                        await self.cache.set(cache_key, item)
-                        count += 1
+                    try:
+                        # Try to get ID from item
+                        item_id = getattr(item, "id", None)
+                        # If is dict, try get method
+                        if item_id is None and isinstance(item, dict):
+                            item_id = item.get("id")
+                        
+                        if item_id:
+                            cache_key = self._get_cache_key("get_one", id=item_id)
+                            await self.cache.set(cache_key, item)
+                            count += 1
+                    except Exception as e:
+                        logger.warning(f"Failed to cache item: {str(e)}")
+                        continue
                 
                 logger.info(f"Cache warmup completed: {count} items preloaded")
                 return count

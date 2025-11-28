@@ -35,10 +35,16 @@ class ReentrantAsyncLock:
             True if lock acquired, False if timeout
         """
         try:
-            current_task = id(asyncio.current_task())
+            # Safely get current task
+            current_task = asyncio.current_task()
+            if current_task is None:
+                logger.error("No current task available")
+                return False
+            
+            current_task_id = id(current_task)
             
             # If already owned by current task, increment count
-            if self._owner == current_task:
+            if self._owner == current_task_id:
                 self._count += 1
                 return True
             
@@ -49,11 +55,14 @@ class ReentrantAsyncLock:
                 await self._lock.acquire()
             
             # Set owner and count
-            self._owner = current_task
+            self._owner = current_task_id
             self._count = 1
             return True
         except asyncio.TimeoutError:
             logger.warning("Lock acquisition timeout")
+            return False
+        except RuntimeError as e:
+            logger.error(f"Runtime error acquiring lock: {str(e)}")
             return False
         except Exception as e:
             logger.error(f"Error acquiring lock: {str(e)}")

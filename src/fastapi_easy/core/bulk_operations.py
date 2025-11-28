@@ -76,10 +76,13 @@ class BulkOperationAdapter:
             try:
                 await session.commit()
             except Exception as e:
-                result.failure_count = len(items)
-                result.success_count = 0
+                # 只增加失败计数，不覆盖之前的成功/失败计数
+                failed_items = len(items) - result.success_count
+                result.failure_count += failed_items
                 result.errors.append({
                     "error": f"Commit failed: {str(e)}",
+                    "type": "transaction_error",
+                    "failed_count": failed_items,
                 })
                 await session.rollback()
         
