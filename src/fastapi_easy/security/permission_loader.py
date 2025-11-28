@@ -1,7 +1,7 @@
 """Permission loader interface and implementations"""
 
 import logging
-from typing import List, Optional, Protocol
+from typing import Any, Dict, List, Optional, Protocol
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +117,8 @@ class CachedPermissionLoader:
         self.cache_ttl = cache_ttl
         self.cache: dict = {}
         self.cache_times: dict = {}
+        self.hits = 0
+        self.misses = 0
 
         logger.debug(f"CachedPermissionLoader initialized with TTL {cache_ttl}s")
 
@@ -139,10 +141,12 @@ class CachedPermissionLoader:
         if user_id in self.cache:
             cache_time = self.cache_times.get(user_id, 0)
             if now - cache_time < self.cache_ttl:
+                self.hits += 1
                 logger.debug(f"Cache hit for user {user_id}")
                 return self.cache[user_id]
 
         # Load from base loader
+        self.misses += 1
         permissions = await self.base_loader.load_permissions(user_id)
 
         # Cache result
@@ -167,3 +171,20 @@ class CachedPermissionLoader:
             self.cache.pop(user_id, None)
             self.cache_times.pop(user_id, None)
             logger.debug(f"Cleared cache for user {user_id}")
+
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Get cache statistics
+
+        Returns:
+            Dictionary with cache statistics
+        """
+        total = self.hits + self.misses
+        hit_rate = (self.hits / total * 100) if total > 0 else 0
+
+        return {
+            "size": len(self.cache),
+            "hits": self.hits,
+            "misses": self.misses,
+            "total": total,
+            "hit_rate": f"{hit_rate:.2f}%",
+        }

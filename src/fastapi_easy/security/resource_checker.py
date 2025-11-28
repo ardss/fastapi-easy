@@ -195,6 +195,8 @@ class CachedResourceChecker:
         self.cache_ttl = cache_ttl
         self.cache: dict = {}
         self.cache_times: dict = {}
+        self.hits = 0
+        self.misses = 0
 
         logger.debug(f"CachedResourceChecker initialized with TTL {cache_ttl}s")
 
@@ -220,10 +222,12 @@ class CachedResourceChecker:
         if cache_key in self.cache:
             cache_time = self.cache_times.get(cache_key, 0)
             if now - cache_time < self.cache_ttl:
+                self.hits += 1
                 logger.debug(f"Cache hit for {cache_key}")
                 return self.cache[cache_key]
 
         # Check with base checker
+        self.misses += 1
         result = await self.base_checker.check_owner(user_id, resource_id)
 
         # Cache result
@@ -260,10 +264,12 @@ class CachedResourceChecker:
         if cache_key in self.cache:
             cache_time = self.cache_times.get(cache_key, 0)
             if now - cache_time < self.cache_ttl:
+                self.hits += 1
                 logger.debug(f"Cache hit for {cache_key}")
                 return self.cache[cache_key]
 
         # Check with base checker
+        self.misses += 1
         result = await self.base_checker.check_permission(user_id, resource_id, permission)
 
         # Cache result
@@ -271,6 +277,23 @@ class CachedResourceChecker:
         self.cache_times[cache_key] = now
 
         return result
+
+    def get_cache_stats(self) -> dict:
+        """Get cache statistics
+
+        Returns:
+            Dictionary with cache statistics
+        """
+        total = self.hits + self.misses
+        hit_rate = (self.hits / total * 100) if total > 0 else 0
+
+        return {
+            "size": len(self.cache),
+            "hits": self.hits,
+            "misses": self.misses,
+            "total": total,
+            "hit_rate": f"{hit_rate:.2f}%",
+        }
 
     def clear_cache(self, pattern: Optional[str] = None) -> None:
         """Clear cache
