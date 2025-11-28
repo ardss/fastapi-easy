@@ -4,12 +4,12 @@ import asyncio
 from typing import Any, Dict, Optional
 from abc import ABC, abstractmethod
 import time
-from collections import defaultdict
+from collections import defaultdict, deque
 from datetime import datetime, timedelta
 
 
 class RateLimitEntry:
-    """Rate limit entry"""
+    """Rate limit entry with optimized time complexity"""
     
     def __init__(self, limit: int, window: int):
         """Initialize rate limit entry
@@ -20,18 +20,19 @@ class RateLimitEntry:
         """
         self.limit = limit
         self.window = window
-        self.requests: list[float] = []
+        self.requests: deque = deque(maxlen=limit)  # 使用 deque 优化性能
     
     def is_allowed(self) -> bool:
-        """Check if request is allowed
+        """Check if request is allowed (O(1) 时间复杂度)
         
         Returns:
             True if request is allowed
         """
         now = time.time()
         
-        # Remove old requests outside window
-        self.requests = [req_time for req_time in self.requests if now - req_time < self.window]
+        # 只检查最早的请求 - O(1) 而不是 O(n)
+        while self.requests and now - self.requests[0] >= self.window:
+            self.requests.popleft()
         
         # Check if limit exceeded
         if len(self.requests) >= self.limit:
@@ -48,7 +49,11 @@ class RateLimitEntry:
             Number of remaining requests
         """
         now = time.time()
-        self.requests = [req_time for req_time in self.requests if now - req_time < self.window]
+        
+        # 清理过期请求
+        while self.requests and now - self.requests[0] >= self.window:
+            self.requests.popleft()
+        
         return max(0, self.limit - len(self.requests))
     
     def get_reset_time(self) -> float:
@@ -60,7 +65,7 @@ class RateLimitEntry:
         if not self.requests:
             return 0
         
-        oldest_request = min(self.requests)
+        oldest_request = self.requests[0]  # deque 的第一个元素
         reset_time = oldest_request + self.window
         now = time.time()
         
@@ -177,6 +182,22 @@ class MemoryRateLimiter(BaseRateLimiter):
                 return 0
             
             return self.limiters[limiter_key].get_reset_time()
+    
+    async def cleanup(self) -> int:
+        """Clean up expired entries
+        
+        Returns:
+            Number of entries removed
+        """
+        async with self._lock:
+            now = time.time()
+            expired_keys = [
+                key for key, entry in self.limiters.items()
+                if entry and now - max(entry.requests or [0]) > entry.window
+            ]
+            for key in expired_keys:
+                del self.limiters[key]
+            return len(expired_keys)
 
 
 class NoRateLimiter(BaseRateLimiter):

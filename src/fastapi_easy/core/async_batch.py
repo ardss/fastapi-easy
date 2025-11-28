@@ -19,15 +19,17 @@ class AsyncBatchProcessor:
         self,
         items: List[Any],
         processor: Callable[[Any], Awaitable[Any]],
+        timeout: Optional[float] = None,
     ) -> List[Any]:
         """Process items concurrently with semaphore
         
         Args:
             items: Items to process
             processor: Async function to process each item
+            timeout: Optional timeout for each item
             
         Returns:
-            List of processed results
+            List of processed results (may contain exceptions)
         """
         if not items:
             return []
@@ -36,16 +38,22 @@ class AsyncBatchProcessor:
         
         async def bounded_processor(item):
             async with semaphore:
-                return await processor(item)
+                try:
+                    if timeout:
+                        return await asyncio.wait_for(processor(item), timeout=timeout)
+                    return await processor(item)
+                except Exception as e:
+                    return e  # 返回异常而不是抛出
         
         tasks = [bounded_processor(item) for item in items]
-        return await asyncio.gather(*tasks)
+        return await asyncio.gather(*tasks, return_exceptions=True)
     
     async def process_batches(
         self,
         items: List[Any],
         batch_size: int,
         processor: Callable[[List[Any]], Awaitable[List[Any]]],
+        timeout: Optional[float] = None,
     ) -> List[Any]:
         """Process items in batches concurrently
         
@@ -53,9 +61,10 @@ class AsyncBatchProcessor:
             items: Items to process
             batch_size: Size of each batch
             processor: Async function to process batch
+            timeout: Optional timeout for each batch
             
         Returns:
-            List of processed results
+            List of processed results (may contain exceptions)
         """
         if not items:
             return []
@@ -71,16 +80,23 @@ class AsyncBatchProcessor:
         
         async def bounded_processor(batch):
             async with semaphore:
-                return await processor(batch)
+                try:
+                    if timeout:
+                        return await asyncio.wait_for(processor(batch), timeout=timeout)
+                    return await processor(batch)
+                except Exception as e:
+                    return e  # 返回异常而不是抛出
         
         tasks = [bounded_processor(batch) for batch in batches]
-        batch_results = await asyncio.gather(*tasks)
+        batch_results = await asyncio.gather(*tasks, return_exceptions=True)
         
         # Flatten results
         results = []
         for batch_result in batch_results:
-            if batch_result:
+            if batch_result and not isinstance(batch_result, Exception):
                 results.extend(batch_result)
+            elif isinstance(batch_result, Exception):
+                results.append(batch_result)  # 保留异常
         
         return results
 
