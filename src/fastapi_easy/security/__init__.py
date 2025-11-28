@@ -137,4 +137,9 @@ __all__ = [
     "AuditStorage",
     "MemoryAuditStorage",
     "DatabaseAuditStorage",
+    # Multi-tenant
+    "TenantContext",
+    "MultiTenantPermissionLoader",
+    "MultiTenantResourceChecker",
+    "TenantIsolationMiddleware",
 ]
