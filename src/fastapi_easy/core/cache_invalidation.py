@@ -111,10 +111,23 @@ class CacheInvalidationManager:
         """
         try:
             deleted_count = 0
-            for key in list(cache.l1_cache.keys()):
-                if filter_key in str(key):
-                    await cache.delete(key)
-                    deleted_count += 1
+            
+            # Handle MultiLayerCache with get_all_keys interface
+            if hasattr(cache, 'get_all_keys'):
+                keys = await cache.get_all_keys()
+                for key in keys:
+                    if filter_key in str(key):
+                        await cache.delete(key)
+                        deleted_count += 1
+            # Handle dict-like cache
+            elif hasattr(cache, 'keys'):
+                for key in list(cache.keys()):
+                    if filter_key in str(key):
+                        await cache.delete(key)
+                        deleted_count += 1
+            else:
+                logger.warning("Cache does not support key iteration")
+                return 0
             
             self._log_invalidation("filter", filter_key, deleted_count)
             return deleted_count
@@ -132,7 +145,14 @@ class CacheInvalidationManager:
             Number of keys invalidated
         """
         try:
-            count = len(cache.l1_cache)
+            # Get count before clearing
+            count = 0
+            if hasattr(cache, 'get_all_keys'):
+                keys = await cache.get_all_keys()
+                count = len(keys)
+            elif hasattr(cache, 'l1_cache'):
+                count = len(cache.l1_cache)
+            
             await cache.clear()
             self._log_invalidation("full", "all", count)
             return count
@@ -158,10 +178,22 @@ class CacheInvalidationManager:
             deleted_count = 0
             pattern = f"{operation}:"
             
-            for key in list(cache.l1_cache.keys()):
-                if key.startswith(pattern):
-                    await cache.delete(key)
-                    deleted_count += 1
+            # Handle MultiLayerCache with get_all_keys interface
+            if hasattr(cache, 'get_all_keys'):
+                keys = await cache.get_all_keys()
+                for key in keys:
+                    if str(key).startswith(pattern):
+                        await cache.delete(key)
+                        deleted_count += 1
+            # Handle dict-like cache
+            elif hasattr(cache, 'keys'):
+                for key in list(cache.keys()):
+                    if str(key).startswith(pattern):
+                        await cache.delete(key)
+                        deleted_count += 1
+            else:
+                logger.warning("Cache does not support key iteration")
+                return 0
             
             self._log_invalidation("pattern", operation, deleted_count)
             return deleted_count
