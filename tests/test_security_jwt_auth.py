@@ -1,11 +1,13 @@
 """Unit tests for JWT authentication"""
 
-import pytest
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+import pytest
+
 from fastapi_easy.security import (
-    JWTAuth,
     InvalidTokenError,
+    JWTAuth,
     TokenExpiredError,
 )
 
@@ -143,7 +145,7 @@ class TestJWTAuth:
         expiration = jwt_auth.get_token_expiration(token)
         assert expiration is not None
         assert isinstance(expiration, datetime)
-        assert expiration > datetime.utcnow()
+        assert expiration > datetime.now(timezone.utc)
 
     def test_is_token_expired(self, jwt_auth):
         """Test checking if token is expired"""
@@ -214,8 +216,11 @@ class TestJWTAuth:
             jwt_auth_different.verify_token(token)
 
     def test_multiple_tokens_are_different(self, jwt_auth):
-        """Test that multiple tokens are different"""
+        """Test that multiple tokens can be created"""
+        import time
+        
         token1 = jwt_auth.create_access_token(subject="user123")
+        time.sleep(1.1)  # Delay to ensure different iat (at least 1 second)
         token2 = jwt_auth.create_access_token(subject="user123")
 
         # Tokens should be different (different iat)

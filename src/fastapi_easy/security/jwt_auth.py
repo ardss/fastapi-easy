@@ -1,7 +1,7 @@
 """JWT authentication for FastAPI-Easy"""
 
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
 try:
@@ -10,9 +10,9 @@ except ImportError:
     raise ImportError("PyJWT is required for JWT authentication. Install it with: pip install PyJWT")
 
 from .exceptions import (
+    InvalidCredentialsError,
     InvalidTokenError,
     TokenExpiredError,
-    InvalidCredentialsError,
 )
 from .models import TokenPayload
 
@@ -66,7 +66,7 @@ class JWTAuth:
         if expires_delta is None:
             expires_delta = timedelta(minutes=self.access_token_expire_minutes)
 
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         expire = now + expires_delta
 
         payload = {
@@ -103,7 +103,7 @@ class JWTAuth:
         if expires_delta is None:
             expires_delta = timedelta(days=self.refresh_token_expire_days)
 
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         expire = now + expires_delta
 
         payload = {
@@ -220,7 +220,7 @@ class JWTAuth:
         try:
             payload = self.decode_token(token)
             if "exp" in payload:
-                return datetime.utcfromtimestamp(payload["exp"])
+                return datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
         except Exception:
             pass
 

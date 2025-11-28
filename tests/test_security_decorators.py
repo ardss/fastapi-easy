@@ -1,16 +1,17 @@
 """Unit tests for security decorators"""
 
 import pytest
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.testclient import TestClient
+
 from fastapi_easy.security import (
-    init_jwt_auth,
-    get_jwt_auth,
     get_current_user,
-    require_role,
-    require_permission,
-    require_all_roles,
+    get_jwt_auth,
+    init_jwt_auth,
     require_all_permissions,
+    require_all_roles,
+    require_permission,
+    require_role,
 )
 
 
@@ -67,7 +68,7 @@ def app(jwt_auth):
         current_user: dict = Depends(require_all_permissions("read", "write"))
     ):
         return {"message": "all permissions"}
-
+    
     return app
 
 

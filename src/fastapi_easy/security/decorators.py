@@ -3,16 +3,15 @@
 from functools import wraps
 from typing import Callable, List, Optional
 
-from fastapi import Depends, HTTPException, Header
+from fastapi import Depends, Header, HTTPException
 
-from .jwt_auth import JWTAuth
 from .exceptions import (
     AuthenticationError,
     AuthorizationError,
     InvalidTokenError,
     TokenExpiredError,
 )
-
+from .jwt_auth import JWTAuth
 
 # Global JWT auth instance
 _jwt_auth: Optional[JWTAuth] = None
@@ -127,7 +126,7 @@ def require_role(*roles: str):
         *roles: Required roles
 
     Returns:
-        Decorator function
+        Dependency function
     """
 
     async def role_checker(current_user: dict = Depends(get_current_user)) -> dict:
@@ -150,7 +149,7 @@ def require_role(*roles: str):
             )
         return current_user
 
-    return Depends(role_checker)
+    return role_checker
 
 
 def require_permission(*permissions: str):
@@ -160,7 +159,7 @@ def require_permission(*permissions: str):
         *permissions: Required permissions
 
     Returns:
-        Decorator function
+        Dependency function
     """
 
     async def permission_checker(
@@ -185,7 +184,7 @@ def require_permission(*permissions: str):
             )
         return current_user
 
-    return Depends(permission_checker)
+    return permission_checker
 
 
 def require_all_roles(*roles: str):
@@ -195,7 +194,7 @@ def require_all_roles(*roles: str):
         *roles: Required roles
 
     Returns:
-        Decorator function
+        Dependency function
     """
 
     async def all_roles_checker(
@@ -220,7 +219,7 @@ def require_all_roles(*roles: str):
             )
         return current_user
 
-    return Depends(all_roles_checker)
+    return all_roles_checker
 
 
 def require_all_permissions(*permissions: str):
@@ -230,7 +229,7 @@ def require_all_permissions(*permissions: str):
         *permissions: Required permissions
 
     Returns:
-        Decorator function
+        Dependency function
     """
 
     async def all_permissions_checker(
@@ -255,4 +254,4 @@ def require_all_permissions(*permissions: str):
             )
         return current_user
 
-    return Depends(all_permissions_checker)
+    return all_permissions_checker
