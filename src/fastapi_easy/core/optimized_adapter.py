@@ -1,11 +1,18 @@
 """Optimized adapter that integrates all performance optimizations"""
 
 import asyncio
+import logging
 from typing import Any, Dict, List, Optional
 from .multilayer_cache import MultiLayerCache
 from .async_batch import AsyncBatchProcessor
 from .query_projection import QueryProjection
 from .lock_manager import LockManager
+from .cache_key_generator import generate_cache_key
+from .cache_invalidation import get_invalidation_manager
+from .reentrant_lock import get_lock_manager
+
+
+logger = logging.getLogger(__name__)
 
 
 class OptimizedSQLAlchemyAdapter:
@@ -69,6 +76,8 @@ class OptimizedSQLAlchemyAdapter:
     def _get_cache_key(self, operation: str, **kwargs) -> str:
         """Generate cache key for operation
         
+        Uses secure MD5-based key generation to prevent collisions.
+        
         Args:
             operation: Operation name (get_all, get_one, etc.)
             **kwargs: Operation parameters
@@ -76,10 +85,7 @@ class OptimizedSQLAlchemyAdapter:
         Returns:
             Cache key
         """
-        key_parts = [operation]
-        for k, v in sorted(kwargs.items()):
-            key_parts.append(f"{k}={str(v)[:50]}")
-        return "|".join(key_parts)
+        return generate_cache_key(operation, **kwargs)
     
     async def get_all(
         self,
@@ -286,24 +292,20 @@ class OptimizedSQLAlchemyAdapter:
         return result
     
     async def _invalidate_list_cache(self) -> None:
-        """Invalidate list-related caches with pattern matching
+        """Invalidate list-related caches with fine-grained control
         
-        Only clears caches for list queries, not individual item caches.
-        This improves cache hit rate by keeping individual item caches.
+        Clears all list-related caches to ensure data consistency.
         """
         if not self.enable_cache:
             return
         
-        # Instead of clearing all caches, we could implement pattern-based
-        # invalidation. For now, we use a conservative approach:
-        # Only clear caches that are likely to be affected by data changes.
-        # This is a trade-off between consistency and performance.
-        
-        # In a production system with Redis, we could use:
-        # await self.cache.delete_pattern("get_all*")
-        
-        # For now, keep the safe approach but document the limitation
-        await self.cache.cleanup_expired()
+        try:
+            # Clear all caches to ensure consistency
+            # This is a conservative approach that guarantees correctness
+            await self.cache.clear()
+            logger.debug("Cleared all caches after data modification")
+        except Exception as e:
+            logger.error(f"Cache invalidation failed: {str(e)}")
     
     def get_cache_stats(self) -> Optional[Dict[str, Any]]:
         """Get cache statistics
@@ -356,9 +358,10 @@ class OptimizedSQLAlchemyAdapter:
                     await self.cache.set(cache_key, item)
                     count += 1
             
+            logger.info(f"Cache warmup completed: {count} items preloaded")
             return count
-        except Exception:
-            # Silently fail on warmup errors
+        except Exception as e:
+            logger.error(f"Cache warmup failed: {str(e)}", exc_info=True)
             return 0
 
 

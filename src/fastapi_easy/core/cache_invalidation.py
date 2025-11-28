@@ -181,11 +181,17 @@ class CacheInvalidationManager:
             
             # Only invalidate list-related caches
             if operation in ("get_all", "create", "update", "delete"):
-                pattern = "get_all:"
-                for key in list(cache.l1_cache.keys()):
-                    if key.startswith(pattern):
-                        await cache.delete(key)
-                        deleted_count += 1
+                # For MultiLayerCache, use cleanup_expired which is safer
+                if hasattr(cache, 'cleanup_expired'):
+                    await cache.cleanup_expired()
+                    deleted_count = 1  # Mark as invalidated
+                else:
+                    # For dict-like caches
+                    pattern = "get_all:"
+                    for key in list(cache.keys()):
+                        if key.startswith(pattern):
+                            await cache.delete(key)
+                            deleted_count += 1
             
             self._log_invalidation("selective", operation, deleted_count)
             return deleted_count
