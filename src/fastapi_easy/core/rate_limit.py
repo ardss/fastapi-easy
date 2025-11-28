@@ -1,5 +1,6 @@
 """Rate limiting support for FastAPI-Easy"""
 
+import asyncio
 from typing import Any, Dict, Optional
 from abc import ABC, abstractmethod
 import time
@@ -117,7 +118,8 @@ class MemoryRateLimiter(BaseRateLimiter):
     
     def __init__(self):
         """Initialize memory rate limiter"""
-        self.limiters: Dict[str, RateLimitEntry] = defaultdict(lambda: None)
+        self.limiters: Dict[str, RateLimitEntry] = {}
+        self._lock = asyncio.Lock()  # 线程安全保护
     
     async def is_allowed(self, key: str, limit: int, window: int) -> bool:
         """Check if request is allowed
@@ -132,10 +134,11 @@ class MemoryRateLimiter(BaseRateLimiter):
         """
         limiter_key = f"{key}:{limit}:{window}"
         
-        if limiter_key not in self.limiters or self.limiters[limiter_key] is None:
-            self.limiters[limiter_key] = RateLimitEntry(limit, window)
-        
-        return self.limiters[limiter_key].is_allowed()
+        async with self._lock:
+            if limiter_key not in self.limiters:
+                self.limiters[limiter_key] = RateLimitEntry(limit, window)
+            
+            return self.limiters[limiter_key].is_allowed()
     
     async def get_remaining(self, key: str, limit: int, window: int) -> int:
         """Get remaining requests
@@ -150,10 +153,11 @@ class MemoryRateLimiter(BaseRateLimiter):
         """
         limiter_key = f"{key}:{limit}:{window}"
         
-        if limiter_key not in self.limiters or self.limiters[limiter_key] is None:
-            return limit
-        
-        return self.limiters[limiter_key].get_remaining()
+        async with self._lock:
+            if limiter_key not in self.limiters:
+                return limit
+            
+            return self.limiters[limiter_key].get_remaining()
     
     async def get_reset_time(self, key: str, limit: int, window: int) -> float:
         """Get reset time
@@ -168,10 +172,11 @@ class MemoryRateLimiter(BaseRateLimiter):
         """
         limiter_key = f"{key}:{limit}:{window}"
         
-        if limiter_key not in self.limiters or self.limiters[limiter_key] is None:
-            return 0
-        
-        return self.limiters[limiter_key].get_reset_time()
+        async with self._lock:
+            if limiter_key not in self.limiters:
+                return 0
+            
+            return self.limiters[limiter_key].get_reset_time()
 
 
 class NoRateLimiter(BaseRateLimiter):
