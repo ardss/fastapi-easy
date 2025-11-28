@@ -11,6 +11,11 @@ This module provides authentication and authorization features:
 """
 
 from .audit_log import AuditEventType, AuditLog, AuditLogger
+from .audit_storage import (
+    AuditStorage,
+    DatabaseAuditStorage,
+    MemoryAuditStorage,
+)
 from .decorators import (
     get_current_user,
     get_current_user_optional,
@@ -128,4 +133,8 @@ __all__ = [
     # Security Config & Engine
     "SecurityConfig",
     "PermissionEngine",
+    # Audit Storage
+    "AuditStorage",
+    "MemoryAuditStorage",
+    "DatabaseAuditStorage",
 ]
