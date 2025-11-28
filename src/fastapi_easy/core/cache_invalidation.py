@@ -68,15 +68,23 @@ class CacheInvalidationManager:
             Number of keys invalidated
         """
         try:
-            # Build cache key pattern
-            key_pattern = f"get_one:*id*{item_id}*"
-            
-            # Find and delete matching keys
             deleted_count = 0
-            for key in list(cache.l1_cache.keys()):
-                if str(item_id) in str(key):
-                    await cache.delete(key)
-                    deleted_count += 1
+            
+            # Handle MultiLayerCache with l1_cache attribute
+            if hasattr(cache, 'l1_cache'):
+                for key in list(cache.l1_cache.keys()):
+                    if str(item_id) in str(key):
+                        await cache.delete(key)
+                        deleted_count += 1
+            # Handle dict-like cache
+            elif hasattr(cache, 'keys'):
+                for key in list(cache.keys()):
+                    if str(item_id) in str(key):
+                        await cache.delete(key)
+                        deleted_count += 1
+            else:
+                logger.warning("Cache does not support key iteration")
+                return 0
             
             # Log invalidation
             self._log_invalidation("item", item_id, deleted_count)

@@ -44,14 +44,22 @@ class OptimizedSQLAlchemyAdapter:
             async_config: Async configuration
             query_timeout: Query timeout in seconds (default: 30)
         """
+        from .config_validator import ConfigValidator
+        
         self.base_adapter = base_adapter
         self.enable_cache = enable_cache
         self.enable_async = enable_async
+        
+        # Validate and set query timeout
+        if not ConfigValidator.validate_timeout(query_timeout):
+            raise ValueError(f"Invalid query timeout: {query_timeout}")
         self.query_timeout = query_timeout
         
-        # Initialize cache
+        # Initialize cache with validation
         if enable_cache:
             cache_cfg = cache_config or {}
+            if not ConfigValidator.validate_cache_config(cache_cfg):
+                raise ValueError("Invalid cache configuration")
             self.cache = MultiLayerCache(
                 l1_size=cache_cfg.get("l1_size", 1000),
                 l1_ttl=cache_cfg.get("l1_ttl", 60),
@@ -138,13 +146,17 @@ class OptimizedSQLAlchemyAdapter:
                 return cached
         
         # Execute query with timeout
-        result = await self._execute_with_timeout(
-            self.base_adapter.get_all(filters, sorts, pagination),
-            "get_all"
-        )
+        try:
+            result = await self._execute_with_timeout(
+                self.base_adapter.get_all(filters, sorts, pagination),
+                "get_all"
+            )
+        except asyncio.TimeoutError:
+            logger.warning("Query timeout, returning empty result")
+            result = []  # 降级返回空结果
         
         # Cache result
-        if self.enable_cache:
+        if self.enable_cache and result:
             await self.cache.set(cache_key, result)
         
         return result
@@ -385,23 +397,29 @@ class OptimizedSQLAlchemyAdapter:
                     "warmup_cache"
                 )
                 
-                # Cache each item
+                # Cache each item with concurrency limit
                 count = 0
-                for item in items:
-                    try:
-                        # Try to get ID from item
-                        item_id = getattr(item, "id", None)
-                        # If is dict, try get method
-                        if item_id is None and isinstance(item, dict):
-                            item_id = item.get("id")
-                        
-                        if item_id:
-                            cache_key = self._get_cache_key("get_one", id=item_id)
-                            await self.cache.set(cache_key, item)
-                            count += 1
-                    except Exception as e:
-                        logger.warning(f"Failed to cache item: {str(e)}")
-                        continue
+                semaphore = asyncio.Semaphore(10)  # 限制并发数为 10
+                
+                async def cache_item(item):
+                    nonlocal count
+                    async with semaphore:
+                        try:
+                            # Try to get ID from item
+                            item_id = getattr(item, "id", None)
+                            # If is dict, try get method
+                            if item_id is None and isinstance(item, dict):
+                                item_id = item.get("id")
+                            
+                            if item_id:
+                                cache_key = self._get_cache_key("get_one", id=item_id)
+                                await self.cache.set(cache_key, item)
+                                count += 1
+                        except Exception as e:
+                            logger.warning(f"Failed to cache item: {str(e)}")
+                
+                # 并发缓存所有项
+                await asyncio.gather(*[cache_item(item) for item in items], return_exceptions=True)
                 
                 logger.info(f"Cache warmup completed: {count} items preloaded")
                 return count
