@@ -5,49 +5,55 @@ This module provides authentication and authorization features:
 - Role-based access control (RBAC)
 - Permission-based access control
 - Decorators for route protection
+- Password hashing and verification
+- Rate limiting and brute force protection
+- Audit logging for security events
 """
 
-from .jwt_auth import JWTAuth
+from .audit_log import AuditEventType, AuditLog, AuditLogger
 from .decorators import (
-    init_jwt_auth,
-    get_jwt_auth,
     get_current_user,
     get_current_user_optional,
-    require_role,
-    require_permission,
-    require_all_roles,
+    get_jwt_auth,
+    init_jwt_auth,
     require_all_permissions,
+    require_all_roles,
+    require_permission,
+    require_role,
 )
 from .exceptions import (
-    SecurityException,
+    AccountLockedError,
     AuthenticationError,
     AuthorizationError,
-    InvalidTokenError,
-    TokenExpiredError,
-    InvalidCredentialsError,
-    UserNotFoundError,
-    AccountLockedError,
     InsufficientPermissionError,
+    InvalidCredentialsError,
+    InvalidTokenError,
     RoleNotFoundError,
+    SecurityException,
+    TokenExpiredError,
+    UserNotFoundError,
 )
+from .jwt_auth import JWTAuth
 from .models import (
-    UserBase,
-    UserCreate,
-    UserUpdate,
-    UserResponse,
-    TokenRequest,
-    TokenResponse,
-    RefreshTokenRequest,
-    TokenPayload,
-    RoleBase,
-    RoleCreate,
-    RoleUpdate,
-    RoleResponse,
+    ErrorResponse,
+    LoginResponse,
     PermissionBase,
     PermissionResponse,
-    LoginResponse,
-    ErrorResponse,
+    RefreshTokenRequest,
+    RoleBase,
+    RoleCreate,
+    RoleResponse,
+    RoleUpdate,
+    TokenPayload,
+    TokenRequest,
+    TokenResponse,
+    UserBase,
+    UserCreate,
+    UserResponse,
+    UserUpdate,
 )
+from .password import PasswordManager
+from .rate_limit import LoginAttemptTracker
 
 __all__ = [
     # JWT Auth
@@ -89,4 +95,10 @@ __all__ = [
     "PermissionResponse",
     "LoginResponse",
     "ErrorResponse",
+    # Password & Security
+    "PasswordManager",
+    "LoginAttemptTracker",
+    "AuditLogger",
+    "AuditLog",
+    "AuditEventType",
 ]
