@@ -3,6 +3,8 @@
 import logging
 from typing import Any, Dict, List, Optional, Protocol
 
+from .cache import LRUCache
+
 logger = logging.getLogger(__name__)
 
 
@@ -188,3 +190,80 @@ class CachedPermissionLoader:
             "total": total,
             "hit_rate": f"{hit_rate:.2f}%",
         }
+
+
+class LRUCachedPermissionLoader:
+    """Wrap permission loader with LRU caching"""
+
+    def __init__(
+        self,
+        base_loader: PermissionLoader,
+        cache_ttl: int = 300,
+        max_size: int = 1000,
+    ):
+        """Initialize LRU cached permission loader
+
+        Args:
+            base_loader: Base permission loader
+            cache_ttl: Cache TTL in seconds (default: 300)
+            max_size: Maximum cache size (default: 1000)
+
+        Raises:
+            TypeError: If base_loader is invalid
+            ValueError: If cache_ttl or max_size is invalid
+        """
+        if not hasattr(base_loader, "load_permissions"):
+            raise TypeError("base_loader must have load_permissions method")
+
+        self.base_loader = base_loader
+        self.cache = LRUCache(max_size=max_size, ttl=cache_ttl)
+
+        logger.debug(
+            f"LRUCachedPermissionLoader initialized with TTL {cache_ttl}s, max_size {max_size}"
+        )
+
+    async def load_permissions(self, user_id: str) -> List[str]:
+        """Load permissions with LRU caching
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            List of permissions
+
+        Raises:
+            TypeError: If user_id is invalid
+        """
+        if not isinstance(user_id, str):
+            raise TypeError("user_id must be a string")
+
+        # Check cache
+        cached = self.cache.get(user_id)
+        if cached is not None:
+            logger.debug(f"LRU cache hit for user {user_id}")
+            return cached
+
+        # Load from base loader
+        permissions = await self.base_loader.load_permissions(user_id)
+
+        # Cache result
+        self.cache.set(user_id, permissions)
+        logger.debug(f"Cached permissions for user {user_id}")
+
+        return permissions
+
+    def clear_cache(self, pattern: Optional[str] = None) -> None:
+        """Clear cache
+
+        Args:
+            pattern: Pattern to match keys (None to clear all)
+        """
+        self.cache.clear(pattern=pattern)
+
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Get cache statistics
+
+        Returns:
+            Dictionary with cache statistics
+        """
+        return self.cache.get_stats()

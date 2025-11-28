@@ -16,6 +16,7 @@ from .audit_storage import (
     DatabaseAuditStorage,
     MemoryAuditStorage,
 )
+from .cache import LRUCache
 from .decorators import (
     get_current_user,
     get_current_user_optional,
@@ -57,11 +58,13 @@ from .models import (
     UserResponse,
     UserUpdate,
 )
+from .monitoring import MonitoredPermissionEngine, PermissionCheckMetrics
 from .password import PasswordManager
 from .permission_engine import PermissionEngine
 from .permission_loader import (
     CachedPermissionLoader,
     DatabasePermissionLoader,
+    LRUCachedPermissionLoader,
     PermissionLoader,
     StaticPermissionLoader,
 )
@@ -73,6 +76,11 @@ from .resource_checker import (
     StaticResourceChecker,
 )
 from .security_config import SecurityConfig
+from .validators import (
+    BatchPermissionCheckRequest,
+    PermissionCheckRequest,
+    ResourceOwnershipCheckRequest,
+)
 
 __all__ = [
     # JWT Auth
@@ -125,6 +133,7 @@ __all__ = [
     "StaticPermissionLoader",
     "DatabasePermissionLoader",
     "CachedPermissionLoader",
+    "LRUCachedPermissionLoader",
     # Resource Checkers
     "ResourcePermissionChecker",
     "StaticResourceChecker",
@@ -137,6 +146,15 @@ __all__ = [
     "AuditStorage",
     "MemoryAuditStorage",
     "DatabaseAuditStorage",
+    # Caching
+    "LRUCache",
+    # Monitoring
+    "MonitoredPermissionEngine",
+    "PermissionCheckMetrics",
+    # Validators
+    "PermissionCheckRequest",
+    "ResourceOwnershipCheckRequest",
+    "BatchPermissionCheckRequest",
     # Multi-tenant
     "TenantContext",
     "MultiTenantPermissionLoader",
