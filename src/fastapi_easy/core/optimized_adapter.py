@@ -1,9 +1,11 @@
 """Optimized adapter that integrates all performance optimizations"""
 
+import asyncio
 from typing import Any, Dict, List, Optional
 from .multilayer_cache import MultiLayerCache
 from .async_batch import AsyncBatchProcessor
 from .query_projection import QueryProjection
+from .lock_manager import LockManager
 
 
 class OptimizedSQLAlchemyAdapter:
@@ -57,6 +59,9 @@ class OptimizedSQLAlchemyAdapter:
             )
         else:
             self.async_processor = None
+        
+        # Initialize lock manager for concurrent access control
+        self.lock_manager = LockManager(default_timeout=5.0)
         
         # Track model for cache invalidation
         self.model = base_adapter.model
@@ -114,7 +119,10 @@ class OptimizedSQLAlchemyAdapter:
         return result
     
     async def get_one(self, id: Any) -> Optional[Any]:
-        """Get single item with caching
+        """Get single item with caching and avalanche prevention
+        
+        Prevents cache avalanche by using distributed lock
+        when multiple requests query the same missing item.
         
         Args:
             id: Item id
@@ -126,17 +134,41 @@ class OptimizedSQLAlchemyAdapter:
         if self.enable_cache:
             cache_key = self._get_cache_key("get_one", id=id)
             cached = await self.cache.get(cache_key)
+            
+            # Check for cached None value (cache penetration prevention)
             if cached is not None:
+                if cached == "__NULL__":
+                    return None
                 return cached
         
-        # Execute query
-        result = await self.base_adapter.get_one(id)
+        # Use lock to prevent cache avalanche
+        lock_key = f"get_one_{id}"
         
-        # Cache result
-        if self.enable_cache and result is not None:
-            await self.cache.set(cache_key, result)
-        
-        return result
+        if await self.lock_manager.acquire(lock_key):
+            try:
+                # Double-check cache after acquiring lock
+                if self.enable_cache:
+                    cached = await self.cache.get(cache_key)
+                    if cached is not None:
+                        if cached == "__NULL__":
+                            return None
+                        return cached
+                
+                # Execute query
+                result = await self.base_adapter.get_one(id)
+                
+                # Cache result (including None values for cache penetration prevention)
+                if self.enable_cache:
+                    cache_value = result if result is not None else "__NULL__"
+                    await self.cache.set(cache_key, cache_value)
+                
+                return result
+            finally:
+                self.lock_manager.release(lock_key)
+        else:
+            # Lock acquisition failed, wait and retry
+            await asyncio.sleep(0.05)
+            return await self.get_one(id)
     
     async def create(self, data: Dict[str, Any]) -> Any:
         """Create item and invalidate cache
@@ -157,7 +189,10 @@ class OptimizedSQLAlchemyAdapter:
         return result
     
     async def update(self, id: Any, data: Dict[str, Any]) -> Any:
-        """Update item and invalidate cache
+        """Update item and invalidate cache with concurrent control
+        
+        Uses distributed lock to prevent concurrent modifications
+        and cache avalanche.
         
         Args:
             id: Item id
@@ -166,17 +201,28 @@ class OptimizedSQLAlchemyAdapter:
         Returns:
             Updated item
         """
-        # Update item
-        result = await self.base_adapter.update(id, data)
+        # Use lock to prevent concurrent modifications
+        lock_key = f"update_{id}"
         
-        # Invalidate specific item cache
-        if self.enable_cache:
-            cache_key = self._get_cache_key("get_one", id=id)
-            await self.cache.delete(cache_key)
-            # Also invalidate list caches
-            await self._invalidate_list_cache()
-        
-        return result
+        if await self.lock_manager.acquire(lock_key):
+            try:
+                # Update item
+                result = await self.base_adapter.update(id, data)
+                
+                # Invalidate specific item cache
+                if self.enable_cache:
+                    cache_key = self._get_cache_key("get_one", id=id)
+                    await self.cache.delete(cache_key)
+                    # Also invalidate list caches
+                    await self._invalidate_list_cache()
+                
+                return result
+            finally:
+                self.lock_manager.release(lock_key)
+        else:
+            # Lock acquisition failed, retry with exponential backoff
+            await asyncio.sleep(0.1)
+            return await self.update(id, data)
     
     async def delete_one(self, id: Any) -> bool:
         """Delete item and invalidate cache
