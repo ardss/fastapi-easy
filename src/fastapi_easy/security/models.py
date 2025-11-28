@@ -9,7 +9,7 @@ class UserBase(BaseModel):
     """Base user model"""
 
     username: str = Field(..., min_length=3, max_length=50)
-    email: Optional[str] = Field(None, regex=r"^[\w\.-]+@[\w\.-]+\.\w+$")
+    email: Optional[str] = Field(None, pattern=r"^[\w\.-]+@[\w\.-]+\.\w+$")
     full_name: Optional[str] = None
 
 

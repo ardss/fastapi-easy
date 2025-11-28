@@ -3,8 +3,7 @@
 from functools import wraps
 from typing import Callable, List, Optional
 
-from fastapi import Depends, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthCredentials
+from fastapi import Depends, HTTPException, Header
 
 from .jwt_auth import JWTAuth
 from .exceptions import (
@@ -60,17 +59,13 @@ def get_jwt_auth() -> JWTAuth:
     return _jwt_auth
 
 
-# HTTP Bearer security
-security = HTTPBearer()
-
-
 async def get_current_user(
-    credentials: HTTPAuthCredentials = Depends(security),
+    authorization: Optional[str] = Header(None),
 ) -> dict:
     """Get current user from JWT token
 
     Args:
-        credentials: HTTP Bearer credentials
+        authorization: Authorization header
 
     Returns:
         User payload
@@ -78,7 +73,15 @@ async def get_current_user(
     Raises:
         HTTPException: If token is invalid or expired
     """
-    token = credentials.credentials
+    if not authorization:
+        raise HTTPException(status_code=403, detail="Missing authorization header")
+
+    # Extract token from "Bearer <token>"
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise HTTPException(status_code=403, detail="Invalid authorization header")
+
+    token = parts[1]
     jwt_auth = get_jwt_auth()
 
     try:
@@ -98,12 +101,12 @@ async def get_current_user(
 
 
 async def get_current_user_optional(
-    credentials: Optional[HTTPAuthCredentials] = Depends(security),
+    authorization: Optional[str] = Header(None),
 ) -> Optional[dict]:
     """Get current user from JWT token (optional)
 
     Args:
-        credentials: HTTP Bearer credentials (optional)
+        authorization: Authorization header (optional)
 
     Returns:
         User payload or None
@@ -111,10 +114,10 @@ async def get_current_user_optional(
     Raises:
         HTTPException: If token is invalid or expired
     """
-    if credentials is None:
+    if authorization is None:
         return None
 
-    return await get_current_user(credentials)
+    return await get_current_user(authorization)
 
 
 def require_role(*roles: str):
