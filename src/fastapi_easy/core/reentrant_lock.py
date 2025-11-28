@@ -128,6 +128,8 @@ class ReentrantLockManager:
             "total_releases": 0,
             "timeouts": 0,
         }
+        # Lock for cleanup operations to prevent race conditions
+        self._cleanup_lock = asyncio.Lock()
     
     async def acquire(
         self,
@@ -177,7 +179,7 @@ class ReentrantLockManager:
         return released
     
     async def cleanup(self, max_age: float = 3600.0) -> int:
-        """Clean up unused locks
+        """Clean up unused locks with race condition protection
         
         Args:
             max_age: Maximum age of unused locks in seconds
@@ -185,22 +187,24 @@ class ReentrantLockManager:
         Returns:
             Number of locks cleaned up
         """
-        import time
-        
-        current_time = time.time()
-        keys_to_remove = []
-        
-        for key, lock in self.locks.items():
-            # Remove locks that are not held
-            if not lock.is_locked():
-                keys_to_remove.append(key)
-        
-        # Remove keys
-        for key in keys_to_remove:
-            del self.locks[key]
-        
-        logger.debug(f"Cleaned up {len(keys_to_remove)} unused locks")
-        return len(keys_to_remove)
+        async with self._cleanup_lock:
+            import time
+            
+            current_time = time.time()
+            keys_to_remove = []
+            
+            # Safely iterate over locks
+            for key, lock in list(self.locks.items()):
+                # Remove locks that are not held
+                if not lock.is_locked():
+                    keys_to_remove.append(key)
+            
+            # Remove keys safely
+            for key in keys_to_remove:
+                self.locks.pop(key, None)
+            
+            logger.debug(f"Cleaned up {len(keys_to_remove)} unused locks")
+            return len(keys_to_remove)
     
     def get_stats(self) -> Dict[str, Any]:
         """Get lock manager statistics

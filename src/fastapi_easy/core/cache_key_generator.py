@@ -7,13 +7,20 @@ and MD5 hashing to prevent key collisions.
 import hashlib
 import json
 from typing import Any, Dict
+from functools import lru_cache
 
 
 class CacheKeyGenerator:
-    """Generate consistent cache keys without collisions"""
+    """Generate consistent cache keys without collisions
     
-    @staticmethod
-    def generate(operation: str, **kwargs) -> str:
+    Uses LRU cache to avoid memory leaks from unlimited key caching.
+    """
+    
+    def __init__(self):
+        """Initialize with LRU cache for key generation"""
+        self._generate_cached = lru_cache(maxsize=10000)(self._generate_impl)
+    
+    def generate(self, operation: str, **kwargs) -> str:
         """Generate a cache key from operation and parameters
         
         Uses JSON serialization with sorted keys to ensure consistency,
@@ -32,22 +39,28 @@ class CacheKeyGenerator:
             >>> key2 = gen.generate('get_one', id=1)
             >>> assert key1 == key2
         """
-        # Build key dictionary with operation
-        key_dict: Dict[str, Any] = {"op": operation}
-        key_dict.update(kwargs)
-        
-        # Serialize to JSON with sorted keys for consistency
+        # Convert kwargs to JSON string for hashability
+        # This handles nested dicts and lists
         try:
-            key_str = json.dumps(key_dict, sort_keys=True, default=str)
-        except (TypeError, ValueError) as e:
-            # Fallback for non-serializable objects
-            key_str = json.dumps(
-                {
-                    "op": operation,
-                    "params": str(kwargs)
-                },
-                sort_keys=True
-            )
+            params_json = json.dumps(kwargs, sort_keys=True, default=str)
+        except (TypeError, ValueError):
+            params_json = json.dumps({"params": str(kwargs)}, sort_keys=True)
+        
+        return self._generate_cached(operation, params_json)
+    
+    @staticmethod
+    def _generate_impl(operation: str, params_json: str) -> str:
+        """Internal implementation for cached key generation
+        
+        Args:
+            operation: Operation name
+            params_json: Parameters as JSON string
+            
+        Returns:
+            Cache key
+        """
+        # Build key string with operation and params
+        key_str = f"{operation}:{params_json}"
         
         # Generate MD5 hash for compact key
         key_hash = hashlib.md5(key_str.encode()).hexdigest()
@@ -55,8 +68,7 @@ class CacheKeyGenerator:
         # Return prefixed key for debugging
         return f"{operation}:{key_hash}"
     
-    @staticmethod
-    def generate_list_key(operation: str, **kwargs) -> str:
+    def generate_list_key(self, operation: str, **kwargs) -> str:
         """Generate cache key for list operations
         
         Args:
@@ -66,10 +78,9 @@ class CacheKeyGenerator:
         Returns:
             Unique cache key for list operation
         """
-        return CacheKeyGenerator.generate(operation, **kwargs)
+        return self.generate(operation, **kwargs)
     
-    @staticmethod
-    def generate_single_key(operation: str, item_id: Any) -> str:
+    def generate_single_key(self, operation: str, item_id: Any) -> str:
         """Generate cache key for single item operations
         
         Args:
@@ -79,7 +90,7 @@ class CacheKeyGenerator:
         Returns:
             Unique cache key for single item
         """
-        return CacheKeyGenerator.generate(operation, id=item_id)
+        return self.generate(operation, id=item_id)
     
     @staticmethod
     def get_pattern(operation: str) -> str:
