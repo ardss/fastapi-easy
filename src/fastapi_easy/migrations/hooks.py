@@ -115,13 +115,24 @@ class HookRegistry:
                 )
 
                 if hook.is_async:
-                    result = await hook.callback(context)
+                    # 异步 Hook 有超时控制
+                    result = await asyncio.wait_for(
+                        hook.callback(context),
+                        timeout=30
+                    )
                 else:
-                    result = hook.callback(context)
+                    # 同步 Hook 在线程池中运行，避免阻塞
+                    result = await asyncio.to_thread(
+                        hook.callback,
+                        context
+                    )
 
                 results[hook.name] = result
                 logger.debug(f"Hook {hook.name} completed successfully")
 
+            except asyncio.TimeoutError:
+                logger.error(f"Hook {hook.name} timed out")
+                results[hook.name] = {"error": "Timeout"}
             except Exception as e:
                 logger.error(
                     f"Error executing hook {hook.name}: {e}",

@@ -1,8 +1,10 @@
-import logging
 import asyncio
+import logging
 from typing import List
-from sqlalchemy.engine import Engine
+
 from sqlalchemy import text
+from sqlalchemy.engine import Engine
+
 from .types import Migration, MigrationPlan, MigrationStatus, RiskLevel
 
 logger = logging.getLogger(__name__)
@@ -109,28 +111,19 @@ class MigrationExecutor:
 
     def _execute_sql_sync(self, sql: str):
         """Execute SQL synchronously within a transaction"""
-        # Check if SQL contains its own transaction control
-        has_transaction = any(keyword in sql.upper() for keyword in ['BEGIN TRANSACTION', 'BEGIN;', 'COMMIT'])
-        
-        if has_transaction:
-            # Execute without wrapping in another transaction
-            with self.engine.connect() as conn:
-                # For transaction-wrapped SQL, execute as a single block
-                # Split carefully to avoid breaking multi-line statements
-                statements = self._split_sql_statements(sql)
-                for statement in statements:
-                    if statement and not statement.upper().startswith('BEGIN') and not statement.upper().startswith('COMMIT'):
-                        logger.debug(f"    Executing: {statement[:100]}...")
-                        conn.execute(text(statement))
-                conn.commit()
-        else:
-            # Wrap in transaction
+        try:
+            # 使用 engine.begin() 自动处理事务
             with self.engine.begin() as conn:
                 statements = self._split_sql_statements(sql)
                 for statement in statements:
                     if statement:
                         logger.debug(f"    Executing: {statement[:100]}...")
                         conn.execute(text(statement))
+                # 自动提交
+        except Exception as e:
+            logger.error(f"Migration failed: {e}")
+            # 自动回滚
+            raise
     
     def _split_sql_statements(self, sql: str) -> List[str]:
         """Split SQL into individual statements, handling multi-line statements"""

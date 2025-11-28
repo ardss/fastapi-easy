@@ -137,8 +137,8 @@ class AdvancedRiskAssessor:
                 condition=lambda change: (
                     change.type == "add_column"
                     and hasattr(change, "column_obj")
-                    and change.column_obj
-                    and not change.column_obj.nullable
+                    and change.column_obj is not None
+                    and change.column_obj.nullable is not True
                 ),
                 risk_level=RiskLevel.HIGH,
                 mitigation="添加默认值或先添加可空列，再更新数据",
@@ -163,7 +163,12 @@ class AdvancedRiskAssessor:
                         logger.warning(f"Mitigation: {rule.mitigation}")
                     return rule.risk_level
             except Exception as e:
-                logger.warning(f"Error evaluating rule {rule.name}: {e}")
+                logger.error(
+                    f"Error evaluating rule {rule.name}: {e}",
+                    exc_info=True
+                )
+                # 规则异常时使用保守的风险等级
+                return RiskLevel.HIGH
 
         # 2. 使用默认评估逻辑
         return self._assess_by_type(change)
