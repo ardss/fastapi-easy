@@ -4,6 +4,7 @@ from typing import List, Tuple
 
 from sqlalchemy.engine import Engine
 from sqlalchemy.schema import CreateTable
+from sqlalchemy.sql import quoted_name
 
 from .types import Migration, MigrationPlan, RiskLevel, SchemaChange
 
@@ -123,11 +124,21 @@ class MigrationGenerator:
             common_columns = [c.name for c in new_table.columns]
         
         cols_str = ", ".join(common_columns)
-        
-        copy_sql = f"INSERT INTO {temp_table_name} ({cols_str}) SELECT {cols_str} FROM {table_name};"
-        
+
+        # 使用 quoted_name 转义表名以防止 SQL 注入
+        table_ident = quoted_name(table_name, quote=True)
+        temp_table_ident = quoted_name(temp_table_name, quote=True)
+
+        copy_sql = (
+            f"INSERT INTO {temp_table_ident} ({cols_str}) "
+            f"SELECT {cols_str} FROM {table_ident};"
+        )
+
         # 3. Drop old & Rename new
-        swap_sql = f"DROP TABLE {table_name}; ALTER TABLE {temp_table_name} RENAME TO {table_name};"
+        swap_sql = (
+            f"DROP TABLE {table_ident}; "
+            f"ALTER TABLE {temp_table_ident} RENAME TO {table_ident};"
+        )
         
         upgrade_sql = f"BEGIN TRANSACTION;\n{create_temp_sql}\n{copy_sql}\n{swap_sql}\nCOMMIT;"
         
