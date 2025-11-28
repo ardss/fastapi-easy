@@ -1,9 +1,11 @@
 import logging
-from typing import List, Tuple
 from datetime import datetime
-from sqlalchemy.schema import CreateTable
+from typing import List, Tuple
+
 from sqlalchemy.engine import Engine
-from .types import SchemaChange, Migration, MigrationPlan, RiskLevel
+from sqlalchemy.schema import CreateTable
+
+from .types import Migration, MigrationPlan, RiskLevel, SchemaChange
 
 logger = logging.getLogger(__name__)
 
@@ -111,9 +113,15 @@ class MigrationGenerator:
         new_table.name = original_name # Restore name
         
         # 2. Copy data
-        # We assume all columns in the NEW table (except the added one if any) 
-        # exist in the OLD table. 
-        common_columns = [c.name for c in new_table.columns if c.name != change.column]
+        # For add_column: copy all columns from old table that exist in new table
+        # For change_column/drop_column: copy all columns except the changed/dropped one
+        if change.type == "add_column":
+            # When adding a column, copy all existing columns
+            common_columns = [c.name for c in new_table.columns if c.name != change.column]
+        else:
+            # When changing/dropping, copy all columns that exist in both tables
+            common_columns = [c.name for c in new_table.columns]
+        
         cols_str = ", ".join(common_columns)
         
         copy_sql = f"INSERT INTO {temp_table_name} ({cols_str}) SELECT {cols_str} FROM {table_name};"
