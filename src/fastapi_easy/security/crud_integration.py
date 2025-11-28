@@ -1,11 +1,15 @@
 """Integration of security module with CRUDRouter"""
 
 import asyncio
+import logging
 from typing import Any, Awaitable, Callable, List, Optional
 
 from fastapi import Depends, HTTPException
 
 from .decorators import get_current_user, require_permission, require_role
+from .exceptions import InvalidTokenError, TokenExpiredError
+
+logger = logging.getLogger(__name__)
 
 
 class CRUDSecurityConfig:
@@ -76,7 +80,12 @@ class ProtectedCRUDRouter:
                     current_user = await get_current_user(
                         kwargs.get("authorization")
                     )
-                except Exception:
+                except (InvalidTokenError, TokenExpiredError) as e:
+                    if self.security_config.enable_auth:
+                        raise HTTPException(status_code=401, detail=str(e))
+                except Exception as e:
+                    # Log unexpected errors for debugging
+                    logger.error(f"Unexpected error in get_current_user: {e}")
                     if self.security_config.enable_auth:
                         raise HTTPException(status_code=401, detail="Unauthorized")
 

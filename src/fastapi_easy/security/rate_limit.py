@@ -103,14 +103,21 @@ class LoginAttemptTracker:
         Returns:
             Remaining seconds or None if not locked out
         """
-        if not self.is_locked_out(username):
-            return None
+        with self._lock:
+            if username not in self.lockouts:
+                return None
 
-        lockout_time = self.lockouts[username]
-        now = datetime.now(timezone.utc)
-        remaining = self.lockout_duration - (now - lockout_time)
+            lockout_time = self.lockouts[username]
+            now = datetime.now(timezone.utc)
 
-        return max(0, int(remaining.total_seconds()))
+            # Check if lockout has expired
+            if now - lockout_time > self.lockout_duration:
+                self.lockouts.pop(username, None)
+                self.attempts[username] = []
+                return None
+
+            remaining = self.lockout_duration - (now - lockout_time)
+            return max(0, int(remaining.total_seconds()))
 
     def get_attempt_count(self, username: str) -> int:
         """Get current attempt count

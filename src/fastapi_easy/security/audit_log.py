@@ -101,6 +101,8 @@ class AuditLogger:
         # Indexes for fast queries
         self.user_index: Dict[str, List[int]] = defaultdict(list)
         self.username_index: Dict[str, List[int]] = defaultdict(list)
+        # Global counter to track log positions (fixes index sync issue)
+        self._log_counter = 0
 
     def log(
         self,
@@ -143,7 +145,9 @@ class AuditLogger:
                 user_agent=user_agent,
             )
 
-            idx = len(self.logs)
+            # Use global counter for index (fixes deque rotation issue)
+            idx = self._log_counter
+            self._log_counter += 1
             self.logs.append(log_entry)
 
             # Update indexes for fast queries
