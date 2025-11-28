@@ -110,8 +110,12 @@ class CRUDRouter(APIRouter):
                 pagination={"skip": skip, "limit": limit},
             )
             
-            # Trigger hooks
-            await self.hooks.trigger("before_get_all", context)
+            # Trigger hooks with error handling
+            try:
+                await self.hooks.trigger("before_get_all", context)
+            except Exception as e:
+                logger.error(f"Error in before_get_all hook: {str(e)}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Hook execution failed")
             
             # Execute adapter method
             result = []
@@ -124,13 +128,20 @@ class CRUDRouter(APIRouter):
                     )
                     if result is None:
                         result = []
+                    elif not isinstance(result, list):
+                        logger.error(f"Expected list from get_all, got {type(result)}")
+                        result = []
                 except Exception as e:
                     logger.error(f"Error in get_all: {str(e)}", exc_info=True)
-                    raise
+                    raise HTTPException(status_code=500, detail="Failed to retrieve items")
             
-            # Trigger hooks
+            # Trigger hooks with error handling
             context.result = result
-            await self.hooks.trigger("after_get_all", context)
+            try:
+                await self.hooks.trigger("after_get_all", context)
+            except Exception as e:
+                logger.error(f"Error in after_get_all hook: {str(e)}", exc_info=True)
+                # Don't fail the request if after hook fails
             
             return result
         
@@ -159,8 +170,12 @@ class CRUDRouter(APIRouter):
                 metadata={"id": id},
             )
             
-            # Trigger hooks
-            await self.hooks.trigger("before_get_one", context)
+            # Trigger hooks with error handling
+            try:
+                await self.hooks.trigger("before_get_one", context)
+            except Exception as e:
+                logger.error(f"Error in before_get_one hook: {str(e)}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Hook execution failed")
             
             # Execute adapter method
             result = None
@@ -169,7 +184,7 @@ class CRUDRouter(APIRouter):
                     result = await self.adapter.get_one(id)
                 except Exception as e:
                     logger.error(f"Error in get_one: {str(e)}", exc_info=True)
-                    raise
+                    raise HTTPException(status_code=500, detail="Failed to retrieve item")
             
             # Return 404 if not found
             if result is None:
@@ -178,9 +193,13 @@ class CRUDRouter(APIRouter):
                     detail=f"{self.schema.__name__} with id {id} not found"
                 )
             
-            # Trigger hooks
+            # Trigger hooks with error handling
             context.result = result
-            await self.hooks.trigger("after_get_one", context)
+            try:
+                await self.hooks.trigger("after_get_one", context)
+            except Exception as e:
+                logger.error(f"Error in after_get_one hook: {str(e)}", exc_info=True)
+                # Don't fail the request if after hook fails
             
             return result
         
@@ -207,18 +226,29 @@ class CRUDRouter(APIRouter):
                 data=data.model_dump() if hasattr(data, 'model_dump') else data.dict(),
             )
             
-            # Trigger hooks
-            await self.hooks.trigger("before_create", context)
+            # Trigger hooks with error handling
+            try:
+                await self.hooks.trigger("before_create", context)
+            except Exception as e:
+                logger.error(f"Error in before_create hook: {str(e)}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Hook execution failed")
             
             # Execute adapter method
+            result = None
             if self.adapter:
-                result = await self.adapter.create(context.data)
-            else:
-                result = None
+                try:
+                    result = await self.adapter.create(context.data)
+                except Exception as e:
+                    logger.error(f"Error in create: {str(e)}", exc_info=True)
+                    raise HTTPException(status_code=500, detail="Failed to create item")
             
-            # Trigger hooks
+            # Trigger hooks with error handling
             context.result = result
-            await self.hooks.trigger("after_create", context)
+            try:
+                await self.hooks.trigger("after_create", context)
+            except Exception as e:
+                logger.error(f"Error in after_create hook: {str(e)}", exc_info=True)
+                # Don't fail the request if after hook fails
             
             return result
         
@@ -248,18 +278,29 @@ class CRUDRouter(APIRouter):
                 metadata={"id": id},
             )
             
-            # Trigger hooks
-            await self.hooks.trigger("before_update", context)
+            # Trigger hooks with error handling
+            try:
+                await self.hooks.trigger("before_update", context)
+            except Exception as e:
+                logger.error(f"Error in before_update hook: {str(e)}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Hook execution failed")
             
             # Execute adapter method
+            result = None
             if self.adapter:
-                result = await self.adapter.update(id, context.data)
-            else:
-                result = None
+                try:
+                    result = await self.adapter.update(id, context.data)
+                except Exception as e:
+                    logger.error(f"Error in update: {str(e)}", exc_info=True)
+                    raise HTTPException(status_code=500, detail="Failed to update item")
             
-            # Trigger hooks
+            # Trigger hooks with error handling
             context.result = result
-            await self.hooks.trigger("after_update", context)
+            try:
+                await self.hooks.trigger("after_update", context)
+            except Exception as e:
+                logger.error(f"Error in after_update hook: {str(e)}", exc_info=True)
+                # Don't fail the request if after hook fails
             
             return result
         
@@ -286,18 +327,29 @@ class CRUDRouter(APIRouter):
                 metadata={"id": id},
             )
             
-            # Trigger hooks
-            await self.hooks.trigger("before_delete", context)
+            # Trigger hooks with error handling
+            try:
+                await self.hooks.trigger("before_delete", context)
+            except Exception as e:
+                logger.error(f"Error in before_delete hook: {str(e)}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Hook execution failed")
             
             # Execute adapter method
+            result = None
             if self.adapter:
-                result = await self.adapter.delete_one(id)
-            else:
-                result = None
+                try:
+                    result = await self.adapter.delete_one(id)
+                except Exception as e:
+                    logger.error(f"Error in delete_one: {str(e)}", exc_info=True)
+                    raise HTTPException(status_code=500, detail="Failed to delete item")
             
-            # Trigger hooks
+            # Trigger hooks with error handling
             context.result = result
-            await self.hooks.trigger("after_delete", context)
+            try:
+                await self.hooks.trigger("after_delete", context)
+            except Exception as e:
+                logger.error(f"Error in after_delete hook: {str(e)}", exc_info=True)
+                # Don't fail the request if after hook fails
             
             return result
         
@@ -331,21 +383,34 @@ class CRUDRouter(APIRouter):
                 request=request,
             )
             
-            # Trigger hooks
-            await self.hooks.trigger("before_delete", context)
+            # Trigger hooks with error handling
+            try:
+                await self.hooks.trigger("before_delete", context)
+            except Exception as e:
+                logger.error(f"Error in before_delete hook: {str(e)}", exc_info=True)
+                raise HTTPException(status_code=500, detail="Hook execution failed")
             
             # Execute adapter method
             result = []
             if self.adapter:
                 try:
                     result = await self.adapter.delete_all()
+                    if result is None:
+                        result = []
+                    elif not isinstance(result, list):
+                        logger.error(f"Expected list from delete_all, got {type(result)}")
+                        result = []
                 except Exception as e:
                     logger.error(f"Error in delete_all: {str(e)}", exc_info=True)
-                    raise
+                    raise HTTPException(status_code=500, detail="Failed to delete items")
             
-            # Trigger hooks
+            # Trigger hooks with error handling
             context.result = result
-            await self.hooks.trigger("after_delete", context)
+            try:
+                await self.hooks.trigger("after_delete", context)
+            except Exception as e:
+                logger.error(f"Error in after_delete hook: {str(e)}", exc_info=True)
+                # Don't fail the request if after hook fails
             
             return result
         
