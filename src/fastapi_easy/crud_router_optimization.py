@@ -1,7 +1,7 @@
 """CRUDRouter optimization integration"""
 
 from typing import Optional, Dict, Any, Type
-from fastapi_easy.crud_router import CRUDRouter
+from fastapi_easy.core.crud_router import CRUDRouter
 from fastapi_easy.core.optimized_adapter import OptimizedSQLAlchemyAdapter, create_optimized_adapter
 
 
@@ -49,7 +49,7 @@ class OptimizedCRUDRouter(CRUDRouter):
         self.optimized_backend = backend if enable_optimization else None
         
         # Initialize parent CRUDRouter
-        super().__init__(schema=schema, backend=backend, **kwargs)
+        super().__init__(schema=schema, adapter=backend, **kwargs)
     
     def get_cache_stats(self) -> Optional[Dict[str, Any]]:
         """Get cache statistics
