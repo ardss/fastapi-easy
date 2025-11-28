@@ -1,0 +1,255 @@
+"""Security decorators for FastAPI-Easy"""
+
+from functools import wraps
+from typing import Callable, List, Optional
+
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthCredentials
+
+from .jwt_auth import JWTAuth
+from .exceptions import (
+    AuthenticationError,
+    AuthorizationError,
+    InvalidTokenError,
+    TokenExpiredError,
+)
+
+
+# Global JWT auth instance
+_jwt_auth: Optional[JWTAuth] = None
+
+
+def init_jwt_auth(
+    secret_key: Optional[str] = None,
+    algorithm: str = "HS256",
+    access_token_expire_minutes: int = 15,
+    refresh_token_expire_days: int = 7,
+) -> JWTAuth:
+    """Initialize global JWT auth instance
+
+    Args:
+        secret_key: Secret key for signing tokens
+        algorithm: JWT algorithm
+        access_token_expire_minutes: Access token expiration time
+        refresh_token_expire_days: Refresh token expiration time
+
+    Returns:
+        JWTAuth instance
+    """
+    global _jwt_auth
+    _jwt_auth = JWTAuth(
+        secret_key=secret_key,
+        algorithm=algorithm,
+        access_token_expire_minutes=access_token_expire_minutes,
+        refresh_token_expire_days=refresh_token_expire_days,
+    )
+    return _jwt_auth
+
+
+def get_jwt_auth() -> JWTAuth:
+    """Get global JWT auth instance
+
+    Returns:
+        JWTAuth instance
+
+    Raises:
+        RuntimeError: If JWT auth is not initialized
+    """
+    if _jwt_auth is None:
+        raise RuntimeError("JWT auth is not initialized. Call init_jwt_auth() first.")
+    return _jwt_auth
+
+
+# HTTP Bearer security
+security = HTTPBearer()
+
+
+async def get_current_user(
+    credentials: HTTPAuthCredentials = Depends(security),
+) -> dict:
+    """Get current user from JWT token
+
+    Args:
+        credentials: HTTP Bearer credentials
+
+    Returns:
+        User payload
+
+    Raises:
+        HTTPException: If token is invalid or expired
+    """
+    token = credentials.credentials
+    jwt_auth = get_jwt_auth()
+
+    try:
+        payload = jwt_auth.verify_token(token)
+        return {
+            "user_id": payload.sub,
+            "roles": payload.roles,
+            "permissions": payload.permissions,
+            "token_type": payload.type,
+        }
+    except TokenExpiredError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    except InvalidTokenError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
+async def get_current_user_optional(
+    credentials: Optional[HTTPAuthCredentials] = Depends(security),
+) -> Optional[dict]:
+    """Get current user from JWT token (optional)
+
+    Args:
+        credentials: HTTP Bearer credentials (optional)
+
+    Returns:
+        User payload or None
+
+    Raises:
+        HTTPException: If token is invalid or expired
+    """
+    if credentials is None:
+        return None
+
+    return await get_current_user(credentials)
+
+
+def require_role(*roles: str):
+    """Require user to have one of the specified roles
+
+    Args:
+        *roles: Required roles
+
+    Returns:
+        Decorator function
+    """
+
+    async def role_checker(current_user: dict = Depends(get_current_user)) -> dict:
+        """Check if user has required role
+
+        Args:
+            current_user: Current user payload
+
+        Returns:
+            Current user payload
+
+        Raises:
+            HTTPException: If user does not have required role
+        """
+        user_roles = current_user.get("roles", [])
+        if not any(role in user_roles for role in roles):
+            raise HTTPException(
+                status_code=403,
+                detail=f"User does not have required role. Required: {roles}",
+            )
+        return current_user
+
+    return Depends(role_checker)
+
+
+def require_permission(*permissions: str):
+    """Require user to have one of the specified permissions
+
+    Args:
+        *permissions: Required permissions
+
+    Returns:
+        Decorator function
+    """
+
+    async def permission_checker(
+        current_user: dict = Depends(get_current_user),
+    ) -> dict:
+        """Check if user has required permission
+
+        Args:
+            current_user: Current user payload
+
+        Returns:
+            Current user payload
+
+        Raises:
+            HTTPException: If user does not have required permission
+        """
+        user_permissions = current_user.get("permissions", [])
+        if not any(perm in user_permissions for perm in permissions):
+            raise HTTPException(
+                status_code=403,
+                detail=f"User does not have required permission. Required: {permissions}",
+            )
+        return current_user
+
+    return Depends(permission_checker)
+
+
+def require_all_roles(*roles: str):
+    """Require user to have all specified roles
+
+    Args:
+        *roles: Required roles
+
+    Returns:
+        Decorator function
+    """
+
+    async def all_roles_checker(
+        current_user: dict = Depends(get_current_user),
+    ) -> dict:
+        """Check if user has all required roles
+
+        Args:
+            current_user: Current user payload
+
+        Returns:
+            Current user payload
+
+        Raises:
+            HTTPException: If user does not have all required roles
+        """
+        user_roles = current_user.get("roles", [])
+        if not all(role in user_roles for role in roles):
+            raise HTTPException(
+                status_code=403,
+                detail=f"User does not have all required roles. Required: {roles}",
+            )
+        return current_user
+
+    return Depends(all_roles_checker)
+
+
+def require_all_permissions(*permissions: str):
+    """Require user to have all specified permissions
+
+    Args:
+        *permissions: Required permissions
+
+    Returns:
+        Decorator function
+    """
+
+    async def all_permissions_checker(
+        current_user: dict = Depends(get_current_user),
+    ) -> dict:
+        """Check if user has all required permissions
+
+        Args:
+            current_user: Current user payload
+
+        Returns:
+            Current user payload
+
+        Raises:
+            HTTPException: If user does not have all required permissions
+        """
+        user_permissions = current_user.get("permissions", [])
+        if not all(perm in user_permissions for perm in permissions):
+            raise HTTPException(
+                status_code=403,
+                detail=f"User does not have all required permissions. Required: {permissions}",
+            )
+        return current_user
+
+    return Depends(all_permissions_checker)
