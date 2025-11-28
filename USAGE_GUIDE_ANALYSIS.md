@@ -255,23 +255,90 @@ router = CRUDRouter(
 - 安全风险：恶意用户可以清理缓存导致性能下降
 - 用户无法追踪谁清理了缓存
 
-**建议修复**:
+**迭代后的修复方案** (改进版):
+
+**方案 A: 添加审计日志（推荐）**
 ```python
-async def clear_cache(self, request: Request) -> Dict[str, Any]:
+async def clear_cache(self) -> Dict[str, Any]:
     """Clear all caches with audit logging"""
     if not self.enable_cache:
         return {"message": "Cache is not enabled"}
     
     try:
         # 记录操作
-        logger.info(f"Cache cleared by {request.client.host}")
+        logger.info(
+            "Cache cleared",
+            extra={
+                "action": "cache_clear",
+                "timestamp": time.time(),
+                "cache_size_before": len(self.cache._cache) if hasattr(self.cache, '_cache') else 0,
+            }
+        )
         
         await self.cache.clear()
-        return {"message": "Cache cleared successfully"}
+        
+        logger.info("Cache cleared successfully")
+        return {
+            "status": "success",
+            "message": "Cache cleared successfully",
+            "timestamp": time.time()
+        }
     except Exception as e:
-        logger.error(f"Failed to clear cache: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to clear cache")
+        logger.error(f"Failed to clear cache: {str(e)}", exc_info=True)
+        return {
+            "status": "error",
+            "message": f"Failed to clear cache: {str(e)}",
+            "timestamp": time.time()
+        }
 ```
+
+**方案 B: 添加权限检查（高安全性）**
+```python
+from fastapi import Depends, HTTPException
+
+async def require_admin(request: Request) -> None:
+    """Check if user is admin"""
+    # 这里应该从 request 中获取用户信息并检查权限
+    # 示例：
+    user = request.state.user if hasattr(request.state, 'user') else None
+    if not user or not user.is_admin:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+async def clear_cache(self, _: None = Depends(require_admin)) -> Dict[str, Any]:
+    """Clear all caches with permission check and audit logging"""
+    if not self.enable_cache:
+        return {"message": "Cache is not enabled"}
+    
+    try:
+        logger.info(
+            "Cache cleared by admin",
+            extra={
+                "action": "cache_clear",
+                "timestamp": time.time(),
+            }
+        )
+        
+        await self.cache.clear()
+        
+        return {
+            "status": "success",
+            "message": "Cache cleared successfully",
+            "timestamp": time.time()
+        }
+    except Exception as e:
+        logger.error(f"Failed to clear cache: {str(e)}", exc_info=True)
+        return {
+            "status": "error",
+            "message": f"Failed to clear cache: {str(e)}",
+            "timestamp": time.time()
+        }
+```
+
+**推荐方案**: 方案 A (审计日志)
+- ✅ 不需要修改路由配置
+- ✅ 记录所有清理操作
+- ✅ 易于集成到现有代码
+- ✅ 向后兼容
 
 **工作量**: 1.5 小时
 

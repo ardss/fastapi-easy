@@ -346,28 +346,95 @@ class OptimizedSQLAlchemyAdapter:
             logger.error(f"Cache invalidation failed: {str(e)}")
     
     def get_cache_stats(self) -> Optional[Dict[str, Any]]:
-        """Get cache statistics
+        """Get cache statistics with error handling
         
         Returns:
-            Cache statistics or None if caching disabled
+            Cache statistics or None if caching disabled or error occurs
         """
         if not self.enable_cache:
+            logger.debug("Cache is not enabled")
             return None
-        return self.cache.get_stats()
+        
+        try:
+            stats = self.cache.get_stats()
+            if stats is None:
+                logger.warning("Cache stats returned None")
+                return None
+            return stats
+        except Exception as e:
+            logger.error(
+                f"Failed to get cache stats: {str(e)}",
+                exc_info=True,
+                extra={
+                    "action": "get_cache_stats",
+                    "error": str(e),
+                }
+            )
+            return None
     
-    async def clear_cache(self) -> None:
-        """Clear all caches
+    async def clear_cache(self) -> Dict[str, Any]:
+        """Clear all caches with audit logging and error handling
         
         Useful for testing or manual cache invalidation.
+        Ensures cache clearing doesn't block application shutdown.
+        
+        Returns:
+            Dictionary with operation status and details
         """
-        if self.enable_cache:
+        if not self.enable_cache:
+            logger.debug("Cache is not enabled, skipping clear")
+            return {"status": "skipped", "message": "Cache is not enabled"}
+        
+        try:
+            # 记录操作
+            logger.info(
+                "Cache clear operation started",
+                extra={
+                    "action": "cache_clear",
+                    "timestamp": time.time(),
+                }
+            )
+            
             await self.cache.clear()
+            
+            logger.info(
+                "Cache cleared successfully",
+                extra={
+                    "action": "cache_clear",
+                    "status": "success",
+                    "timestamp": time.time(),
+                }
+            )
+            
+            return {
+                "status": "success",
+                "message": "Cache cleared successfully",
+                "timestamp": time.time()
+            }
+        except Exception as e:
+            logger.error(
+                f"Failed to clear cache: {str(e)}",
+                exc_info=True,
+                extra={
+                    "action": "cache_clear",
+                    "status": "error",
+                    "error": str(e),
+                    "timestamp": time.time(),
+                }
+            )
+            
+            return {
+                "status": "error",
+                "message": f"Failed to clear cache: {str(e)}",
+                "timestamp": time.time()
+            }
     
     async def warmup_cache(
         self,
         limit: int = 1000,
         max_retries: int = 3,
-        retry_delay: float = 1.0
+        retry_delay: float = 1.0,
+        max_concurrent: int = 10,
     ) -> int:
         """Warmup cache by preloading hot data with retry mechanism
         
@@ -378,17 +445,20 @@ class OptimizedSQLAlchemyAdapter:
             limit: Maximum number of items to preload
             max_retries: Maximum number of retry attempts
             retry_delay: Delay between retries in seconds
+            max_concurrent: Maximum concurrent items to cache (default: 10)
             
         Returns:
             Number of items warmed up
         """
         if not self.enable_cache:
+            logger.debug("Cache is disabled, skipping warmup")
             return 0
         
         last_error = None
         for attempt in range(max_retries):
             try:
                 # Load hot data (first N items) with timeout
+                logger.debug(f"Cache warmup attempt {attempt + 1}/{max_retries}: loading up to {limit} items")
                 items = await self._execute_with_timeout(
                     self.base_adapter.get_all(
                         filters={},
@@ -398,9 +468,13 @@ class OptimizedSQLAlchemyAdapter:
                     "warmup_cache"
                 )
                 
+                if not items:
+                    logger.warning("Cache warmup: no items returned from database")
+                    return 0
+                
                 # Cache each item with concurrency limit
                 count = 0
-                semaphore = asyncio.Semaphore(10)  # 限制并发数为 10
+                semaphore = asyncio.Semaphore(max_concurrent)
                 
                 async def cache_item(item):
                     nonlocal count
@@ -422,20 +496,34 @@ class OptimizedSQLAlchemyAdapter:
                 # 并发缓存所有项
                 await asyncio.gather(*[cache_item(item) for item in items], return_exceptions=True)
                 
-                logger.info(f"Cache warmup completed: {count} items preloaded")
+                logger.info(
+                    f"Cache warmup completed successfully",
+                    extra={
+                        "action": "cache_warmup",
+                        "items_warmed": count,
+                        "total_items": len(items),
+                        "attempt": attempt + 1,
+                    }
+                )
                 return count
             except Exception as e:
                 last_error = e
                 if attempt < max_retries - 1:
                     logger.warning(
                         f"Cache warmup attempt {attempt + 1} failed: {str(e)}. "
-                        f"Retrying in {retry_delay}s..."
+                        f"Retrying in {retry_delay}s...",
+                        exc_info=True
                     )
                     await asyncio.sleep(retry_delay)
                 else:
                     logger.error(
                         f"Cache warmup failed after {max_retries} attempts: {str(e)}",
-                        exc_info=True
+                        exc_info=True,
+                        extra={
+                            "action": "cache_warmup_failed",
+                            "attempts": max_retries,
+                            "last_error": str(e),
+                        }
                     )
         
         return 0
