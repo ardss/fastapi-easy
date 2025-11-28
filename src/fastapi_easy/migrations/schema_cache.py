@@ -8,6 +8,7 @@ Schema 哈希缓存系统
 - 缓存监控
 """
 
+import asyncio
 import hashlib
 import json
 import logging
@@ -101,11 +102,30 @@ class FileSchemaCacheProvider(SchemaCacheProvider):
             return False
 
     async def clear(self) -> bool:
-        """清空所有缓存"""
+        """清空所有缓存 - 使用流式处理防止内存占用过高"""
         try:
+            count = 0
+            batch_size = 100  # 每 100 个文件让出控制权一次
+
             for cache_file in self.cache_dir.glob("*.json"):
-                cache_file.unlink()
-            logger.info("All caches cleared")
+                try:
+                    cache_file.unlink()
+                    count += 1
+
+                    # 定期让出控制权，防止阻塞事件循环
+                    if count % batch_size == 0:
+                        await asyncio.sleep(0)
+                        logger.debug(
+                            f"Cleared {count} cache files, "
+                            f"yielding control..."
+                        )
+                except OSError as e:
+                    logger.warning(
+                        f"Failed to delete cache file {cache_file}: {e}"
+                    )
+                    continue
+
+            logger.info(f"Cleared {count} cache files")
             return True
         except Exception as e:
             logger.error(f"Error clearing cache: {e}")
