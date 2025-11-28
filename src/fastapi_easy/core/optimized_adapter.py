@@ -350,14 +350,21 @@ class OptimizedSQLAlchemyAdapter:
         if self.enable_cache:
             await self.cache.clear()
     
-    async def warmup_cache(self, limit: int = 1000) -> int:
-        """Warmup cache by preloading hot data
+    async def warmup_cache(
+        self,
+        limit: int = 1000,
+        max_retries: int = 3,
+        retry_delay: float = 1.0
+    ) -> int:
+        """Warmup cache by preloading hot data with retry mechanism
         
         Loads frequently accessed items into cache to improve
-        cold start performance.
+        cold start performance. Retries on failure.
         
         Args:
             limit: Maximum number of items to preload
+            max_retries: Maximum number of retry attempts
+            retry_delay: Delay between retries in seconds
             
         Returns:
             Number of items warmed up
@@ -365,29 +372,46 @@ class OptimizedSQLAlchemyAdapter:
         if not self.enable_cache:
             return 0
         
-        try:
-            # Load hot data (first N items)
-            items = await self.base_adapter.get_all(
-                filters={},
-                sorts={},
-                pagination={"skip": 0, "limit": limit},
-            )
-            
-            # Cache each item
-            count = 0
-            for item in items:
-                # Try to get ID from item
-                item_id = getattr(item, "id", None) or item.get("id")
-                if item_id:
-                    cache_key = self._get_cache_key("get_one", id=item_id)
-                    await self.cache.set(cache_key, item)
-                    count += 1
-            
-            logger.info(f"Cache warmup completed: {count} items preloaded")
-            return count
-        except Exception as e:
-            logger.error(f"Cache warmup failed: {str(e)}", exc_info=True)
-            return 0
+        last_error = None
+        for attempt in range(max_retries):
+            try:
+                # Load hot data (first N items) with timeout
+                items = await self._execute_with_timeout(
+                    self.base_adapter.get_all(
+                        filters={},
+                        sorts={},
+                        pagination={"skip": 0, "limit": limit},
+                    ),
+                    "warmup_cache"
+                )
+                
+                # Cache each item
+                count = 0
+                for item in items:
+                    # Try to get ID from item
+                    item_id = getattr(item, "id", None) or item.get("id")
+                    if item_id:
+                        cache_key = self._get_cache_key("get_one", id=item_id)
+                        await self.cache.set(cache_key, item)
+                        count += 1
+                
+                logger.info(f"Cache warmup completed: {count} items preloaded")
+                return count
+            except Exception as e:
+                last_error = e
+                if attempt < max_retries - 1:
+                    logger.warning(
+                        f"Cache warmup attempt {attempt + 1} failed: {str(e)}. "
+                        f"Retrying in {retry_delay}s..."
+                    )
+                    await asyncio.sleep(retry_delay)
+                else:
+                    logger.error(
+                        f"Cache warmup failed after {max_retries} attempts: {str(e)}",
+                        exc_info=True
+                    )
+        
+        return 0
 
 
 def create_optimized_adapter(
