@@ -1,6 +1,9 @@
 """Query projection optimization for reducing network transfer"""
 
+import logging
 from typing import List, Optional, Dict, Any
+
+logger = logging.getLogger(__name__)
 
 
 class QueryProjection:
@@ -67,8 +70,23 @@ class QueryProjection:
             
         Returns:
             Projected dictionary with only selected fields
+            
+        Raises:
+            TypeError: If data is not a dictionary
         """
-        return {k: v for k, v in data.items() if k in self.fields}
+        if data is None:
+            logger.warning("Projection applied to None data, returning empty dict")
+            return {}
+        
+        if not isinstance(data, dict):
+            logger.error(f"Expected dict for projection, got {type(data)}")
+            raise TypeError(f"Expected dict, got {type(data).__name__}")
+        
+        try:
+            return {k: v for k, v in data.items() if k in self.fields}
+        except Exception as e:
+            logger.error(f"Failed to apply projection: {str(e)}")
+            raise
     
     def apply_to_list(self, data_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Apply projection to list of dictionaries
@@ -88,9 +106,31 @@ class QueryProjection:
             available_fields: List of available field names
             
         Returns:
-            True if all projection fields are available
+            True if all projection fields are available, False otherwise
         """
-        return all(field in available_fields for field in self.fields)
+        invalid = self.get_invalid_fields(available_fields)
+        if invalid:
+            logger.warning(f"Invalid projection fields: {invalid}")
+            return False
+        return True
+    
+    def validate_fields_strict(self, available_fields: List[str]) -> bool:
+        """Validate fields and raise exception if invalid
+        
+        Args:
+            available_fields: List of available field names
+            
+        Returns:
+            True if all projection fields are available
+            
+        Raises:
+            ValueError: If invalid fields are found
+        """
+        invalid = self.get_invalid_fields(available_fields)
+        if invalid:
+            logger.error(f"Invalid projection fields: {invalid}")
+            raise ValueError(f"Invalid projection fields: {invalid}")
+        return True
     
     def get_invalid_fields(self, available_fields: List[str]) -> List[str]:
         """Get fields that don't exist in available fields

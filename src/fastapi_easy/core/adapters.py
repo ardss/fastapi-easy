@@ -9,6 +9,10 @@ class ORMAdapter(ABC):
     
     All ORM adapters should inherit from this class and implement
     the abstract methods.
+    
+    Raises:
+        ValueError: If invalid parameters provided
+        RuntimeError: If database operation fails
     """
     
     @abstractmethod
@@ -26,7 +30,11 @@ class ORMAdapter(ABC):
             pagination: Pagination info (skip, limit)
             
         Returns:
-            List of items
+            List of items (never None, may be empty)
+            
+        Raises:
+            ValueError: If invalid pagination parameters
+            RuntimeError: If database query fails
         """
         pass
     
