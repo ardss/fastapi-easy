@@ -148,6 +148,14 @@ class MultiLayerCache:
         await self.l1_cache.clear()
         await self.l2_cache.clear()
     
+    async def cleanup(self) -> None:
+        """Clean up resources
+        
+        Clears all caches and releases resources.
+        """
+        await self.clear()
+        logger.info("Cache cleaned up")
+    
     async def cleanup_expired(self) -> int:
         """Clean up expired entries from both caches
         

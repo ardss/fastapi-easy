@@ -43,8 +43,12 @@ class CacheKeyGenerator:
         # This handles nested dicts and lists
         try:
             params_json = json.dumps(kwargs, sort_keys=True, default=str)
-        except (TypeError, ValueError):
+        except TypeError as e:
+            logger.warning(f"Failed to serialize params: {str(e)}")
             params_json = json.dumps({"params": str(kwargs)}, sort_keys=True)
+        except ValueError as e:
+            logger.error(f"Invalid JSON value: {str(e)}")
+            raise
         
         return self._generate_cached(operation, params_json)
     

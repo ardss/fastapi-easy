@@ -1,12 +1,14 @@
-"""Main CRUD Router class for FastAPI-Easy"""
+"""Main CRUD router for FastAPI"""
 
-from typing import Type, Optional, List, Any, Dict
-from fastapi import APIRouter, Query, Path, Body, Request
+import logging
+from typing import Any, Dict, List, Optional, Type, Callable
+from fastapi import APIRouter, Query, Path, Request, HTTPException, Body
 from pydantic import BaseModel
-
 from .config import CRUDConfig
 from .adapters import ORMAdapter
 from .hooks import HookRegistry, ExecutionContext
+
+logger = logging.getLogger(__name__)
 
 
 class CRUDRouter(APIRouter):
@@ -60,7 +62,7 @@ class CRUDRouter(APIRouter):
                 stacklevel=2
             )
         
-        # Initialize registries
+        # Initialize hooks
         self.hooks = HookRegistry()
         
         # Set default prefix
@@ -123,8 +125,6 @@ class CRUDRouter(APIRouter):
                     if result is None:
                         result = []
                 except Exception as e:
-                    import logging
-                    logger = logging.getLogger(__name__)
                     logger.error(f"Error in get_all: {str(e)}", exc_info=True)
                     raise
             
@@ -168,8 +168,6 @@ class CRUDRouter(APIRouter):
                 try:
                     result = await self.adapter.get_one(id)
                 except Exception as e:
-                    import logging
-                    logger = logging.getLogger(__name__)
                     logger.error(f"Error in get_one: {str(e)}", exc_info=True)
                     raise
             
@@ -342,8 +340,6 @@ class CRUDRouter(APIRouter):
                 try:
                     result = await self.adapter.delete_all()
                 except Exception as e:
-                    import logging
-                    logger = logging.getLogger(__name__)
                     logger.error(f"Error in delete_all: {str(e)}", exc_info=True)
                     raise
             
