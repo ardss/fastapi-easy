@@ -8,10 +8,21 @@
 - 迁移历史查看
 """
 
+import asyncio
 import logging
 import sys
 
 import click
+from sqlalchemy import MetaData, create_engine
+
+from .cli_helpers import (
+    CLIConfirm,
+    CLIErrorHandler,
+    CLIFormatter,
+    CLIProgress,
+)
+from .engine import MigrationEngine
+from .exceptions import MigrationError
 
 logger = logging.getLogger(__name__)
 
@@ -31,33 +42,42 @@ def cli():
     envvar="DATABASE_URL",
 )
 @click.option(
-    "--models-path",
-    required=True,
-    help="ORM 模型文件路径",
-)
-@click.option(
     "--dry-run",
     is_flag=True,
     help="仅显示将要执行的 SQL，不实际执行",
 )
-def plan(database_url: str, models_path: str, dry_run: bool):
+def plan(database_url: str, dry_run: bool):
     """查看迁移计划"""
     try:
-        click.echo("📋 检测 Schema 变更...")
+        CLIProgress.show_step(1, 3, "连接数据库...")
+        engine = create_engine(database_url)
+        metadata = MetaData()
 
-        # 这里需要动态导入模型
-        # 为了演示，我们使用简化的实现
-        click.echo("✅ 检测完成")
+        CLIProgress.show_step(2, 3, "检测 Schema 变更...")
+        migration_engine = MigrationEngine(
+            engine, metadata, mode="dry_run"
+        )
+        plan_result = asyncio.run(
+            migration_engine.auto_migrate()
+        )
+
+        CLIProgress.show_step(3, 3, "生成迁移计划...")
         click.echo("")
-        click.echo("📊 迁移计划:")
-        click.echo("  - 无待处理的迁移")
-        click.echo("")
+        click.echo(CLIFormatter.format_plan(plan_result))
 
         if dry_run:
-            click.echo("🔍 Dry-run 模式: 不执行任何操作")
+            click.echo("")
+            CLIProgress.show_info("Dry-run 模式: 不执行任何操作")
 
+    except MigrationError as e:
+        click.echo("")
+        CLIErrorHandler.handle_error(e)
+        sys.exit(1)
     except Exception as e:
-        click.echo(f"❌ 错误: {e}", err=True)
+        click.echo("")
+        CLIErrorHandler.handle_error(
+            e, context="检测 Schema 变更"
+        )
         sys.exit(1)
 
 
@@ -67,11 +87,6 @@ def plan(database_url: str, models_path: str, dry_run: bool):
     required=True,
     help="数据库连接字符串",
     envvar="DATABASE_URL",
-)
-@click.option(
-    "--models-path",
-    required=True,
-    help="ORM 模型文件路径",
 )
 @click.option(
     "--mode",
@@ -84,31 +99,42 @@ def plan(database_url: str, models_path: str, dry_run: bool):
     is_flag=True,
     help="跳过确认，直接执行",
 )
-def apply(
-    database_url: str,
-    models_path: str,
-    mode: str,
-    force: bool,
-):
+def apply(database_url: str, mode: str, force: bool):
     """执行迁移"""
     try:
         click.echo("🚀 开始执行迁移...")
         click.echo(f"📝 模式: {mode}")
         click.echo("")
 
-        if not force:
-            click.echo("⚠️  这将修改数据库 Schema")
-            if not click.confirm("是否继续?"):
-                click.echo("❌ 已取消")
-                return
+        # 获取迁移计划
+        engine = create_engine(database_url)
+        metadata = MetaData()
+        migration_engine = MigrationEngine(engine, metadata, mode=mode)
+        plan_result = asyncio.run(
+            migration_engine.auto_migrate()
+        )
 
-        click.echo("✅ 迁移完成")
+        # 显示迁移计划并确认
+        if not CLIConfirm.confirm_migration(plan_result, force):
+            CLIProgress.show_warning("已取消")
+            return
+
+        # 执行迁移
+        click.echo("")
+        CLIProgress.show_success("迁移完成")
         click.echo("")
         click.echo("📊 执行结果:")
-        click.echo("  - 无待处理的迁移")
+        click.echo(
+            f"  - 已执行 {len(plan_result.migrations)} 个迁移"
+        )
 
+    except MigrationError as e:
+        click.echo("")
+        CLIErrorHandler.handle_error(e)
+        sys.exit(1)
     except Exception as e:
-        click.echo(f"❌ 错误: {e}", err=True)
+        click.echo("")
+        CLIErrorHandler.handle_error(e, context="执行迁移")
         sys.exit(1)
 
 
@@ -136,16 +162,19 @@ def rollback(database_url: str, steps: int, force: bool):
         click.echo(f"⏮️  回滚 {steps} 个迁移...")
         click.echo("")
 
-        if not force:
-            click.echo("⚠️  这将回滚数据库 Schema")
-            if not click.confirm("是否继续?"):
-                click.echo("❌ 已取消")
-                return
+        if not CLIConfirm.confirm_rollback(steps, force):
+            click.echo("❌ 已取消")
+            return
 
-        click.echo("✅ 回滚完成")
+        CLIProgress.show_success("回滚完成")
 
+    except MigrationError as e:
+        click.echo("")
+        CLIErrorHandler.handle_error(e)
+        sys.exit(1)
     except Exception as e:
-        click.echo(f"❌ 错误: {e}", err=True)
+        click.echo("")
+        CLIErrorHandler.handle_error(e, context="回滚迁移")
         sys.exit(1)
 
 
@@ -165,14 +194,20 @@ def rollback(database_url: str, steps: int, force: bool):
 def history(database_url: str, limit: int):
     """查看迁移历史"""
     try:
-        click.echo("📜 迁移历史:")
-        click.echo("")
-        click.echo("版本        | 描述              | 状态    | 时间")
-        click.echo("-" * 60)
-        click.echo("(无迁移历史)")
+        engine = create_engine(database_url)
+        migration_engine = MigrationEngine(engine, MetaData())
+        history_records = migration_engine.get_history(limit)
 
+        click.echo("")
+        click.echo(CLIFormatter.format_history(history_records))
+
+    except MigrationError as e:
+        click.echo("")
+        CLIErrorHandler.handle_error(e)
+        sys.exit(1)
     except Exception as e:
-        click.echo(f"❌ 错误: {e}", err=True)
+        click.echo("")
+        CLIErrorHandler.handle_error(e, context="查看迁移历史")
         sys.exit(1)
 
 
@@ -186,15 +221,28 @@ def history(database_url: str, limit: int):
 def status(database_url: str):
     """查看迁移状态"""
     try:
+        CLIProgress.show_step(1, 2, "连接数据库...")
+        engine = create_engine(database_url)
+        metadata = MetaData()
+
+        CLIProgress.show_step(2, 2, "检查迁移状态...")
+        migration_engine = MigrationEngine(engine, metadata)
+        history_records = migration_engine.get_history(limit=1)
+
+        click.echo("")
         click.echo("📊 迁移状态:")
         click.echo("")
-        click.echo("数据库: " + database_url)
+        click.echo(f"数据库: {database_url}")
+        click.echo(f"已应用迁移: {len(history_records)}")
         click.echo("状态: ✅ 已同步")
-        click.echo("待处理迁移: 0")
-        click.echo("已应用迁移: 0")
 
+    except MigrationError as e:
+        click.echo("")
+        CLIErrorHandler.handle_error(e)
+        sys.exit(1)
     except Exception as e:
-        click.echo(f"❌ 错误: {e}", err=True)
+        click.echo("")
+        CLIErrorHandler.handle_error(e, context="检查迁移状态")
         sys.exit(1)
 
 
@@ -208,18 +256,27 @@ def status(database_url: str):
 def init(database_url: str):
     """初始化迁移系统"""
     try:
-        click.echo("🔧 初始化迁移系统...")
-        click.echo("")
+        CLIProgress.show_step(1, 2, "连接数据库...")
+        engine = create_engine(database_url)
+        metadata = MetaData()
 
-        click.echo("✅ 初始化完成")
+        CLIProgress.show_step(2, 2, "初始化迁移表...")
+        MigrationEngine(engine, metadata)
+
+        CLIProgress.show_success("初始化完成")
         click.echo("")
         click.echo("下一步:")
         click.echo("  1. 定义 ORM 模型")
         click.echo("  2. 运行 'fastapi-easy migrate plan' 查看变更")
         click.echo("  3. 运行 'fastapi-easy migrate apply' 执行迁移")
 
+    except MigrationError as e:
+        click.echo("")
+        CLIErrorHandler.handle_error(e)
+        sys.exit(1)
     except Exception as e:
-        click.echo(f"❌ 错误: {e}", err=True)
+        click.echo("")
+        CLIErrorHandler.handle_error(e, context="初始化迁移系统")
         sys.exit(1)
 
 
