@@ -33,6 +33,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
+from contextlib import asynccontextmanager
 
 # ============ 1. 数据库配置 ============
 
@@ -99,10 +100,54 @@ class Product(BaseModel):
 
 # ============ 4. 创建 FastAPI 应用 ============
 
+# 定义生命周期事件处理器
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """应用生命周期管理"""
+    # 启动事件: 创建表
+    Base.metadata.create_all(bind=engine)
+    
+    # 初始化示例数据
+    db = SessionLocal()
+    try:
+        if db.query(ProductDB).count() == 0:
+            sample_products = [
+                ProductDB(
+                    name="笔记本电脑",
+                    description="高性能笔记本",
+                    price=5999.99,
+                    stock=10
+                ),
+                ProductDB(
+                    name="鼠标",
+                    description="无线鼠标",
+                    price=99.99,
+                    stock=50
+                ),
+                ProductDB(
+                    name="键盘",
+                    description="机械键盘",
+                    price=299.99,
+                    stock=30
+                ),
+            ]
+            db.add_all(sample_products)
+            db.commit()
+    finally:
+        db.close()
+    
+    print("✅ 应用启动完成，数据库已初始化")
+    
+    yield
+    
+    print("✅ 应用关闭")
+
+
 app = FastAPI(
     title="FastAPI-Easy 示例 2",
     description="与数据库集成的 CRUD API",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 
@@ -272,44 +317,7 @@ async def delete_product(product_id: int):
 
 
 # ============ 7. 初始化数据库 ============
-
-@app.on_event("startup")
-async def startup_event():
-    """
-    应用启动时创建表和初始化数据
-    """
-    # 创建所有表
-    Base.metadata.create_all(bind=engine)
-    
-    # 初始化示例数据
-    db = SessionLocal()
-    try:
-        # 检查是否已有数据
-        if db.query(ProductDB).count() == 0:
-            sample_products = [
-                ProductDB(
-                    name="笔记本电脑",
-                    description="高性能笔记本",
-                    price=5999.99,
-                    stock=10
-                ),
-                ProductDB(
-                    name="鼠标",
-                    description="无线鼠标",
-                    price=99.99,
-                    stock=50
-                ),
-                ProductDB(
-                    name="键盘",
-                    description="机械键盘",
-                    price=299.99,
-                    stock=30
-                ),
-            ]
-            db.add_all(sample_products)
-            db.commit()
-    finally:
-        db.close()
+# 注意: 初始化已在 lifespan 中处理
 
 
 # ============ 8. 如何运行此示例 ============

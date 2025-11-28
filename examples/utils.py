@@ -123,11 +123,13 @@ def run_app(
         thread.start()
     
     # 启动 Uvicorn 服务器
+    # 注意: 当使用 reload=True 时，需要传递模块路径字符串而不是应用对象
+    # 但由于这里直接传递应用对象，所以禁用 reload
     uvicorn.run(
         app,
         host=host,
         port=port,
-        reload=reload,
+        reload=False,  # 直接运行时禁用 reload，避免警告
     )
 
 

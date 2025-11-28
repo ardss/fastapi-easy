@@ -51,6 +51,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
+from contextlib import asynccontextmanager
 
 # ============ 1. 数据库配置 ============
 
@@ -105,10 +106,37 @@ class Product(BaseModel):
 
 # ============ 5. 创建应用 ============
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """应用生命周期管理"""
+    Base.metadata.create_all(bind=engine)
+    
+    db = SessionLocal()
+    try:
+        if db.query(ProductDB).count() == 0:
+            sample_products = [
+                ProductDB(name="笔记本电脑", description="高性能笔记本", price=5999.99, stock=10, category="electronics"),
+                ProductDB(name="无线鼠标", description="无线鼠标", price=99.99, stock=50, category="electronics"),
+                ProductDB(name="机械键盘", description="机械键盘", price=299.99, stock=30, category="electronics"),
+                ProductDB(name="T恤", description="棉质T恤", price=49.99, stock=100, category="clothing"),
+                ProductDB(name="牛仔裤", description="蓝色牛仔裤", price=199.99, stock=50, category="clothing"),
+                ProductDB(name="Python 编程", description="Python 编程入门", price=89.99, stock=20, category="books"),
+            ]
+            db.add_all(sample_products)
+            db.commit()
+    finally:
+        db.close()
+    
+    print("✅ 应用启动完成，数据库已初始化")
+    yield
+    print("✅ 应用关闭")
+
+
 app = FastAPI(
     title="FastAPI-Easy 示例 3",
     description="查询功能 (过滤、排序、分页)",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 
@@ -303,63 +331,7 @@ async def delete_product(product_id: int):
 
 
 # ============ 8. 初始化数据库 ============
-
-@app.on_event("startup")
-async def startup_event():
-    """应用启动时创建表和初始化数据"""
-    Base.metadata.create_all(bind=engine)
-    
-    db = SessionLocal()
-    try:
-        if db.query(ProductDB).count() == 0:
-            sample_products = [
-                ProductDB(
-                    name="笔记本电脑",
-                    description="高性能笔记本",
-                    price=5999.99,
-                    stock=10,
-                    category="electronics"
-                ),
-                ProductDB(
-                    name="无线鼠标",
-                    description="无线鼠标",
-                    price=99.99,
-                    stock=50,
-                    category="electronics"
-                ),
-                ProductDB(
-                    name="机械键盘",
-                    description="机械键盘",
-                    price=299.99,
-                    stock=30,
-                    category="electronics"
-                ),
-                ProductDB(
-                    name="T恤",
-                    description="棉质T恤",
-                    price=49.99,
-                    stock=100,
-                    category="clothing"
-                ),
-                ProductDB(
-                    name="牛仔裤",
-                    description="蓝色牛仔裤",
-                    price=199.99,
-                    stock=50,
-                    category="clothing"
-                ),
-                ProductDB(
-                    name="Python 编程",
-                    description="Python 编程入门",
-                    price=89.99,
-                    stock=20,
-                    category="books"
-                ),
-            ]
-            db.add_all(sample_products)
-            db.commit()
-    finally:
-        db.close()
+# 注意: 初始化已在 lifespan 中处理
 
 
 # ============ 9. 如何运行此示例 ============

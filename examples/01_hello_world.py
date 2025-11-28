@@ -27,6 +27,7 @@ FastAPI-Easy 示例 1: 最简单的 CRUD API
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional
+from contextlib import asynccontextmanager
 
 # ============ 1. 定义数据模型 ============
 
@@ -64,10 +65,37 @@ item_id_counter = 1
 
 # ============ 3. 创建 FastAPI 应用 ============
 
+# 定义生命周期事件处理器 (现代方式，替代 @app.on_event)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    应用生命周期管理
+    
+    yield 前的代码在应用启动时执行
+    yield 后的代码在应用关闭时执行
+    """
+    # 启动事件
+    global item_id_counter
+    sample_items = [
+        {"id": 1, "name": "苹果", "description": "新鲜苹果", "price": 15.5},
+        {"id": 2, "name": "香蕉", "description": "黄色香蕉", "price": 8.0},
+        {"id": 3, "name": "橙子", "description": "新鲜橙子", "price": 12.0},
+    ]
+    items_db.extend(sample_items)
+    item_id_counter = 4
+    print("✅ 应用启动完成，已加载示例数据")
+    
+    yield
+    
+    # 关闭事件
+    print("✅ 应用关闭")
+
+
 app = FastAPI(
     title="FastAPI-Easy 示例 1",
     description="最简单的 CRUD API 示例",
     version="1.0.0",
+    lifespan=lifespan,  # 使用现代的 lifespan 参数
 )
 
 
@@ -191,22 +219,7 @@ async def delete_item(item_id: int):
 
 
 # ============ 5. 初始化示例数据 ============
-
-@app.on_event("startup")
-async def startup_event():
-    """
-    应用启动时初始化示例数据
-    """
-    global item_id_counter
-    
-    sample_items = [
-        {"id": 1, "name": "苹果", "description": "新鲜苹果", "price": 15.5},
-        {"id": 2, "name": "香蕉", "description": "黄色香蕉", "price": 8.0},
-        {"id": 3, "name": "橙子", "description": "新鲜橙子", "price": 12.0},
-    ]
-    
-    items_db.extend(sample_items)
-    item_id_counter = 4
+# 注意: 初始化已在 lifespan 中处理，这里不需要额外的启动事件
 
 
 # ============ 6. 如何运行此示例 ============

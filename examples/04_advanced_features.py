@@ -33,6 +33,7 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
+from contextlib import asynccontextmanager
 import json
 
 # ============ 1. 数据库配置 ============
@@ -114,10 +115,20 @@ class AuditLog(BaseModel):
 
 # ============ 5. 创建应用 ============
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """应用生命周期管理"""
+    Base.metadata.create_all(bind=engine)
+    print("✅ 应用启动完成，数据库已初始化")
+    yield
+    print("✅ 应用关闭")
+
+
 app = FastAPI(
     title="FastAPI-Easy 示例 4",
     description="高级功能 (软删除、权限、审计日志、Hook)",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 
@@ -475,11 +486,7 @@ async def get_audit_logs(
 
 
 # ============ 10. 初始化数据库 ============
-
-@app.on_event("startup")
-async def startup_event():
-    """应用启动时创建表"""
-    Base.metadata.create_all(bind=engine)
+# 注意: 初始化已在 lifespan 中处理
 
 
 # ============ 11. 如何运行此示例 ============
