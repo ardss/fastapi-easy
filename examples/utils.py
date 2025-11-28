@@ -93,18 +93,18 @@ def run_app(
     if auto_port:
         port = find_available_port(start_port)
         if port != start_port:
-            print(f"⚠️  端口 {start_port} 被占用，自动使用端口 {port}")
+            print(f"[WARNING] 端口 {start_port} 被占用，自动使用端口 {port}")
     else:
         port = start_port
     
     url = f"http://{host}:{port}"
     
     print(f"\n{'='*60}")
-    print(f"🚀 FastAPI 应用启动")
+    print(f"[INFO] FastAPI 应用启动")
     print(f"{'='*60}")
-    print(f"📍 地址: {url}")
-    print(f"📖 API 文档: {url}/docs")
-    print(f"🔧 ReDoc: {url}/redoc")
+    print(f"[INFO] 地址: {url}")
+    print(f"[INFO] API 文档: {url}/docs")
+    print(f"[INFO] ReDoc: {url}/redoc")
     print(f"{'='*60}\n")
     
     # 自动打开浏览器
@@ -114,9 +114,9 @@ def run_app(
             time.sleep(2)
             try:
                 webbrowser.open(f"{url}/docs")
-                print(f"✅ 已打开浏览器: {url}/docs\n")
+                print(f"[INFO] 已打开浏览器: {url}/docs\n")
             except Exception as e:
-                print(f"⚠️  无法打开浏览器: {e}\n")
+                print(f"[WARNING] 无法打开浏览器: {e}\n")
         
         import threading
         thread = threading.Thread(target=open_browser_later, daemon=True)

@@ -136,11 +136,11 @@ async def lifespan(app: FastAPI):
     finally:
         db.close()
     
-    print("✅ 应用启动完成，数据库已初始化")
+    print("[INFO] 应用启动完成，数据库已初始化")
     
     yield
     
-    print("✅ 应用关闭")
+    print("[INFO] 应用关闭")
 
 
 app = FastAPI(

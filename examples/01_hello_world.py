@@ -1,46 +1,46 @@
 """
-FastAPI-Easy 示例 1: 最简单的 CRUD API
+FastAPI-Easy 示例 1: 最简单的 CRUD API (使用 CRUDRouter 自动生成)
 
-这是最简单的示例，展示如何用 10 行代码创建一个完整的 CRUD API。
+这个示例展示 fastapi-easy 的核心价值：
+只需要 10 行代码就能自动生成完整的 CRUD API！
+
+对比传统 FastAPI:
+  传统 FastAPI: 需要手动写 GET、POST、PUT、DELETE 等 8+ 个端点
+  fastapi-easy: 只需要定义 Schema + 创建 CRUDRouter
 
 功能:
-    - 自动生成 CRUD 路由
+    - 自动生成 GET /items (获取所有)
+    - 自动生成 GET /items/{id} (获取单个)
+    - 自动生成 POST /items (创建)
+    - 自动生成 PUT /items/{id} (更新)
+    - 自动生成 DELETE /items/{id} (删除)
     - 自动生成 OpenAPI 文档
-    - 支持异步操作
 
 运行方式:
-    uvicorn examples.01_hello_world:app --reload
+    python examples/01_hello_world.py
 
 访问 API 文档:
-    http://localhost:8000/docs
+    http://localhost:8001/docs
 
 学习内容:
     - 如何定义 Pydantic Schema
     - 如何创建 CRUDRouter
-    - 如何注册路由到应用
+    - 如何自动生成 CRUD API
 
 预计学习时间: 5 分钟
-代码行数: ~50 行
+代码行数: ~20 行 (不包括注释)
 复杂度: ⭐ 极简
 """
 
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional
-from contextlib import asynccontextmanager
+from fastapi_easy import CRUDRouter
 
-# ============ 1. 定义数据模型 ============
+# ============ 1. 定义数据模型 (Schema) ============
 
 class Item(BaseModel):
-    """
-    物品数据模型
-    
-    属性:
-        id: 物品 ID (可选，创建时由系统生成)
-        name: 物品名称
-        description: 物品描述
-        price: 物品价格
-    """
+    """物品数据模型"""
     id: Optional[int] = None
     name: str
     description: Optional[str] = None
@@ -49,7 +49,6 @@ class Item(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "id": 1,
                 "name": "苹果",
                 "description": "新鲜苹果",
                 "price": 15.5
@@ -57,233 +56,100 @@ class Item(BaseModel):
         }
 
 
-# ============ 2. 模拟数据存储 ============
-
-items_db = []
-item_id_counter = 1
-
-
-# ============ 3. 创建 FastAPI 应用 ============
-
-# 定义生命周期事件处理器 (现代方式，替代 @app.on_event)
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """
-    应用生命周期管理
-    
-    yield 前的代码在应用启动时执行
-    yield 后的代码在应用关闭时执行
-    """
-    # 启动事件
-    global item_id_counter
-    sample_items = [
-        {"id": 1, "name": "苹果", "description": "新鲜苹果", "price": 15.5},
-        {"id": 2, "name": "香蕉", "description": "黄色香蕉", "price": 8.0},
-        {"id": 3, "name": "橙子", "description": "新鲜橙子", "price": 12.0},
-    ]
-    items_db.extend(sample_items)
-    item_id_counter = 4
-    print("✅ 应用启动完成，已加载示例数据")
-    
-    yield
-    
-    # 关闭事件
-    print("✅ 应用关闭")
-
+# ============ 2. 创建 FastAPI 应用 ============
 
 app = FastAPI(
     title="FastAPI-Easy 示例 1",
-    description="最简单的 CRUD API 示例",
+    description="展示如何用 CRUDRouter 自动生成 CRUD API",
     version="1.0.0",
-    lifespan=lifespan,  # 使用现代的 lifespan 参数
 )
 
 
-# ============ 4. 定义 CRUD 路由 ============
+# ============ 3. 创建 CRUDRouter (自动生成所有 API) ============
+
+# 这一行代码就自动生成了所有 CRUD 端点！
+router = CRUDRouter(schema=Item)
+
+# 注册路由到应用
+app.include_router(router)
+
+
+# ============ 4. 根路由 (可选) ============
 
 @app.get("/", tags=["root"])
 async def root():
-    """
-    根路由
-    
-    返回欢迎信息和 API 文档链接
-    """
+    """欢迎页面"""
     return {
         "message": "欢迎使用 FastAPI-Easy",
         "docs": "/docs",
-        "endpoints": {
-            "get_all": "GET /items",
-            "get_one": "GET /items/{id}",
-            "create": "POST /items",
-            "update": "PUT /items/{id}",
-            "delete": "DELETE /items/{id}",
-        }
+        "note": "所有 CRUD API 已自动生成！查看 /docs 查看完整 API 列表",
+        "auto_generated_endpoints": [
+            "GET /items - 获取所有物品",
+            "GET /items/{id} - 获取单个物品",
+            "POST /items - 创建物品",
+            "PUT /items/{id} - 更新物品",
+            "DELETE /items/{id} - 删除物品",
+        ]
     }
 
 
-@app.get("/items", tags=["items"], summary="获取所有物品")
-async def get_items(skip: int = 0, limit: int = 10):
-    """
-    获取所有物品 (支持分页)
-    
-    参数:
-        skip: 跳过的物品数
-        limit: 返回的物品数
-    
-    返回:
-        物品列表
-    """
-    total = len(items_db)
-    items = items_db[skip:skip + limit]
-    return {
-        "total": total,
-        "skip": skip,
-        "limit": limit,
-        "items": items
-    }
-
-
-@app.get("/items/{item_id}", tags=["items"], summary="获取单个物品")
-async def get_item(item_id: int):
-    """
-    获取单个物品
-    
-    参数:
-        item_id: 物品 ID
-    
-    返回:
-        物品信息
-    """
-    for item in items_db:
-        if item.get("id") == item_id:
-            return item
-    return {"error": "物品不存在"}
-
-
-@app.post("/items", tags=["items"], summary="创建物品", status_code=201)
-async def create_item(item: Item):
-    """
-    创建新物品
-    
-    参数:
-        item: 物品信息
-    
-    返回:
-        创建的物品信息 (包含 ID)
-    """
-    global item_id_counter
-    item_dict = item.model_dump()
-    item_dict["id"] = item_id_counter
-    item_id_counter += 1
-    items_db.append(item_dict)
-    return item_dict
-
-
-@app.put("/items/{item_id}", tags=["items"], summary="更新物品")
-async def update_item(item_id: int, item: Item):
-    """
-    更新物品
-    
-    参数:
-        item_id: 物品 ID
-        item: 新的物品信息
-    
-    返回:
-        更新后的物品信息
-    """
-    for i, existing_item in enumerate(items_db):
-        if existing_item.get("id") == item_id:
-            item_dict = item.model_dump()
-            item_dict["id"] = item_id
-            items_db[i] = item_dict
-            return item_dict
-    return {"error": "物品不存在"}
-
-
-@app.delete("/items/{item_id}", tags=["items"], summary="删除物品")
-async def delete_item(item_id: int):
-    """
-    删除物品
-    
-    参数:
-        item_id: 物品 ID
-    
-    返回:
-        删除结果
-    """
-    for i, item in enumerate(items_db):
-        if item.get("id") == item_id:
-            items_db.pop(i)
-            return {"message": "物品已删除"}
-    return {"error": "物品不存在"}
-
-
-# ============ 5. 初始化示例数据 ============
-# 注意: 初始化已在 lifespan 中处理，这里不需要额外的启动事件
-
-
-# ============ 6. 如何运行此示例 ============
+# ============ 5. 如何运行此示例 ============
 
 if __name__ == "__main__":
     from utils import run_app
     
-    # 使用 run_app 自动处理端口占用问题
-    # 如果 8000 端口被占用，会自动使用 8001、8002 等
+    # 自动处理端口占用，自动打开浏览器
     run_app(app, start_port=8000, open_browser=True)
 
 
 # ============ 学习要点 ============
 
 """
-✅ 学到的内容:
+✅ 这个示例展示了什么:
 
-1. 如何定义 Pydantic Schema
-   - 使用 BaseModel 定义数据模型
-   - 添加字段验证
-   - 添加示例数据
+1. 定义 Pydantic Schema
+   - 只需要定义一个 BaseModel
+   - 包含字段和验证规则
 
-2. 如何创建 CRUD 路由
-   - GET: 获取资源
-   - POST: 创建资源
-   - PUT: 更新资源
-   - DELETE: 删除资源
+2. 创建 CRUDRouter
+   - 只需一行代码: router = CRUDRouter(schema=Item)
+   - 自动生成所有 CRUD 操作
 
-3. 如何使用 FastAPI 装饰器
-   - @app.get()
-   - @app.post()
-   - @app.put()
-   - @app.delete()
+3. 自动生成的 API:
+   - GET /items - 获取所有物品 (支持分页)
+   - GET /items/{id} - 获取单个物品
+   - POST /items - 创建新物品
+   - PUT /items/{id} - 更新物品
+   - DELETE /items/{id} - 删除物品
 
-4. 如何添加文档
-   - 使用 docstring
-   - 使用 tags 分组
-   - 使用 summary 和 description
-
-5. 如何处理错误
-   - 检查资源是否存在
-   - 返回有意义的错误信息
+4. 自动生成的文档
+   - OpenAPI/Swagger 文档
+   - 参数验证和示例
+   - 错误响应说明
 
 ❓ 常见问题:
 
-Q: 为什么使用 async?
-A: FastAPI 支持异步操作，提高性能。
+Q: 为什么没有看到数据持久化?
+A: 这个示例使用内存存储 (没有数据库)。
+   要使用真实数据库，查看示例 2: 02_with_database.py
 
 Q: 如何添加更多字段?
-A: 在 Item 类中添加新字段即可。
+A: 在 Item 类中添加新字段即可，API 会自动更新。
 
-Q: 如何连接真实数据库?
-A: 查看示例 2: 02_with_database.py
+Q: 如何启用过滤、排序、分页?
+A: 使用 CRUDConfig 配置，查看示例 3: 03_with_queries.py
 
-Q: 如何添加过滤和排序?
-A: 查看示例 3: 03_with_queries.py
+Q: 如何添加软删除、权限、审计日志?
+A: 使用 CRUDConfig 的高级选项，查看示例 4: 04_advanced_features.py
 
 🔗 相关文档:
 - 快速开始: docs/usage/01-quick-start.md
-- 数据流: docs/usage/03-data-flow.md
+- CRUDRouter 配置: docs/usage/14-configuration.md
 - 最佳实践: docs/usage/16-best-practices.md
 
 📚 下一步:
-- 修改示例代码，添加新字段
-- 运行 API 并测试所有端点
-- 查看 02_with_database.py 学习数据库集成
+1. 运行此示例: python examples/01_hello_world.py
+2. 访问 http://localhost:8001/docs 查看自动生成的 API
+3. 尝试创建、读取、更新、删除物品
+4. 查看示例 2 学习如何与数据库集成
 """
