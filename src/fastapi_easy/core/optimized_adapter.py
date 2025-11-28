@@ -152,10 +152,11 @@ class OptimizedSQLAlchemyAdapter:
                 "get_all"
             )
         except asyncio.TimeoutError:
-            logger.warning("Query timeout, returning empty result")
-            result = []  # 降级返回空结果
+            logger.error("Query timeout, not caching empty result")
+            # 不缓存超时结果，直接返回空列表
+            return []
         
-        # Cache result
+        # Cache result only if successful
         if self.enable_cache and result:
             await self.cache.set(cache_key, result)
         

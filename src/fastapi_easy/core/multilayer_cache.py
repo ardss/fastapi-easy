@@ -83,7 +83,11 @@ class MultiLayerCache:
                 self.l2_hits += 1
                 # Record access for LFU eviction
                 self.l2_eviction.record_access(key)
-                # Promote to L1
+                # Promote to L1 with eviction check
+                await self.l1_eviction.check_and_evict(
+                    self.l1_cache._cache,
+                    self.l1_max_size
+                )
                 await self.l1_cache.set(key, result)
                 self.l1_eviction.record_insertion(key)
                 return result
@@ -155,6 +159,20 @@ class MultiLayerCache:
         """
         await self.clear()
         logger.info("Cache cleaned up")
+    
+    async def get_all_keys(self) -> list:
+        """Get all keys from both caches
+        
+        Returns:
+            List of all cache keys
+        """
+        try:
+            l1_keys = list(self.l1_cache._cache.keys())
+            l2_keys = list(self.l2_cache._cache.keys())
+            return l1_keys + l2_keys
+        except Exception as e:
+            logger.error(f"Failed to get all keys: {str(e)}")
+            return []
     
     async def cleanup_expired(self) -> int:
         """Clean up expired entries from both caches

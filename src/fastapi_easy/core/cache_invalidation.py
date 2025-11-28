@@ -70,9 +70,10 @@ class CacheInvalidationManager:
         try:
             deleted_count = 0
             
-            # Handle MultiLayerCache with l1_cache attribute
-            if hasattr(cache, 'l1_cache'):
-                for key in list(cache.l1_cache.keys()):
+            # Handle MultiLayerCache with get_all_keys interface
+            if hasattr(cache, 'get_all_keys'):
+                keys = await cache.get_all_keys()
+                for key in keys:
                     if str(item_id) in str(key):
                         await cache.delete(key)
                         deleted_count += 1
