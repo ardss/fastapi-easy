@@ -53,7 +53,21 @@ from .models import (
     UserUpdate,
 )
 from .password import PasswordManager
+from .permission_engine import PermissionEngine
+from .permission_loader import (
+    CachedPermissionLoader,
+    DatabasePermissionLoader,
+    PermissionLoader,
+    StaticPermissionLoader,
+)
 from .rate_limit import LoginAttemptTracker
+from .resource_checker import (
+    CachedResourceChecker,
+    DatabaseResourceChecker,
+    ResourcePermissionChecker,
+    StaticResourceChecker,
+)
+from .security_config import SecurityConfig
 
 __all__ = [
     # JWT Auth
@@ -101,4 +115,17 @@ __all__ = [
     "AuditLogger",
     "AuditLog",
     "AuditEventType",
+    # Permission Loaders
+    "PermissionLoader",
+    "StaticPermissionLoader",
+    "DatabasePermissionLoader",
+    "CachedPermissionLoader",
+    # Resource Checkers
+    "ResourcePermissionChecker",
+    "StaticResourceChecker",
+    "DatabaseResourceChecker",
+    "CachedResourceChecker",
+    # Security Config & Engine
+    "SecurityConfig",
+    "PermissionEngine",
 ]
