@@ -106,7 +106,16 @@ class MigrationEngine:
             return plan
             
         except Exception as e:
-            logger.error(f"❌ Migration failed: {e}")
+            error_msg = str(e)
+            logger.error(
+                f"❌ 迁移失败: {error_msg}\n"
+                f"\n调试步骤:\n"
+                f"  1. 检查数据库连接: fastapi-easy migrate status\n"
+                f"  2. 查看详细日志: 设置 LOG_LEVEL=DEBUG\n"
+                f"  3. 运行 dry-run: fastapi-easy migrate plan --dry-run\n"
+                f"  4. 查看完整错误: {error_msg}",
+                exc_info=True
+            )
             raise
         finally:
             # 7. Release Lock
@@ -115,8 +124,12 @@ class MigrationEngine:
                 await self.lock.release()
             except Exception as e:
                 logger.error(
-                    f"Failed to release lock: {e}. "
-                    f"You may need to manually clean up the lock.",
+                    f"❌ 锁释放失败: {e}\n"
+                    f"您可能需要手动清理锁文件。\n"
+                    f"解决方案:\n"
+                    f"  1. 检查锁文件: .fastapi_easy_migration.lock\n"
+                    f"  2. 手动删除: rm .fastapi_easy_migration.lock\n"
+                    f"  3. 重新运行迁移",
                     exc_info=True
                 )
     
