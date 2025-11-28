@@ -1,8 +1,11 @@
 """Hook system for FastAPI-Easy"""
 
 import asyncio
+import logging
 from typing import Callable, Dict, List, Any, Optional
 from dataclasses import dataclass, field
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -87,21 +90,25 @@ class HookRegistry:
             return
         
         for callback in self.hooks[event]:
-            if callable(callback):
-                try:
-                    # Support both async and sync callbacks
-                    if asyncio.iscoroutinefunction(callback):
-                        await callback(context)
-                    else:
-                        result = callback(context)
-                        # If callback returns a coroutine, await it
-                        if asyncio.iscoroutine(result):
-                            await result
-                except Exception as e:
-                    # Log error but don't stop other hooks
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    logger.error(f"Error in hook {callback.__name__} for event {event}: {str(e)}", exc_info=True)
+            if not callable(callback):
+                logger.warning(f"Hook callback {callback} is not callable, skipping")
+                continue
+            
+            try:
+                # Support both async and sync callbacks
+                if asyncio.iscoroutinefunction(callback):
+                    await callback(context)
+                else:
+                    result = callback(context)
+                    # If callback returns a coroutine, await it
+                    if asyncio.iscoroutine(result):
+                        await result
+            except TypeError as e:
+                # Invalid callback signature
+                logger.error(f"Invalid callback signature for {callback.__name__} in event {event}: {str(e)}", exc_info=True)
+            except Exception as e:
+                # Log error but don't stop other hooks
+                logger.error(f"Error in hook {callback.__name__} for event {event}: {str(e)}", exc_info=True)
     
     def get_hooks(self, event: str) -> List[Callable]:
         """Get all hooks for an event

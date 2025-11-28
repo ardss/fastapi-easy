@@ -139,18 +139,20 @@ class MultiLayerCache:
                 self.l2_eviction.record_insertion(key)
     
     async def delete(self, key: str) -> None:
-        """Delete value from both caches
+        """Delete value from both caches with lock protection
         
         Args:
             key: Cache key
         """
-        await self.l1_cache.delete(key)
-        await self.l2_cache.delete(key)
+        async with self.lock:
+            await self.l1_cache.delete(key)
+            await self.l2_cache.delete(key)
     
     async def clear(self) -> None:
         """Clear all caches"""
-        await self.l1_cache.clear()
-        await self.l2_cache.clear()
+        async with self.lock:
+            await self.l1_cache.clear()
+            await self.l2_cache.clear()
     
     async def cleanup(self) -> None:
         """Clean up resources
@@ -167,22 +169,24 @@ class MultiLayerCache:
             List of all cache keys
         """
         try:
-            l1_keys = list(self.l1_cache._cache.keys())
-            l2_keys = list(self.l2_cache._cache.keys())
-            return l1_keys + l2_keys
+            async with self.lock:
+                l1_keys = list(self.l1_cache._cache.keys())
+                l2_keys = list(self.l2_cache._cache.keys())
+                return l1_keys + l2_keys
         except Exception as e:
             logger.error(f"Failed to get all keys: {str(e)}")
             return []
     
     async def cleanup_expired(self) -> int:
-        """Clean up expired entries from both caches
+        """Clean up expired entries from both caches with lock protection
         
         Returns:
             Total number of entries removed
         """
-        l1_removed = await self.l1_cache.cleanup_expired()
-        l2_removed = await self.l2_cache.cleanup_expired()
-        return l1_removed + l2_removed
+        async with self.lock:
+            l1_removed = await self.l1_cache.cleanup_expired()
+            l2_removed = await self.l2_cache.cleanup_expired()
+            return l1_removed + l2_removed
     
     def get_stats(self) -> dict:
         """Get cache statistics

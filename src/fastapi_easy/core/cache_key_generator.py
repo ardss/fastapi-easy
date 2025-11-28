@@ -6,8 +6,11 @@ and MD5 hashing to prevent key collisions.
 
 import hashlib
 import json
+import logging
 from typing import Any, Dict
 from functools import lru_cache
+
+logger = logging.getLogger(__name__)
 
 
 class CacheKeyGenerator:
@@ -43,12 +46,15 @@ class CacheKeyGenerator:
         # This handles nested dicts and lists
         try:
             params_json = json.dumps(kwargs, sort_keys=True, default=str)
-        except TypeError as e:
-            logger.warning(f"Failed to serialize params: {str(e)}")
-            params_json = json.dumps({"params": str(kwargs)}, sort_keys=True)
-        except ValueError as e:
-            logger.error(f"Invalid JSON value: {str(e)}")
-            raise
+        except (TypeError, ValueError) as e:
+            # Use fallback serialization for non-serializable objects
+            logger.warning(f"Failed to serialize params: {str(e)}, using fallback")
+            try:
+                params_json = json.dumps({"params": str(kwargs)}, sort_keys=True)
+            except Exception as fallback_error:
+                logger.error(f"Fallback serialization failed: {str(fallback_error)}")
+                # Last resort: use string representation
+                params_json = json.dumps({"params": repr(kwargs)}, sort_keys=True)
         
         return self._generate_cached(operation, params_json)
     
