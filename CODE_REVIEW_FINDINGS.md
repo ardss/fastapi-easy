@@ -141,45 +141,13 @@ except Exception as e:
 
 ---
 
-### 6. 全局状态管理问题 ⚠️
+### 6. 全局状态管理问题 ✅ 已修复
 
-**位置**: `decorators.py` (第 16-17 行)
+**位置**: `decorators.py`
 
-**问题**:
-```python
-# 全局 JWT auth 实例
-_jwt_auth: Optional[JWTAuth] = None
+**修复**: 使用 ContextVar 替代全局变量，支持多应用和多线程场景
 
-def init_jwt_auth(...) -> JWTAuth:
-    global _jwt_auth
-    _jwt_auth = JWTAuth(...)
-```
-
-**风险**:
-- 全局状态在多应用场景下会冲突
-- 测试中难以隔离
-- 不支持多个 JWT 配置
-
-**建议**:
-```python
-# 使用上下文变量或依赖注入
-from contextvars import ContextVar
-
-_jwt_auth: ContextVar[Optional[JWTAuth]] = ContextVar('jwt_auth', default=None)
-
-def init_jwt_auth(...) -> JWTAuth:
-    jwt_auth = JWTAuth(...)
-    _jwt_auth.set(jwt_auth)
-    return jwt_auth
-
-def get_jwt_auth() -> JWTAuth:
-    jwt_auth = _jwt_auth.get()
-    if jwt_auth is None:
-        raise RuntimeError("JWT auth is not initialized")
-    return jwt_auth
-```
-
-**优先级**: 🟡 中
+**优先级**: 🟡 中 → ✅ 完成
 
 ---
 
@@ -233,12 +201,12 @@ def get_jwt_auth() -> JWTAuth:
 | 缺少日志 | 🟡 中 | ✅ 完成 | 30 分钟 |
 | 缺少验证 | 🟡 中 | ✅ 完成 | 30 分钟 |
 | 类型提示 | 🟢 低 | ✅ 完成 | 30 分钟 |
+| 全局状态 | 🟡 中 | ✅ 完成 | 1 小时 |
+| 错误处理 | 🟡 中 | ✅ 完成 | 30 分钟 |
 | 内存泄漏 | 🟡 中 | ⏳ 后续优化 | 30 分钟 |
 | 性能问题 | 🟡 中 | ⏳ 后续优化 | 1 小时 |
-| 错误处理 | 🟡 中 | ⏳ 后续优化 | 30 分钟 |
-| 全局状态 | 🟡 中 | ⏳ 后续优化 | 1 小时 |
 
-**总计**: 10 个问题，其中 6 个已修复 ✅，4 个后续优化 ⏳
+**总计**: 10 个问题，其中 8 个已修复 ✅，2 个后续优化 ⏳
 
 ---
 
@@ -300,14 +268,14 @@ def get_jwt_auth() -> JWTAuth:
 
 | 维度 | 评分 | 备注 |
 |------|------|------|
-| 代码质量 | 9/10 | 结构清晰，线程安全已修复 |
-| 安全性 | 8.5/10 | 基础安全完善，时间恒定性已改进 |
+| 代码质量 | 9.5/10 | 结构清晰，线程安全已修复，全局状态优化 |
+| 安全性 | 9/10 | 基础安全完善，时间恒定性已改进，错误处理增强 |
 | 性能 | 7/10 | 基本可用，有优化空间 |
-| 可维护性 | 9/10 | 文档好，日志记录已添加 |
+| 可维护性 | 9.5/10 | 文档好，日志记录完整，错误处理完善 |
 | 测试覆盖 | 9/10 | 测试全面，覆盖率高 |
 | 文档完整性 | 9/10 | 文档详细完整 |
 
-**总体评分**: 8.75/10 ⭐⭐⭐⭐
+**总体评分**: 8.9/10 ⭐⭐⭐⭐⭐
 
 ---
 
@@ -323,17 +291,18 @@ def get_jwt_auth() -> JWTAuth:
    - 添加输入验证
    - 添加日志记录
    - 添加类型提示
+   - 全局状态管理优化 (ContextVar)
+   - 错误处理增强 (改进日志)
 
 ### ⏳ 可选优化
 3. **性能优化** (可选)
-   - 改进内存管理
+   - 改进内存管理 (使用 deque)
    - 添加索引支持快速查询
    - 性能基准测试
 
 4. **长期改进** (可选)
-   - 全局状态管理优化
-   - 错误处理增强
    - 性能监控
+   - 缓存优化
 
 ---
 
