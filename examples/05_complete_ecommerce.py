@@ -412,5 +412,7 @@ async def startup_event():
 
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    from utils import run_app
+    
+    # 使用 run_app 自动处理端口占用问题
+    run_app(app, start_port=8000, open_browser=True)
