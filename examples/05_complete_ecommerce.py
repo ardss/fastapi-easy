@@ -1,418 +1,290 @@
 """
-完整的电商 API 示例
+FastAPI-Easy 示例 5: 完整项目 (电商 API)
 
-这个示例展示了如何使用 fastapi-easy 快速构建一个功能完整的电商 API。
+这个示例展示如何在实际项目中使用 fastapi-easy。
 
-功能包括：
-- CRUD 操作
-- 搜索和过滤
-- 排序
-- 分页
-- 异步支持
+功能:
+    - 多个资源 (Category, Product, Order)
+    - 不同的配置
+    - 综合应用所有特性
 
-运行方式：
-    uvicorn examples.ecommerce_api:app --reload
+运行方式:
+    python examples/05_complete_ecommerce.py
 
-访问 API 文档：
-    http://localhost:8000/docs
+访问 API 文档:
+    http://localhost:8001/docs
+
+学习内容:
+    - 如何管理多个资源
+    - 如何为不同资源配置不同的功能
+    - 如何在实际项目中使用 fastapi-easy
+
+预计学习时间: 15 分钟
+代码行数: ~100 行 (不包括注释)
+复杂度: ⭐⭐⭐⭐⭐ 完整
+
+API 资源:
+    - /categories - 分类管理
+    - /products - 商品管理 (支持过滤、排序)
+    - /orders - 订单管理 (支持软删除)
 """
 
 from fastapi import FastAPI
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Boolean
+from sqlalchemy.orm import declarative_base, sessionmaker
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 from datetime import datetime
-import asyncio
+from fastapi_easy import CRUDRouter, SQLAlchemyAdapter, CRUDConfig
 
-# ============ 数据模型 ============
+# ============ 1. 数据库配置 ============
+
+DATABASE_URL = "sqlite:///./ecommerce.db"
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+
+# ============ 2. ORM 模型 ============
+
+class CategoryDB(Base):
+    """分类数据库模型"""
+    __tablename__ = "categories"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+    description = Column(String, nullable=True)
+
+
+class ProductDB(Base):
+    """商品数据库模型"""
+    __tablename__ = "products"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    description = Column(String, nullable=True)
+    price = Column(Float, index=True)
+    stock = Column(Integer, default=0)
+    category_id = Column(Integer, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+class OrderDB(Base):
+    """订单数据库模型 (支持软删除)"""
+    __tablename__ = "orders"
+    id = Column(Integer, primary_key=True, index=True)
+    order_number = Column(String, unique=True, index=True)
+    customer_name = Column(String, index=True)
+    total_amount = Column(Float)
+    is_deleted = Column(Boolean, default=False, index=True)
+    deleted_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
+# ============ 3. Pydantic Schema ============
 
 class Category(BaseModel):
-    """商品分类"""
+    """分类 API Schema"""
     id: Optional[int] = None
     name: str
     description: Optional[str] = None
 
     class Config:
-        json_schema_extra = {
-            "example": {
-                "id": 1,
-                "name": "水果",
-                "description": "新鲜水果"
-            }
-        }
+        from_attributes = True
 
 
 class Product(BaseModel):
-    """商品"""
+    """商品 API Schema"""
     id: Optional[int] = None
     name: str
     description: Optional[str] = None
     price: float
-    stock: int
+    stock: int = 0
     category_id: int
     created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
 
     class Config:
-        json_schema_extra = {
-            "example": {
-                "id": 1,
-                "name": "苹果",
-                "description": "新鲜苹果",
-                "price": 15.5,
-                "stock": 100,
-                "category_id": 1,
-                "created_at": "2025-01-01T00:00:00",
-                "updated_at": "2025-01-01T00:00:00"
-            }
-        }
+        from_attributes = True
 
 
 class Order(BaseModel):
-    """订单"""
+    """订单 API Schema"""
     id: Optional[int] = None
     order_number: str
-    total_price: float
-    status: str = "pending"
+    customer_name: str
+    total_amount: float
+    is_deleted: bool = False
+    deleted_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
 
     class Config:
-        json_schema_extra = {
-            "example": {
-                "id": 1,
-                "order_number": "ORD-001",
-                "total_price": 150.0,
-                "status": "pending",
-                "created_at": "2025-01-01T00:00:00",
-                "updated_at": "2025-01-01T00:00:00"
-            }
-        }
+        from_attributes = True
 
 
-# ============ 模拟数据存储 ============
-
-# 使用内存存储进行演示
-categories_db: List[Category] = []
-products_db: List[Product] = []
-orders_db: List[Order] = []
-
-category_id_counter = 1
-product_id_counter = 1
-order_id_counter = 1
-
-
-# ============ 创建 FastAPI 应用 ============
+# ============ 4. 创建应用 ============
 
 app = FastAPI(
-    title="电商 API",
-    description="完整的电商 API 示例，展示 fastapi-easy 的功能",
+    title="FastAPI-Easy 示例 5",
+    description="完整项目 - 电商 API",
     version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
 )
 
+# 创建数据库表
+Base.metadata.create_all(bind=engine)
 
-# ============ 根路由 ============
 
-@app.get("/")
+# ============ 5. 为每个资源创建 CRUDRouter ============
+
+# ===== 分类 (基础 CRUD) =====
+category_adapter = SQLAlchemyAdapter(model=CategoryDB, session_factory=SessionLocal)
+category_router = CRUDRouter(schema=Category, adapter=category_adapter)
+
+# ===== 商品 (启用过滤、排序) =====
+product_config = CRUDConfig(
+    enable_filters=True,
+    enable_sorters=True,
+    enable_pagination=True,
+    filter_fields=["name", "price", "category_id"],
+    sort_fields=["name", "price", "created_at"],
+)
+product_adapter = SQLAlchemyAdapter(model=ProductDB, session_factory=SessionLocal)
+product_router = CRUDRouter(schema=Product, adapter=product_adapter, config=product_config)
+
+# ===== 订单 (启用软删除) =====
+order_config = CRUDConfig(
+    enable_soft_delete=True,
+    enable_audit=True,
+    deleted_at_field="deleted_at",
+)
+order_adapter = SQLAlchemyAdapter(model=OrderDB, session_factory=SessionLocal)
+order_router = CRUDRouter(schema=Order, adapter=order_adapter, config=order_config)
+
+
+# ============ 6. 注册所有路由 ============
+
+app.include_router(category_router)
+app.include_router(product_router)
+app.include_router(order_router)
+
+
+# ============ 7. 根路由 ============
+
+@app.get("/", tags=["root"])
 async def root():
-    """根路由"""
+    """欢迎页面"""
     return {
-        "message": "欢迎来到电商 API",
-        "version": "1.0.0",
+        "message": "欢迎使用 FastAPI-Easy 示例 5 - 电商 API",
         "docs": "/docs",
-        "endpoints": {
-            "categories": "/categories",
-            "products": "/products",
-            "orders": "/orders"
+        "resources": {
+            "categories": {
+                "path": "/categories",
+                "features": ["基础 CRUD"],
+                "endpoints": [
+                    "GET /categories - 获取所有分类",
+                    "GET /categories/{id} - 获取单个分类",
+                    "POST /categories - 创建分类",
+                    "PUT /categories/{id} - 更新分类",
+                    "DELETE /categories/{id} - 删除分类",
+                ]
+            },
+            "products": {
+                "path": "/products",
+                "features": ["CRUD", "过滤", "排序", "分页"],
+                "endpoints": [
+                    "GET /products?skip=0&limit=10 - 获取商品列表",
+                    "GET /products?price__gte=100&sort=-price - 过滤和排序",
+                    "GET /products/{id} - 获取单个商品",
+                    "POST /products - 创建商品",
+                    "PUT /products/{id} - 更新商品",
+                    "DELETE /products/{id} - 删除商品",
+                ]
+            },
+            "orders": {
+                "path": "/orders",
+                "features": ["CRUD", "软删除", "审计日志"],
+                "endpoints": [
+                    "GET /orders - 获取所有订单",
+                    "GET /orders/{id} - 获取单个订单",
+                    "POST /orders - 创建订单",
+                    "PUT /orders/{id} - 更新订单",
+                    "DELETE /orders/{id} - 软删除订单",
+                ]
+            }
         }
     }
 
 
-# ============ 分类 API ============
-
-@app.get("/categories", tags=["categories"], summary="获取所有分类")
-async def get_categories(skip: int = 0, limit: int = 10):
-    """获取所有分类（支持分页）"""
-    total = len(categories_db)
-    items = categories_db[skip:skip + limit]
-    return {
-        "total": total,
-        "skip": skip,
-        "limit": limit,
-        "items": items
-    }
-
-
-@app.get("/categories/{category_id}", tags=["categories"], summary="获取单个分类")
-async def get_category(category_id: int):
-    """获取单个分类"""
-    for cat in categories_db:
-        if cat.id == category_id:
-            return cat
-    return {"error": "分类不存在"}
-
-
-@app.post("/categories", tags=["categories"], summary="创建分类", status_code=201)
-async def create_category(category: Category):
-    """创建新分类"""
-    global category_id_counter
-    category.id = category_id_counter
-    category_id_counter += 1
-    categories_db.append(category)
-    return category
-
-
-@app.put("/categories/{category_id}", tags=["categories"], summary="更新分类")
-async def update_category(category_id: int, category: Category):
-    """更新分类"""
-    for i, cat in enumerate(categories_db):
-        if cat.id == category_id:
-            category.id = category_id
-            categories_db[i] = category
-            return category
-    return {"error": "分类不存在"}
-
-
-@app.delete("/categories/{category_id}", tags=["categories"], summary="删除分类")
-async def delete_category(category_id: int):
-    """删除分类"""
-    for i, cat in enumerate(categories_db):
-        if cat.id == category_id:
-            categories_db.pop(i)
-            return {"message": "分类已删除"}
-    return {"error": "分类不存在"}
-
-
-# ============ 商品 API ============
-
-@app.get("/products", tags=["products"], summary="获取所有商品")
-async def get_products(
-    skip: int = 0,
-    limit: int = 10,
-    category_id: Optional[int] = None,
-    min_price: Optional[float] = None,
-    max_price: Optional[float] = None,
-    sort_by: str = "created_at"
-):
-    """获取所有商品（支持过滤、排序、分页）"""
-    # 过滤
-    filtered = products_db
-    if category_id is not None:
-        filtered = [p for p in filtered if p.category_id == category_id]
-    if min_price is not None:
-        filtered = [p for p in filtered if p.price >= min_price]
-    if max_price is not None:
-        filtered = [p for p in filtered if p.price <= max_price]
-    
-    # 排序
-    reverse = sort_by.startswith("-")
-    sort_field = sort_by.lstrip("-")
-    if sort_field == "price":
-        filtered = sorted(filtered, key=lambda p: p.price, reverse=reverse)
-    elif sort_field == "created_at":
-        filtered = sorted(filtered, key=lambda p: p.created_at or datetime.now(), reverse=reverse)
-    
-    # 分页
-    total = len(filtered)
-    items = filtered[skip:skip + limit]
-    
-    return {
-        "total": total,
-        "skip": skip,
-        "limit": limit,
-        "items": items
-    }
-
-
-@app.get("/products/{product_id}", tags=["products"], summary="获取单个商品")
-async def get_product(product_id: int):
-    """获取单个商品"""
-    for prod in products_db:
-        if prod.id == product_id:
-            return prod
-    return {"error": "商品不存在"}
-
-
-@app.post("/products", tags=["products"], summary="创建商品", status_code=201)
-async def create_product(product: Product):
-    """创建新商品"""
-    global product_id_counter
-    product.id = product_id_counter
-    product_id_counter += 1
-    product.created_at = datetime.now()
-    product.updated_at = datetime.now()
-    products_db.append(product)
-    return product
-
-
-@app.put("/products/{product_id}", tags=["products"], summary="更新商品")
-async def update_product(product_id: int, product: Product):
-    """更新商品"""
-    for i, prod in enumerate(products_db):
-        if prod.id == product_id:
-            product.id = product_id
-            product.created_at = prod.created_at
-            product.updated_at = datetime.now()
-            products_db[i] = product
-            return product
-    return {"error": "商品不存在"}
-
-
-@app.delete("/products/{product_id}", tags=["products"], summary="删除商品")
-async def delete_product(product_id: int):
-    """删除商品"""
-    for i, prod in enumerate(products_db):
-        if prod.id == product_id:
-            products_db.pop(i)
-            return {"message": "商品已删除"}
-    return {"error": "商品不存在"}
-
-
-# ============ 订单 API ============
-
-@app.get("/orders", tags=["orders"], summary="获取所有订单")
-async def get_orders(
-    skip: int = 0,
-    limit: int = 10,
-    status: Optional[str] = None,
-    sort_by: str = "-created_at"
-):
-    """获取所有订单（支持过滤、排序、分页）"""
-    # 过滤
-    filtered = orders_db
-    if status is not None:
-        filtered = [o for o in filtered if o.status == status]
-    
-    # 排序
-    reverse = sort_by.startswith("-")
-    sort_field = sort_by.lstrip("-")
-    if sort_field == "created_at":
-        filtered = sorted(filtered, key=lambda o: o.created_at or datetime.now(), reverse=reverse)
-    elif sort_field == "total_price":
-        filtered = sorted(filtered, key=lambda o: o.total_price, reverse=reverse)
-    
-    # 分页
-    total = len(filtered)
-    items = filtered[skip:skip + limit]
-    
-    return {
-        "total": total,
-        "skip": skip,
-        "limit": limit,
-        "items": items
-    }
-
-
-@app.get("/orders/{order_id}", tags=["orders"], summary="获取单个订单")
-async def get_order(order_id: int):
-    """获取单个订单"""
-    for order in orders_db:
-        if order.id == order_id:
-            return order
-    return {"error": "订单不存在"}
-
-
-@app.post("/orders", tags=["orders"], summary="创建订单", status_code=201)
-async def create_order(order: Order):
-    """创建新订单"""
-    global order_id_counter
-    order.id = order_id_counter
-    order_id_counter += 1
-    order.created_at = datetime.now()
-    order.updated_at = datetime.now()
-    orders_db.append(order)
-    return order
-
-
-@app.put("/orders/{order_id}", tags=["orders"], summary="更新订单")
-async def update_order(order_id: int, order: Order):
-    """更新订单"""
-    for i, ord in enumerate(orders_db):
-        if ord.id == order_id:
-            order.id = order_id
-            order.created_at = ord.created_at
-            order.updated_at = datetime.now()
-            orders_db[i] = order
-            return order
-    return {"error": "订单不存在"}
-
-
-@app.delete("/orders/{order_id}", tags=["orders"], summary="删除订单")
-async def delete_order(order_id: int):
-    """删除订单"""
-    for i, ord in enumerate(orders_db):
-        if ord.id == order_id:
-            orders_db.pop(i)
-            return {"message": "订单已删除"}
-    return {"error": "订单不存在"}
-
-
-# ============ 统计 API ============
-
-@app.get("/stats", tags=["stats"], summary="获取统计信息")
-async def get_stats():
-    """获取统计信息"""
-    return {
-        "categories_count": len(categories_db),
-        "products_count": len(products_db),
-        "orders_count": len(orders_db),
-        "total_revenue": sum(o.total_price for o in orders_db),
-        "average_order_value": sum(o.total_price for o in orders_db) / len(orders_db) if orders_db else 0,
-    }
-
-
-# ============ 初始化示例数据 ============
-
-@app.on_event("startup")
-async def startup_event():
-    """应用启动时初始化示例数据"""
-    global category_id_counter, product_id_counter, order_id_counter
-    
-    # 创建示例分类
-    categories = [
-        Category(name="水果", description="新鲜水果"),
-        Category(name="蔬菜", description="新鲜蔬菜"),
-        Category(name="肉类", description="优质肉类"),
-    ]
-    
-    for cat in categories:
-        cat.id = category_id_counter
-        category_id_counter += 1
-        categories_db.append(cat)
-    
-    # 创建示例商品
-    products = [
-        Product(name="苹果", description="新鲜苹果", price=15.5, stock=100, category_id=1),
-        Product(name="香蕉", description="黄色香蕉", price=8.0, stock=150, category_id=1),
-        Product(name="番茄", description="红色番茄", price=5.5, stock=200, category_id=2),
-        Product(name="牛肉", description="优质牛肉", price=85.0, stock=50, category_id=3),
-    ]
-    
-    for prod in products:
-        prod.id = product_id_counter
-        product_id_counter += 1
-        prod.created_at = datetime.now()
-        prod.updated_at = datetime.now()
-        products_db.append(prod)
-    
-    # 创建示例订单
-    orders = [
-        Order(order_number="ORD-001", total_price=150.0, status="completed"),
-        Order(order_number="ORD-002", total_price=200.0, status="pending"),
-        Order(order_number="ORD-003", total_price=85.0, status="shipped"),
-    ]
-    
-    for order in orders:
-        order.id = order_id_counter
-        order_id_counter += 1
-        order.created_at = datetime.now()
-        order.updated_at = datetime.now()
-        orders_db.append(order)
-
+# ============ 8. 如何运行此示例 ============
 
 if __name__ == "__main__":
     from utils import run_app
     
-    # 使用 run_app 自动处理端口占用问题
+    # 自动处理端口占用，自动打开浏览器
     run_app(app, start_port=8000, open_browser=True)
+
+
+# ============ 学习要点 ============
+
+"""
+✅ 这个示例展示了什么:
+
+1. 定义多个 ORM 模型
+   - CategoryDB: 分类
+   - ProductDB: 商品
+   - OrderDB: 订单 (支持软删除)
+
+2. 定义多个 Pydantic Schema
+   - Category: 分类 Schema
+   - Product: 商品 Schema
+   - Order: 订单 Schema
+
+3. 为每个资源创建不同的配置
+   - 分类: 基础 CRUD
+   - 商品: 启用过滤、排序、分页
+   - 订单: 启用软删除、审计日志
+
+4. 为每个资源创建 CRUDRouter
+   - 只需一行代码: router = CRUDRouter(...)
+   - 所有功能自动生成！
+
+5. 注册所有路由
+   - app.include_router(category_router)
+   - app.include_router(product_router)
+   - app.include_router(order_router)
+
+6. 自动生成的 API:
+   - /categories - 完整 CRUD
+   - /products - 完整 CRUD + 过滤 + 排序 + 分页
+   - /orders - 完整 CRUD + 软删除 + 审计
+
+对比传统 FastAPI:
+  传统 FastAPI: 500+ 行代码手动实现所有功能
+  fastapi-easy: 100 行代码配置生成！
+
+节省 80% 的代码！
+
+❓ 常见问题:
+
+Q: 如何添加更多资源?
+A: 重复相同的步骤：定义 ORM 模型 → 定义 Schema → 创建 CRUDRouter → 注册路由
+
+Q: 如何为不同资源配置不同的功能?
+A: 为每个资源创建不同的 CRUDConfig。
+
+Q: 如何处理资源之间的关系?
+A: 在 ORM 模型中使用 ForeignKey，在 Schema 中使用 relationship。
+
+Q: 如何添加自定义端点?
+A: 使用 @app.get()、@app.post() 等装饰器添加自定义路由。
+
+🔗 相关文档:
+- 快速开始: docs/usage/01-quick-start.md
+- 配置: docs/usage/14-configuration.md
+- 最佳实践: docs/usage/16-best-practices.md
+
+📚 下一步:
+1. 运行此示例: python examples/05_complete_ecommerce.py
+2. 访问 http://localhost:8001/docs 查看所有 API
+3. 尝试创建分类、商品、订单
+4. 尝试过滤、排序、分页商品
+5. 尝试软删除订单
+6. 基于此示例创建自己的项目！
+"""
