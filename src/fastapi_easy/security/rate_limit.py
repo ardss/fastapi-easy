@@ -41,6 +41,16 @@ class LoginAttemptTracker:
             username: Username
             success: Whether the attempt was successful
         """
+        # Validate input
+        if not isinstance(username, str):
+            raise TypeError("username must be a string")
+        
+        if len(username) > 255:
+            raise ValueError("username too long (max 255 characters)")
+        
+        if not username.strip():
+            raise ValueError("username cannot be empty")
+
         with self._lock:
             now = datetime.now(timezone.utc)
 

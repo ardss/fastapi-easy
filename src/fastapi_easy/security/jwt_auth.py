@@ -1,8 +1,11 @@
 """JWT authentication for FastAPI-Easy"""
 
+import logging
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 try:
     import jwt
@@ -148,13 +151,17 @@ class JWTAuth:
             if "type" not in payload:
                 raise InvalidTokenError("Token missing 'type' claim")
 
+            logger.debug(f"Token verified for user: {payload.get('sub')}")
             return TokenPayload(**payload)
 
         except jwt.ExpiredSignatureError:
+            logger.warning("Expired token attempted")
             raise TokenExpiredError("Token has expired")
         except jwt.InvalidTokenError as e:
+            logger.warning(f"Invalid token: {str(e)}")
             raise InvalidTokenError(f"Invalid token: {str(e)}")
         except Exception as e:
+            logger.error(f"Token verification failed: {str(e)}")
             raise InvalidTokenError(f"Token verification failed: {str(e)}")
 
     def decode_token(self, token: str) -> Dict:

@@ -39,7 +39,7 @@ class PasswordManager:
         return hashed.decode("utf-8")
 
     def verify_password(self, password: str, hashed_password: str) -> bool:
-        """Verify password against hash
+        """Verify password against hash with constant time comparison
 
         Args:
             password: Plain text password
@@ -55,11 +55,26 @@ class PasswordManager:
             raise ValueError("Password and hash cannot be empty")
 
         try:
+            # bcrypt.checkpw uses constant time comparison
             return bcrypt.checkpw(
                 password.encode("utf-8"),
                 hashed_password.encode("utf-8"),
             )
+        except (ValueError, TypeError):
+            # Invalid hash format - still perform dummy operation for timing consistency
+            try:
+                dummy_hash = bcrypt.hashpw(b"dummy", bcrypt.gensalt(rounds=4))
+                bcrypt.checkpw(b"dummy", dummy_hash)
+            except Exception:
+                pass
+            return False
         except Exception:
+            # Other errors - perform dummy operation
+            try:
+                dummy_hash = bcrypt.hashpw(b"dummy", bcrypt.gensalt(rounds=4))
+                bcrypt.checkpw(b"dummy", dummy_hash)
+            except Exception:
+                pass
             return False
 
     def needs_rehash(self, hashed_password: str) -> bool:
