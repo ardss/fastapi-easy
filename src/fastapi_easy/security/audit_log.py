@@ -1,5 +1,6 @@
 """Audit logging for security events in FastAPI-Easy"""
 
+import threading
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -93,6 +94,7 @@ class AuditLogger:
             max_logs: Maximum number of logs to keep in memory
         """
         self.max_logs = max_logs
+        self._lock = threading.RLock()
         self.logs: List[AuditLog] = []
 
     def log(
@@ -123,25 +125,26 @@ class AuditLogger:
         Returns:
             Audit log entry
         """
-        log_entry = AuditLog(
-            event_type=event_type,
-            user_id=user_id,
-            username=username,
-            resource=resource,
-            action=action,
-            status=status,
-            details=details,
-            ip_address=ip_address,
-            user_agent=user_agent,
-        )
+        with self._lock:
+            log_entry = AuditLog(
+                event_type=event_type,
+                user_id=user_id,
+                username=username,
+                resource=resource,
+                action=action,
+                status=status,
+                details=details,
+                ip_address=ip_address,
+                user_agent=user_agent,
+            )
 
-        self.logs.append(log_entry)
+            self.logs.append(log_entry)
 
-        # Keep only recent logs
-        if len(self.logs) > self.max_logs:
-            self.logs = self.logs[-self.max_logs :]
+            # Keep only recent logs
+            if len(self.logs) > self.max_logs:
+                self.logs = self.logs[-self.max_logs :]
 
-        return log_entry
+            return log_entry
 
     def get_logs(
         self,
@@ -161,20 +164,21 @@ class AuditLogger:
         Returns:
             List of audit log entries
         """
-        filtered_logs = self.logs
+        with self._lock:
+            filtered_logs = self.logs
 
-        # Apply filters
-        if user_id:
-            filtered_logs = [log for log in filtered_logs if log.user_id == user_id]
+            # Apply filters
+            if user_id:
+                filtered_logs = [log for log in filtered_logs if log.user_id == user_id]
 
-        if username:
-            filtered_logs = [log for log in filtered_logs if log.username == username]
+            if username:
+                filtered_logs = [log for log in filtered_logs if log.username == username]
 
-        if event_type:
-            filtered_logs = [log for log in filtered_logs if log.event_type == event_type]
+            if event_type:
+                filtered_logs = [log for log in filtered_logs if log.event_type == event_type]
 
-        # Return most recent logs
-        return [log.to_dict() for log in filtered_logs[-limit:]]
+            # Return most recent logs
+            return [log.to_dict() for log in filtered_logs[-limit:]]
 
     def get_user_activity(self, user_id: Optional[str] = None, username: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
         """Get user activity logs
@@ -199,17 +203,19 @@ class AuditLogger:
         Returns:
             List of failed login logs
         """
-        failed_logins = [
-            log for log in self.logs
-            if log.username == username
-            and log.event_type == AuditEventType.LOGIN_FAILURE
-        ]
+        with self._lock:
+            failed_logins = [
+                log for log in self.logs
+                if log.username == username
+                and log.event_type == AuditEventType.LOGIN_FAILURE
+            ]
 
-        return [log.to_dict() for log in failed_logins[-limit:]]
+            return [log.to_dict() for log in failed_logins[-limit:]]
 
     def clear_logs(self) -> None:
         """Clear all logs"""
-        self.logs.clear()
+        with self._lock:
+            self.logs.clear()
 
     def export_logs(self) -> List[Dict[str, Any]]:
         """Export all logs
@@ -217,4 +223,5 @@ class AuditLogger:
         Returns:
             List of all audit log entries
         """
-        return [log.to_dict() for log in self.logs]
+        with self._lock:
+            return [log.to_dict() for log in self.logs]

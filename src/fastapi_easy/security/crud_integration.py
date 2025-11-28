@@ -1,6 +1,7 @@
 """Integration of security module with CRUDRouter"""
 
-from typing import Any, Callable, List, Optional
+import asyncio
+from typing import Any, Awaitable, Callable, List, Optional
 
 from fastapi import Depends, HTTPException
 
@@ -56,24 +57,21 @@ class ProtectedCRUDRouter:
         # Get all routes from the router
         for route in self.crud_router.routes:
             if hasattr(route, "endpoint"):
-                # Wrap the endpoint with security checks
                 original_endpoint = route.endpoint
-                route.endpoint = self._wrap_with_security(original_endpoint)
+                
+                # Check if endpoint is async
+                if asyncio.iscoroutinefunction(original_endpoint):
+                    route.endpoint = self._wrap_with_security_async(original_endpoint)
+                else:
+                    route.endpoint = self._wrap_with_security_sync(original_endpoint)
 
-    def _wrap_with_security(self, endpoint: Callable) -> Callable:
-        """Wrap endpoint with security checks
-
-        Args:
-            endpoint: Original endpoint function
-
-        Returns:
-            Wrapped endpoint function
-        """
-        async def secured_endpoint(*args, **kwargs):
-            # Get current user
+    def _wrap_with_security_async(
+        self, endpoint: Callable[..., Awaitable[Any]]
+    ) -> Callable[..., Awaitable[Any]]:
+        """Wrap async endpoint with security checks"""
+        async def secured_endpoint(*args: Any, **kwargs: Any) -> Any:
             current_user = kwargs.get("current_user")
             if current_user is None:
-                # Try to get from dependency injection
                 try:
                     current_user = await get_current_user(
                         kwargs.get("authorization")
@@ -83,28 +81,32 @@ class ProtectedCRUDRouter:
                         raise HTTPException(status_code=401, detail="Unauthorized")
 
             # Check roles
-            if self.security_config.require_roles:
+            if self.security_config.require_roles and current_user:
                 user_roles = current_user.get("roles", [])
                 if not any(role in user_roles for role in self.security_config.require_roles):
-                    raise HTTPException(
-                        status_code=403,
-                        detail="Insufficient role",
-                    )
+                    raise HTTPException(status_code=403, detail="Insufficient role")
 
             # Check permissions
-            if self.security_config.require_permissions:
+            if self.security_config.require_permissions and current_user:
                 user_permissions = current_user.get("permissions", [])
-                if not any(
-                    perm in user_permissions
-                    for perm in self.security_config.require_permissions
-                ):
-                    raise HTTPException(
-                        status_code=403,
-                        detail="Insufficient permission",
-                    )
+                if not any(perm in user_permissions for perm in self.security_config.require_permissions):
+                    raise HTTPException(status_code=403, detail="Insufficient permission")
 
-            # Call original endpoint
             return await endpoint(*args, **kwargs)
+
+        return secured_endpoint
+
+    def _wrap_with_security_sync(
+        self, endpoint: Callable[..., Any]
+    ) -> Callable[..., Any]:
+        """Wrap sync endpoint with security checks"""
+        def secured_endpoint(*args: Any, **kwargs: Any) -> Any:
+            # Sync endpoints cannot use async get_current_user
+            # This is a limitation of FastAPI dependency injection
+            raise NotImplementedError(
+                "Sync endpoints are not supported with async authentication. "
+                "Please use async endpoints with 'async def'."
+            )
 
         return secured_endpoint
 

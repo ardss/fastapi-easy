@@ -1,5 +1,6 @@
 """Rate limiting and brute force protection for FastAPI-Easy"""
 
+import threading
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
@@ -25,6 +26,9 @@ class LoginAttemptTracker:
         self.lockout_duration = timedelta(minutes=lockout_duration_minutes)
         self.reset_duration = timedelta(minutes=reset_duration_minutes)
 
+        # Thread safety
+        self._lock = threading.RLock()
+
         # Track attempts per username
         self.attempts: Dict[str, list] = defaultdict(list)
         # Track lockout status
@@ -37,23 +41,24 @@ class LoginAttemptTracker:
             username: Username
             success: Whether the attempt was successful
         """
-        now = datetime.now(timezone.utc)
+        with self._lock:
+            now = datetime.now(timezone.utc)
 
-        # If successful, clear attempts
-        if success:
-            self.attempts[username] = []
-            self.lockouts.pop(username, None)
-            return
+            # If successful, clear attempts
+            if success:
+                self.attempts[username] = []
+                self.lockouts.pop(username, None)
+                return
 
-        # Record failed attempt
-        self.attempts[username].append(now)
+            # Record failed attempt
+            self.attempts[username].append(now)
 
-        # Clean up old attempts
-        self._cleanup_old_attempts(username)
+            # Clean up old attempts
+            self._cleanup_old_attempts(username)
 
-        # Check if should lock out
-        if len(self.attempts[username]) >= self.max_attempts:
-            self.lockouts[username] = now
+            # Check if should lock out
+            if len(self.attempts[username]) >= self.max_attempts:
+                self.lockouts[username] = now
 
     def is_locked_out(self, username: str) -> bool:
         """Check if user is locked out
@@ -64,19 +69,20 @@ class LoginAttemptTracker:
         Returns:
             True if user is locked out
         """
-        if username not in self.lockouts:
-            return False
+        with self._lock:
+            if username not in self.lockouts:
+                return False
 
-        lockout_time = self.lockouts[username]
-        now = datetime.now(timezone.utc)
+            lockout_time = self.lockouts[username]
+            now = datetime.now(timezone.utc)
 
-        # Check if lockout has expired
-        if now - lockout_time > self.lockout_duration:
-            self.lockouts.pop(username, None)
-            self.attempts[username] = []
-            return False
+            # Check if lockout has expired
+            if now - lockout_time > self.lockout_duration:
+                self.lockouts.pop(username, None)
+                self.attempts[username] = []
+                return False
 
-        return True
+            return True
 
     def get_lockout_remaining_seconds(self, username: str) -> Optional[int]:
         """Get remaining lockout time in seconds
@@ -105,8 +111,9 @@ class LoginAttemptTracker:
         Returns:
             Number of failed attempts
         """
-        self._cleanup_old_attempts(username)
-        return len(self.attempts[username])
+        with self._lock:
+            self._cleanup_old_attempts(username)
+            return len(self.attempts[username])
 
     def _cleanup_old_attempts(self, username: str) -> None:
         """Clean up attempts older than reset duration
@@ -129,10 +136,12 @@ class LoginAttemptTracker:
         Args:
             username: Username
         """
-        self.attempts.pop(username, None)
-        self.lockouts.pop(username, None)
+        with self._lock:
+            self.attempts.pop(username, None)
+            self.lockouts.pop(username, None)
 
     def reset_all(self) -> None:
         """Reset all attempts and lockouts"""
-        self.attempts.clear()
-        self.lockouts.clear()
+        with self._lock:
+            self.attempts.clear()
+            self.lockouts.clear()
