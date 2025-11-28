@@ -60,8 +60,12 @@ class MigrationStorage:
         description: str,
         rollback_sql: str,
         risk_level: str
-    ):
-        """Record a successful migration"""
+    ) -> bool:
+        """Record a successful migration
+        
+        Returns:
+            True if recorded successfully, False if recording failed
+        """
         try:
             with self.engine.begin() as conn:
                 conn.execute(
@@ -81,16 +85,23 @@ class MigrationStorage:
                     }
                 )
             logger.info(f"📝 Recorded migration: {version}")
-        except IntegrityError as e:
-            logger.error(
-                f"Migration {version} already recorded: {e}",
-                exc_info=True
+            return True
+
+        except IntegrityError:
+            # 迁移已记录，这不是错误（幂等性）
+            logger.warning(
+                f"Migration {version} already recorded (idempotent)"
             )
-            raise
+            return True
+
         except Exception as e:
-            logger.error(f"Failed to record migration {version}: {e}")
-            raise
-            # Don't raise - recording failure shouldn't block migration
+            # 记录失败不应阻止迁移
+            logger.warning(
+                f"⚠️ Failed to record migration {version} in history: {e}\n"
+                f"迁移已执行，但历史记录失败。"
+                f"这不会影响迁移本身，但会影响回滚功能。"
+            )
+            return False
     
     def get_applied_versions(self) -> List[str]:
         """Get list of applied migration versions"""
