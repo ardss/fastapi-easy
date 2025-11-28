@@ -1,12 +1,14 @@
 import logging
 from typing import Optional
+
 from sqlalchemy import Engine
+
 from .detector import SchemaDetector
-from .generator import MigrationGenerator
+from .distributed_lock import get_lock_provider
 from .executor import MigrationExecutor
+from .generator import MigrationGenerator
 from .storage import MigrationStorage
 from .types import MigrationPlan
-from .locks import get_lock_provider
 
 logger = logging.getLogger(__name__)
 

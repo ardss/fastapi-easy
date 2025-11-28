@@ -1,11 +1,11 @@
-import logging
 import asyncio
-from typing import List, Dict, Any
-from sqlalchemy import Engine, inspect, Table, Column
-from sqlalchemy.sql import sqltypes
+import logging
+from typing import Any, Dict, List
 
-from .types import SchemaChange, RiskLevel
-from .risk import RiskAssessor
+from sqlalchemy import Column, Engine, inspect
+
+from .risk_engine import AdvancedRiskAssessor
+from .types import RiskLevel, SchemaChange
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ class SchemaDetector:
         self.engine = engine
         self.metadata = metadata
         self.dialect = engine.dialect.name
-        self.risk_assessor = RiskAssessor(self.dialect)
+        self.risk_assessor = AdvancedRiskAssessor(self.dialect)
         
     async def detect_changes(self) -> List[SchemaChange]:
         """Main detection logic"""
