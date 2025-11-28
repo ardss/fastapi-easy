@@ -1,5 +1,9 @@
 """Password hashing and verification for FastAPI-Easy"""
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 try:
     import bcrypt
 except ImportError:
@@ -30,13 +34,18 @@ class PasswordManager:
             ValueError: If password is empty
         """
         if not password:
+            logger.warning("Attempt to hash empty password")
             raise ValueError("Password cannot be empty")
 
-        # Generate salt and hash password
-        salt = bcrypt.gensalt(rounds=self.rounds)
-        hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
-
-        return hashed.decode("utf-8")
+        try:
+            # Generate salt and hash password
+            salt = bcrypt.gensalt(rounds=self.rounds)
+            hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+            logger.debug("Password hashed successfully")
+            return hashed.decode("utf-8")
+        except Exception as e:
+            logger.error(f"Password hashing failed: {e}")
+            raise
 
     def verify_password(self, password: str, hashed_password: str) -> bool:
         """Verify password against hash with constant time comparison
@@ -52,24 +61,32 @@ class PasswordManager:
             ValueError: If password or hash is empty
         """
         if not password or not hashed_password:
+            logger.warning("Attempt to verify with empty password or hash")
             raise ValueError("Password and hash cannot be empty")
 
         try:
             # bcrypt.checkpw uses constant time comparison
-            return bcrypt.checkpw(
+            result = bcrypt.checkpw(
                 password.encode("utf-8"),
                 hashed_password.encode("utf-8"),
             )
-        except (ValueError, TypeError):
+            if result:
+                logger.debug("Password verification successful")
+            else:
+                logger.debug("Password verification failed - incorrect password")
+            return result
+        except (ValueError, TypeError) as e:
             # Invalid hash format - still perform dummy operation for timing consistency
+            logger.warning(f"Invalid hash format: {e}")
             try:
                 dummy_hash = bcrypt.hashpw(b"dummy", bcrypt.gensalt(rounds=4))
                 bcrypt.checkpw(b"dummy", dummy_hash)
             except Exception:
                 pass
             return False
-        except Exception:
+        except Exception as e:
             # Other errors - perform dummy operation
+            logger.error(f"Password verification error: {e}")
             try:
                 dummy_hash = bcrypt.hashpw(b"dummy", bcrypt.gensalt(rounds=4))
                 bcrypt.checkpw(b"dummy", dummy_hash)

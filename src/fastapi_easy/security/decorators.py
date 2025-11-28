@@ -1,5 +1,6 @@
 """Security decorators for FastAPI-Easy"""
 
+from contextvars import ContextVar
 from functools import wraps
 from typing import Callable, List, Optional
 
@@ -13,8 +14,8 @@ from .exceptions import (
 )
 from .jwt_auth import JWTAuth
 
-# Global JWT auth instance
-_jwt_auth: Optional[JWTAuth] = None
+# Use ContextVar for thread-safe JWT auth instance
+_jwt_auth: ContextVar[Optional[JWTAuth]] = ContextVar('jwt_auth', default=None)
 
 
 def init_jwt_auth(
@@ -23,7 +24,7 @@ def init_jwt_auth(
     access_token_expire_minutes: int = 15,
     refresh_token_expire_days: int = 7,
 ) -> JWTAuth:
-    """Initialize global JWT auth instance
+    """Initialize JWT auth instance
 
     Args:
         secret_key: Secret key for signing tokens
@@ -34,18 +35,18 @@ def init_jwt_auth(
     Returns:
         JWTAuth instance
     """
-    global _jwt_auth
-    _jwt_auth = JWTAuth(
+    jwt_auth = JWTAuth(
         secret_key=secret_key,
         algorithm=algorithm,
         access_token_expire_minutes=access_token_expire_minutes,
         refresh_token_expire_days=refresh_token_expire_days,
     )
-    return _jwt_auth
+    _jwt_auth.set(jwt_auth)
+    return jwt_auth
 
 
 def get_jwt_auth() -> JWTAuth:
-    """Get global JWT auth instance
+    """Get JWT auth instance
 
     Returns:
         JWTAuth instance
@@ -53,9 +54,10 @@ def get_jwt_auth() -> JWTAuth:
     Raises:
         RuntimeError: If JWT auth is not initialized
     """
-    if _jwt_auth is None:
+    jwt_auth = _jwt_auth.get()
+    if jwt_auth is None:
         raise RuntimeError("JWT auth is not initialized. Call init_jwt_auth() first.")
-    return _jwt_auth
+    return jwt_auth
 
 
 async def get_current_user(
