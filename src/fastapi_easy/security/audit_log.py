@@ -1,6 +1,7 @@
 """Audit logging for security events in FastAPI-Easy"""
 
 import threading
+from collections import defaultdict, deque
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -95,7 +96,11 @@ class AuditLogger:
         """
         self.max_logs = max_logs
         self._lock = threading.RLock()
-        self.logs: List[AuditLog] = []
+        # Use deque for automatic old log removal
+        self.logs: deque = deque(maxlen=max_logs)
+        # Indexes for fast queries
+        self.user_index: Dict[str, List[int]] = defaultdict(list)
+        self.username_index: Dict[str, List[int]] = defaultdict(list)
 
     def log(
         self,
@@ -138,11 +143,14 @@ class AuditLogger:
                 user_agent=user_agent,
             )
 
+            idx = len(self.logs)
             self.logs.append(log_entry)
 
-            # Keep only recent logs
-            if len(self.logs) > self.max_logs:
-                self.logs = self.logs[-self.max_logs :]
+            # Update indexes for fast queries
+            if log_entry.user_id:
+                self.user_index[log_entry.user_id].append(idx)
+            if log_entry.username:
+                self.username_index[log_entry.username].append(idx)
 
             return log_entry
 
@@ -165,15 +173,17 @@ class AuditLogger:
             List of audit log entries
         """
         with self._lock:
-            filtered_logs = self.logs
-
-            # Apply filters
+            # Use indexes for fast filtering
             if user_id:
-                filtered_logs = [log for log in filtered_logs if log.user_id == user_id]
+                indices = self.user_index.get(user_id, [])
+                filtered_logs = [self.logs[i] for i in indices if i < len(self.logs)]
+            elif username:
+                indices = self.username_index.get(username, [])
+                filtered_logs = [self.logs[i] for i in indices if i < len(self.logs)]
+            else:
+                filtered_logs = list(self.logs)
 
-            if username:
-                filtered_logs = [log for log in filtered_logs if log.username == username]
-
+            # Apply event_type filter if needed
             if event_type:
                 filtered_logs = [log for log in filtered_logs if log.event_type == event_type]
 
