@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Optional
 
@@ -116,20 +117,31 @@ class MigrationEngine:
             )
             raise
         finally:
-            # 7. Release Lock
-            logger.info("🔓 Releasing migration lock...")
-            try:
-                await self.lock.release()
-            except Exception as e:
-                logger.error(
-                    f"❌ 锁释放失败: {e}\n"
-                    f"您可能需要手动清理锁文件。\n"
-                    f"解决方案:\n"
-                    f"  1. 检查锁文件: .fastapi_easy_migration.lock\n"
-                    f"  2. 手动删除: rm .fastapi_easy_migration.lock\n"
-                    f"  3. 重新运行迁移",
-                    exc_info=True
-                )
+            # 7. Release Lock with retry
+            logger.info("释放迁移锁...")
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    await self.lock.release()
+                    logger.info("迁移锁已释放")
+                    break
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        logger.warning(
+                            f"锁释放失败 (尝试 {attempt + 1}/{max_retries}), "
+                            f"重试中..."
+                        )
+                        await asyncio.sleep(1)
+                    else:
+                        logger.error(
+                            f"锁释放失败: {e}\n"
+                            f"您可能需要手动清理锁文件。\n"
+                            f"解决方案:\n"
+                            f"  1. 检查锁文件: .fastapi_easy_migration.lock\n"
+                            f"  2. 手动删除: rm .fastapi_easy_migration.lock\n"
+                            f"  3. 重新运行迁移",
+                            exc_info=True
+                        )
     
     def get_history(self, max_items: int = 10):
         """Get migration history
