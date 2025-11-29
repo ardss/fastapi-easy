@@ -86,6 +86,14 @@ class SchemaDetector:
         return changes
 
     def _create_table_change(self, table_name: str) -> SchemaChange:
+        """创建表变更对象
+        
+        Args:
+            table_name: 表名
+            
+        Returns:
+            SchemaChange 对象，包含风险等级
+        """
         # 先创建临时 SchemaChange 对象用于风险评估
         temp_change = SchemaChange(
             type="create_table",
