@@ -149,10 +149,6 @@ class Migration(BaseModel):
     upgrade_sql: str
     downgrade_sql: str
     created_at: datetime = datetime.now()
-    
-    # For data migration hooks
-    pre_hook: Optional[str] = None
-    post_hook: Optional[str] = None
 
 class MigrationPlan(BaseModel):
     """A plan containing multiple migrations"""
