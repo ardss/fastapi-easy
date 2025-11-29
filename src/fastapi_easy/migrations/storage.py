@@ -119,11 +119,18 @@ class MigrationStorage:
             )
     
     def get_applied_versions(self) -> List[str]:
-        """Get list of applied migration versions"""
+        """Get list of applied migration versions
+        
+        Returns:
+            List of applied migration version strings
+        """
         try:
             with self.engine.connect() as conn:
                 result = conn.execute(
-                    text(f"SELECT version FROM {self.TABLE_NAME} WHERE status = 'applied' ORDER BY applied_at")
+                    text(
+                        f"SELECT version FROM {self.TABLE_NAME} "
+                        f"WHERE status = 'applied' ORDER BY applied_at"
+                    )
                 )
                 return [row[0] for row in result]
         except Exception as e:

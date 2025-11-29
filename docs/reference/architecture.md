@@ -152,7 +152,7 @@ class CustomSearchOperation(Operation):
         await log_search(context.user, context.search_query)
 
 # 注册自定义操作
-router = CRUDRouter(schema=Item, backend=backend)
+router = CRUDRouter(schema=Item, adapter=adapter)
 router.register_operation(CustomSearchOperation())
 ```
 
@@ -432,7 +432,7 @@ async def check_permission_before_delete(context: ExecutionContext):
         raise PermissionDeniedError("delete")
 
 # 注册钩子
-router = CRUDRouter(schema=Item, backend=backend)
+router = CRUDRouter(schema=Item, adapter=adapter)
 router.hooks.register("after_create", send_email_on_create)
 router.hooks.register("before_delete", check_permission_before_delete)
 ```
@@ -524,7 +524,7 @@ class CustomResponseFormatter(ResponseFormatter):
 
 router = CRUDRouter(
     schema=Item,
-    backend=backend,
+    adapter=adapter,
     response_formatter=CustomResponseFormatter()
 )
 ```
@@ -583,7 +583,7 @@ config = CRUDConfig(
     max_limit=100
 )
 
-router = CRUDRouter(schema=Item, backend=backend, config=config)
+router = CRUDRouter(schema=Item, adapter=adapter, config=config)
 ```
 
 ---
@@ -640,7 +640,7 @@ config = CRUDConfig(
 
 router = CRUDRouter(
     schema=Item,
-    backend=SQLAlchemyAdapter(ItemDB, get_db),
+    adapter=SQLAlchemyAdapter(ItemDB, get_db),
     config=config
 )
 

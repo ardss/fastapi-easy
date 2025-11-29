@@ -63,7 +63,7 @@ pip install fastapi-easy
 ```python
 from fastapi import FastAPI
 from fastapi_easy import CRUDRouter
-from fastapi_easy.backends import SQLAlchemyAsyncBackend
+from fastapi_easy.backends import SQLAlchemyAdapter
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import Column, Integer, String, Float
@@ -93,18 +93,6 @@ engine = create_async_engine(DATABASE_URL)
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 async def get_db():
-    async with AsyncSessionLocal() as session:
-        yield session
-
-# 4. 创建应用和路由
-app = FastAPI()
-
-backend = SQLAlchemyAsyncBackend(ItemDB, get_db)
-router = CRUDRouter(schema=Item, backend=backend)
-app.include_router(router)
-
-# 自动生成的 API：
-# GET    /itemdb              - 获取所有项目
 # GET    /itemdb/{item_id}    - 获取单个项目
 # POST   /itemdb              - 创建项目
 # PUT    /itemdb/{item_id}    - 更新项目
@@ -180,7 +168,7 @@ pip install fastapi-easy[all]
 ```python
 router = CRUDRouter(
     schema=Item,
-    backend=backend,
+    adapter=adapter,
     enable_filters=True,
     filter_fields=["name", "price"],
 )
@@ -197,7 +185,7 @@ router = CRUDRouter(
 ```python
 router = CRUDRouter(
     schema=Item,
-    backend=backend,
+    adapter=adapter,
     enable_sorters=True,
     sort_fields=["name", "price"],
 )
@@ -215,7 +203,7 @@ from fastapi_easy.features import PaginationConfig
 
 router = CRUDRouter(
     schema=Item,
-    backend=backend,
+    adapter=adapter,
     enable_pagination=True,
     pagination_config=PaginationConfig(default_limit=10, max_limit=100),
 )
@@ -231,7 +219,7 @@ from fastapi_easy.features import SoftDeleteConfig
 
 router = CRUDRouter(
     schema=Item,
-    backend=backend,
+    adapter=adapter,
     enable_soft_delete=True,
     soft_delete_config=SoftDeleteConfig(deleted_at_field="deleted_at"),
 )
@@ -265,7 +253,7 @@ app = FastAPIEasy(
 ```python
 router = CRUDRouter(
     schema=Item,
-    backend=backend,
+    adapter=adapter,
     enable_bulk_operations=True,
 )
 
@@ -288,7 +276,7 @@ async def check_admin():
 
 router = CRUDRouter(
     schema=Item,
-    backend=backend,
+    adapter=adapter,
     dependencies={
         "get_all": [Depends(get_current_user)],
         "delete_one": [Depends(check_admin)],
@@ -364,7 +352,7 @@ app = FastAPI()
 # 5. 创建路由
 router = CRUDRouter(
     schema=Item,
-    backend=SQLAlchemyAsyncBackend(ItemDB, get_db),
+    adapter=SQLAlchemyAdapter(ItemDB, get_db),
     prefix="/items",
     enable_filters=True,
     filter_fields=["name", "price"],
@@ -443,9 +431,6 @@ typing-extensions>=4.0
 ```
 sqlalchemy>=2.0          # SQLAlchemy ORM
 tortoise-orm>=0.19       # Tortoise ORM
-gino>=1.0                # Gino ORM
-ormar>=0.12              # Ormar ORM
-databases>=0.7           # Databases 驱动
 
 # 数据库驱动
 aiosqlite>=0.19          # SQLite 异步驱动

@@ -50,6 +50,12 @@ class CheckpointManager:
                 json.dump(record.to_dict(), f, indent=2)
             logger.info(f"保存检查点: {record.migration_id} ({record.status})")
             return True
+        except (IOError, OSError) as e:
+            logger.error(f"文件操作失败: {e}")
+            return False
+        except (TypeError, ValueError) as e:
+            logger.error(f"数据序列化失败: {e}")
+            return False
         except Exception as e:
             logger.error(f"保存检查点失败: {e}")
             return False
@@ -65,6 +71,15 @@ class CheckpointManager:
                 data = json.load(f)
             
             return CheckpointRecord(**data)
+        except (IOError, OSError) as e:
+            logger.error(f"文件读取失败: {e}")
+            return None
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON 解析失败: {e}")
+            return None
+        except (TypeError, ValueError) as e:
+            logger.error(f"数据验证失败: {e}")
+            return None
         except Exception as e:
             logger.error(f"加载检查点失败: {e}")
             return None

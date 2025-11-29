@@ -33,9 +33,9 @@ class MigrationExecutor:
             Tuple of (updated plan, list of successfully executed migrations)
         """
         if mode == ExecutionMode.DRY_RUN:
-            logger.info("🔍 Dry-run mode: No migrations will be executed")
+            logger.info("🔍 干运行模式: 不执行任何迁移")
             for migration in plan.migrations:
-                logger.info(f"  Would execute: {migration.description}")
+                logger.info(f"  将执行: {migration.description}")
                 logger.debug(f"    SQL: {migration.upgrade_sql}")
             return plan, []
         
@@ -50,42 +50,42 @@ class MigrationExecutor:
         if mode in [ExecutionMode.SAFE, ExecutionMode.AUTO, ExecutionMode.AGGRESSIVE]:
             # Always execute safe migrations
             if safe_migrations:
-                logger.info(f"🔄 Executing {len(safe_migrations)} SAFE migrations...")
+                logger.info(f"🔄 执行 {len(safe_migrations)} 个低风险迁移...")
                 for migration in safe_migrations:
                     try:
                         if await self._execute_migration(migration):
                             executed.append(migration)
                     except Exception as e:
-                        logger.error(f"  ❌ Migration failed, stopping execution: {e}")
+                        logger.error(f"  ❌ 迁移失败，停止执行: {e}")
                         raise  # Re-raise to stop execution on failure
         
         if mode in [ExecutionMode.AUTO, ExecutionMode.AGGRESSIVE]:
             # Execute medium risk migrations
             if medium_migrations:
-                logger.info(f"⚠️ Executing {len(medium_migrations)} MEDIUM risk migrations...")
+                logger.info(f"⚠️ 执行 {len(medium_migrations)} 个中等风险迁移...")
                 for migration in medium_migrations:
                     try:
                         if await self._execute_migration(migration):
                             executed.append(migration)
                     except Exception as e:
-                        logger.error(f"  ❌ Migration failed, stopping execution: {e}")
+                        logger.error(f"  ❌ 迁移失败，停止执行: {e}")
                         raise
         
         if mode == ExecutionMode.AGGRESSIVE:
             # Execute high risk migrations
             if risky_migrations:
-                logger.warning(f"🔴 Executing {len(risky_migrations)} HIGH risk migrations...")
+                logger.warning(f"🔴 执行 {len(risky_migrations)} 个高风险迁移...")
                 for migration in risky_migrations:
                     try:
                         if await self._execute_migration(migration):
                             executed.append(migration)
                     except Exception as e:
-                        logger.error(f"  ❌ Migration failed, stopping execution: {e}")
+                        logger.error(f"  ❌ 迁移失败，停止执行: {e}")
                         raise
         else:
             # Warn about unexecuted risky migrations
             if risky_migrations:
-                logger.warning(f"⚠️ {len(risky_migrations)} HIGH risk migrations require manual review:")
+                logger.warning(f"⚠️ {len(risky_migrations)} 个高风险迁移需要手动审查:")
                 for migration in risky_migrations:
                     logger.warning(f"  - {migration.description}")
         
@@ -102,11 +102,11 @@ class MigrationExecutor:
         Raises:
             Exception if migration fails
         """
-        logger.info(f"  ▶️ Executing: {migration.description}")
+        logger.info(f"  ▶️ 执行: {migration.description}")
         
         # Run in thread pool to avoid blocking
         await asyncio.to_thread(self._execute_sql_sync, migration.upgrade_sql)
-        logger.info(f"  ✅ Success: {migration.description}")
+        logger.info(f"  ✅ 成功: {migration.description}")
         return True
 
     def _execute_sql_sync(self, sql: str):
@@ -126,7 +126,14 @@ class MigrationExecutor:
             raise
     
     def _split_sql_statements(self, sql: str) -> List[str]:
-        """Split SQL into individual statements, handling multi-line statements"""
+        """Split SQL into individual statements, handling multi-line statements
+        
+        Args:
+            sql: SQL string to split
+            
+        Returns:
+            List of individual SQL statements
+        """
         # Remove leading/trailing whitespace and split by semicolon
         statements = []
         for stmt in sql.split(';'):

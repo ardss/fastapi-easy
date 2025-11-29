@@ -29,7 +29,7 @@
                          ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                   后端适配器                                 │
-│  (SQLAlchemyAsyncBackend / TortoiseBackend / ...)           │
+│  (SQLAlchemyAdapter / TortoiseAdapter / ...)           │
 │  (构建查询、应用过滤、排序、分页)                            │
 └────────────────────────┬────────────────────────────────────┘
                          │
@@ -109,7 +109,7 @@ from fastapi_easy import CRUDRouter
 
 router = CRUDRouter(
     schema=Item,
-    backend=backend,
+    adapter=adapter,
     enable_filters=True,
     filter_fields=["name", "price"],
     enable_sorters=True,
@@ -130,9 +130,9 @@ router = CRUDRouter(
 **依赖库**: `fastapi-easy.backends`
 
 ```python
-from fastapi_easy.backends import SQLAlchemyAsyncBackend
+from fastapi_easy.backends import SQLAlchemyAdapter
 
-backend = SQLAlchemyAsyncBackend(ItemDB, get_db)
+adapter = SQLAlchemyAdapter(ItemDB, get_db)
 
 # 后端做的事：
 # 1. 构建基础查询
@@ -146,7 +146,7 @@ backend = SQLAlchemyAsyncBackend(ItemDB, get_db)
 
 ```python
 # 伪代码
-class SQLAlchemyAsyncBackend:
+class SQLAlchemyAdapter:
     async def get_all(self, filters, sorts, skip, limit):
         # 1. 构建基础查询
         query = select(ItemDB)
@@ -339,8 +339,6 @@ Content-Type: application/json
 |-----|------|
 | **sqlalchemy** | ORM、SQL 构建 |
 | **tortoise-orm** | 异步 ORM |
-| **gino** | 异步 ORM（PostgreSQL） |
-| **ormar** | 异步 ORM |
 | **databases** | 异步数据库驱动 |
 
 ### 可选依赖（数据库驱动）
@@ -361,7 +359,7 @@ Content-Type: application/json
 # 1. 导入依赖
 from fastapi import FastAPI
 from fastapi_easy import CRUDRouter
-from fastapi_easy.backends import SQLAlchemyAsyncBackend
+from fastapi_easy.backends import SQLAlchemyAdapter
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy import Column, Integer, String, Float
@@ -404,7 +402,7 @@ app = FastAPI()
 # 6. 创建 CRUDRouter（自动生成路由）
 router = CRUDRouter(
     schema=Item,
-    backend=SQLAlchemyAsyncBackend(ItemDB, get_db),
+    adapter=SQLAlchemyAdapter(ItemDB, get_db),
     prefix="/items",
     enable_filters=True,
     filter_fields=["name", "price"],
@@ -451,6 +449,6 @@ HTTP 响应
 
 ## 下一步
 
-- 学习[搜索和过滤](04-filters.md)
-- 了解[排序功能](05-sorting.md)
-- 查看[完整示例](06-complete-example.md)
+- 学习[搜索和过滤](../guides/querying.md)
+- 了解[排序功能](../guides/querying.md)
+- 查看[完整示例](../tutorial/03-complete-example.md)
