@@ -23,6 +23,7 @@
 
 ### ✨ 核心特性
 
+**CRUD 功能**:
 - ✅ **自动生成 CRUD 路由** - 一行代码生成 6 个标准 API
 - ✅ **搜索和过滤** - 支持 9 种过滤操作符
 - ✅ **排序功能** - 支持升序、降序、多字段排序
@@ -32,6 +33,17 @@
 - ✅ **权限控制** - 灵活的权限配置
 - ✅ **审计日志** - 自动记录操作历史
 - ✅ **关系处理** - 自动处理关联数据，避免 N+1 查询
+
+**迁移功能** ⭐ **新增**:
+- ✅ **自动 Schema 检测** - 启动时自动检测数据库变更
+- ✅ **自动迁移生成** - 自动生成迁移脚本
+- ✅ **自动迁移应用** - 自动应用迁移
+- ✅ **安全迁移模式** - Safe/Auto/Aggressive 三种模式
+- ✅ **回滚支持** - 支持迁移回滚
+- ✅ **迁移历史** - 完整的迁移历史记录
+- ✅ **CLI 工具** - 命令行管理迁移
+
+**其他特性**:
 - ✅ **Pydantic v2 兼容** - 完全支持 Pydantic v2
 - ✅ **异步统一** - 所有 ORM 都支持 async/await
 - ✅ **多 ORM 支持** - SQLAlchemy、Tortoise、MongoDB、SQLModel（4 种）
@@ -229,7 +241,26 @@ router = CRUDRouter(
 # GET /items?include_deleted=true          # 包括已删除的
 ```
 
-### 5. 批量操作
+### 5. 数据库迁移 ⭐ **新增**
+
+```python
+from fastapi_easy import FastAPIEasy
+
+# 创建应用，自动处理数据库迁移
+app = FastAPIEasy(
+    database_url="sqlite:///db.sqlite",
+    models=[User, Product],
+    migration_mode="safe"  # safe/auto/aggressive
+)
+
+# 功能：
+# - 启动时自动检测 Schema 变更
+# - 自动生成和应用迁移
+# - 支持迁移回滚
+# - 完整的迁移历史记录
+```
+
+### 6. 批量操作
 
 ```python
 router = CRUDRouter(
