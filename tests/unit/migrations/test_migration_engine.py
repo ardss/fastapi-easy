@@ -7,7 +7,7 @@ from sqlalchemy import Column, Integer, String, create_engine, text
 from sqlalchemy.orm import declarative_base
 
 from fastapi_easy.migrations.engine import MigrationEngine
-from fastapi_easy.migrations.types import RiskLevel
+from fastapi_easy.migrations.types import ExecutionMode, RiskLevel
 
 Base = declarative_base()
 
@@ -39,7 +39,7 @@ def temp_db():
 async def test_migration_engine_detects_changes(temp_db):
     """Test: Detect missing table"""
     engine = create_engine(temp_db, connect_args={"check_same_thread": False})
-    migration_engine = MigrationEngine(engine, Base.metadata, mode="safe")
+    migration_engine = MigrationEngine(engine, Base.metadata, mode=ExecutionMode.SAFE)
     
     plan = await migration_engine.auto_migrate()
     
@@ -57,7 +57,7 @@ async def test_migration_engine_detects_new_column(temp_db):
         conn.execute(text("CREATE TABLE users (id INTEGER PRIMARY KEY, name VARCHAR)"))
         conn.commit()
         
-    migration_engine = MigrationEngine(engine, Base.metadata, mode="safe")
+    migration_engine = MigrationEngine(engine, Base.metadata, mode=ExecutionMode.SAFE)
     plan = await migration_engine.auto_migrate()
     
     assert len(plan.migrations) == 1
@@ -75,7 +75,7 @@ async def test_migration_engine_detects_type_change_sqlite(temp_db):
         conn.execute(text("CREATE TABLE users (id INTEGER PRIMARY KEY, name VARCHAR, age VARCHAR)"))
         conn.commit()
         
-    migration_engine = MigrationEngine(engine, Base.metadata, mode="safe")
+    migration_engine = MigrationEngine(engine, Base.metadata, mode=ExecutionMode.SAFE)
     plan = await migration_engine.auto_migrate()
     
     assert len(plan.migrations) == 1
@@ -98,7 +98,7 @@ async def test_migration_engine_executes_safe_migrations(temp_db):
     engine = create_engine(temp_db, connect_args={"check_same_thread": False})
     
     # Start with empty database
-    migration_engine = MigrationEngine(engine, Base.metadata, mode="safe")
+    migration_engine = MigrationEngine(engine, Base.metadata, mode=ExecutionMode.SAFE)
     plan = await migration_engine.auto_migrate()
     
     # Should have created the table
@@ -124,7 +124,7 @@ async def test_migration_engine_skips_risky_migrations_in_safe_mode(temp_db):
         conn.execute(text("CREATE TABLE users (id INTEGER PRIMARY KEY, name VARCHAR, age VARCHAR)"))
         conn.commit()
     
-    migration_engine = MigrationEngine(engine, Base.metadata, mode="safe")
+    migration_engine = MigrationEngine(engine, Base.metadata, mode=ExecutionMode.SAFE)
     plan = await migration_engine.auto_migrate()
     
     # Should detect the change but not execute it
@@ -148,7 +148,7 @@ async def test_migration_engine_executes_risky_migrations_in_aggressive_mode(tem
         conn.execute(text("CREATE TABLE users (id INTEGER PRIMARY KEY, name VARCHAR, age VARCHAR)"))
         conn.commit()
     
-    migration_engine = MigrationEngine(engine, Base.metadata, mode="aggressive")
+    migration_engine = MigrationEngine(engine, Base.metadata, mode=ExecutionMode.AGGRESSIVE)
     plan = await migration_engine.auto_migrate()
     
     # Should execute the risky migration

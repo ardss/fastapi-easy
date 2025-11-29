@@ -5,7 +5,7 @@ from typing import List
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
-from .types import Migration, MigrationPlan, MigrationStatus, RiskLevel
+from .types import ExecutionMode, Migration, MigrationPlan, RiskLevel
 
 logger = logging.getLogger(__name__)
 
@@ -17,22 +17,22 @@ class MigrationExecutor:
         self.auto_backup = auto_backup
         self.dialect = engine.dialect.name
 
-    async def execute_plan(self, plan: MigrationPlan, mode: str = "safe") -> tuple[MigrationPlan, List[Migration]]:
+    async def execute_plan(self, plan: MigrationPlan, mode: ExecutionMode = ExecutionMode.SAFE) -> tuple[MigrationPlan, List[Migration]]:
         """
         Execute a migration plan based on mode.
         
         Args:
             plan: The migration plan to execute
-            mode: Execution mode
-                - "safe": Only execute SAFE migrations automatically
-                - "auto": Execute SAFE and MEDIUM automatically
-                - "aggressive": Execute all migrations
-                - "dry_run": Don't execute, just log
+            mode: Execution mode (ExecutionMode enum)
+                - SAFE: Only execute SAFE migrations automatically
+                - AUTO: Execute SAFE and MEDIUM automatically
+                - AGGRESSIVE: Execute all migrations
+                - DRY_RUN: Don't execute, just log
         
         Returns:
             Tuple of (updated plan, list of successfully executed migrations)
         """
-        if mode == "dry_run":
+        if mode == ExecutionMode.DRY_RUN:
             logger.info("🔍 Dry-run mode: No migrations will be executed")
             for migration in plan.migrations:
                 logger.info(f"  Would execute: {migration.description}")
@@ -47,7 +47,7 @@ class MigrationExecutor:
         executed = []
         
         # Execute based on mode
-        if mode in ["safe", "auto", "aggressive"]:
+        if mode in [ExecutionMode.SAFE, ExecutionMode.AUTO, ExecutionMode.AGGRESSIVE]:
             # Always execute safe migrations
             if safe_migrations:
                 logger.info(f"🔄 Executing {len(safe_migrations)} SAFE migrations...")
@@ -59,7 +59,7 @@ class MigrationExecutor:
                         logger.error(f"  ❌ Migration failed, stopping execution: {e}")
                         raise  # Re-raise to stop execution on failure
         
-        if mode in ["auto", "aggressive"]:
+        if mode in [ExecutionMode.AUTO, ExecutionMode.AGGRESSIVE]:
             # Execute medium risk migrations
             if medium_migrations:
                 logger.info(f"⚠️ Executing {len(medium_migrations)} MEDIUM risk migrations...")
@@ -71,7 +71,7 @@ class MigrationExecutor:
                         logger.error(f"  ❌ Migration failed, stopping execution: {e}")
                         raise
         
-        if mode == "aggressive":
+        if mode == ExecutionMode.AGGRESSIVE:
             # Execute high risk migrations
             if risky_migrations:
                 logger.warning(f"🔴 Executing {len(risky_migrations)} HIGH risk migrations...")

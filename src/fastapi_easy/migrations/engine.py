@@ -8,7 +8,7 @@ from .distributed_lock import get_lock_provider
 from .executor import MigrationExecutor
 from .generator import MigrationGenerator
 from .storage import MigrationStorage
-from .types import MigrationPlan, OperationResult
+from .types import ExecutionMode, MigrationPlan, OperationResult
 
 logger = logging.getLogger(__name__)
 
@@ -19,15 +19,13 @@ class MigrationEngine:
         self, 
         engine: Engine, 
         metadata,
-        mode: str = "safe",
+        mode: ExecutionMode = ExecutionMode.SAFE,
         auto_backup: bool = False
     ):
-        # 验证 mode 参数
-        valid_modes = {"safe", "auto", "aggressive", "dry_run"}
-        if mode not in valid_modes:
-            raise ValueError(
-                f"Invalid mode '{mode}'. "
-                f"Must be one of {valid_modes}"
+        # mode 参数已通过类型系统验证
+        if not isinstance(mode, ExecutionMode):
+            raise TypeError(
+                f"mode must be ExecutionMode enum, got {type(mode).__name__}"
             )
         
         # 验证 engine 连接

@@ -23,6 +23,7 @@ from .cli_helpers import (
 )
 from .engine import MigrationEngine
 from .exceptions import MigrationError
+from .types import ExecutionMode
 
 logger = logging.getLogger(__name__)
 
@@ -102,14 +103,17 @@ def plan(database_url: str, dry_run: bool):
 def apply(database_url: str, mode: str, force: bool):
     """执行迁移"""
     try:
+        # 转换 mode 字符串为 ExecutionMode 枚举
+        mode_enum = ExecutionMode(mode)
+        
         click.echo("🚀 开始执行迁移...")
-        click.echo(f"📝 模式: {mode}")
+        click.echo(f"📝 模式: {mode_enum.value}")
         click.echo("")
 
         # 获取迁移计划
         engine = create_engine(database_url)
         metadata = MetaData()
-        migration_engine = MigrationEngine(engine, metadata, mode=mode)
+        migration_engine = MigrationEngine(engine, metadata, mode=mode_enum)
         plan_result = asyncio.run(
             migration_engine.auto_migrate()
         )
