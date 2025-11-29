@@ -18,19 +18,23 @@ class SchemaDetector:
         self.dialect = engine.dialect.name
         self.risk_assessor = AdvancedRiskAssessor(self.dialect)
         
-    async def detect_changes(self, timeout: int = 60) -> List[SchemaChange]:
-        """Main detection logic with timeout control"""
+    async def detect_changes(self, timeout_seconds: int = 60) -> List[SchemaChange]:
+        """Main detection logic with timeout control
+        
+        Args:
+            timeout_seconds: Timeout in seconds for schema detection
+        """
         try:
             # Run synchronous inspect in thread pool with timeout
             inspector = await asyncio.wait_for(
                 asyncio.to_thread(inspect, self.engine),
-                timeout=timeout
+                timeout=timeout_seconds
             )
             changes = []
         except asyncio.TimeoutError:
             logger.error(
-                f"Schema detection timed out after {timeout}s. "
-                f"Consider increasing timeout or checking database performance."
+                f"Schema detection timed out after {timeout_seconds}s. "
+                f"Consider increasing timeout_seconds or checking database."
             )
             raise
         

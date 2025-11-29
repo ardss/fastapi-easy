@@ -131,9 +131,13 @@ class MigrationEngine:
                     exc_info=True
                 )
     
-    def get_history(self, limit: int = 10):
-        """Get migration history"""
-        return self.storage.get_migration_history(limit)
+    def get_history(self, max_items: int = 10):
+        """Get migration history
+        
+        Args:
+            max_items: Maximum number of migration records to return
+        """
+        return self.storage.get_migration_history(limit=max_items)
     
     async def rollback(self, steps: int = 1, continue_on_error: bool = False) -> OperationResult:
         """
