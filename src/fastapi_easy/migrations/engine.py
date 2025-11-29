@@ -8,6 +8,7 @@ from .detector import SchemaDetector
 from .distributed_lock import get_lock_provider
 from .executor import MigrationExecutor
 from .generator import MigrationGenerator
+from .hooks import HookTrigger, get_hook_registry
 from .storage import MigrationStorage
 from .types import ExecutionMode, MigrationPlan, OperationResult
 
