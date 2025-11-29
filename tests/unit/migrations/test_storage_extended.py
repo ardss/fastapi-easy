@@ -8,6 +8,7 @@ import pytest
 from sqlalchemy import create_engine, text
 
 from fastapi_easy.migrations.storage import MigrationStorage
+from fastapi_easy.migrations.types import OperationResult
 
 
 @pytest.fixture
@@ -67,13 +68,15 @@ class TestMigrationStorageRecord:
         storage = MigrationStorage(in_memory_db)
         storage.initialize()
         
-        success = storage.record_migration(
+        result = storage.record_migration(
             version="001",
             description="Test migration",
             rollback_sql="ROLLBACK",
             risk_level="SAFE"
         )
-        assert success is True
+        assert result.success is True
+        assert result.data["version"] == "001"
+        assert result.metadata["idempotent"] is False
 
     def test_record_migration_idempotent(self, in_memory_db):
         """测试记录迁移的幂等性"""
@@ -84,8 +87,9 @@ class TestMigrationStorageRecord:
         storage.record_migration("001", "Test", "ROLLBACK", "SAFE")
         # 第二次记录相同的版本
         result = storage.record_migration("001", "Test", "ROLLBACK", "SAFE")
-        # 应该返回 True (幂等)
-        assert result is True
+        # 应该返回成功 (幂等)
+        assert result.success is True
+        assert result.metadata["idempotent"] is True
 
     def test_record_migration_multiple(self, in_memory_db):
         """测试记录多个迁移"""
@@ -104,13 +108,15 @@ class TestMigrationStorageRecord:
         storage = MigrationStorage(in_memory_db)
         storage.initialize()
         
-        success = storage.record_migration(
-            version="001",
-            description="Add 'users' table with @index",
-            rollback_sql="DROP TABLE users",
-            risk_level="SAFE"
+        result = storage.record_migration(
+            version="001_test",
+            description="Test with 'quotes' and \"double quotes\"",
+            rollback_sql="DROP TABLE \"test\"",
+            risk_level="HIGH"
         )
-        assert success is True
+        assert isinstance(result, OperationResult)
+        assert result.success is True
+        assert result.data["version"] == "001_test"
 
 
 class TestMigrationStorageQuery:
@@ -174,8 +180,8 @@ class TestMigrationStorageEdgeCases:
         storage = MigrationStorage(in_memory_db)
         storage.initialize()
         
-        success = storage.record_migration("001", "", "ROLLBACK", "SAFE")
-        assert success is True
+        result = storage.record_migration("001", "", "ROLLBACK", "SAFE")
+        assert result.success is True
 
     def test_record_migration_long_description(self, in_memory_db):
         """测试长描述的迁移"""
@@ -183,8 +189,8 @@ class TestMigrationStorageEdgeCases:
         storage.initialize()
         
         long_desc = "A" * 500
-        success = storage.record_migration("001", long_desc, "ROLLBACK", "SAFE")
-        assert success is True
+        result = storage.record_migration("001", long_desc, "ROLLBACK", "SAFE")
+        assert result.success is True
 
     def test_record_migration_different_risk_levels(self, in_memory_db):
         """测试不同风险等级的迁移"""

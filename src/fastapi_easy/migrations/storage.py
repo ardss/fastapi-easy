@@ -7,6 +7,8 @@ from sqlalchemy import Column, DateTime, Integer, MetaData, String, Table, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import IntegrityError
 
+from .types import OperationResult, RecordStatus
+
 logger = logging.getLogger(__name__)
 
 class MigrationStorage:
@@ -60,11 +62,11 @@ class MigrationStorage:
         description: str,
         rollback_sql: str,
         risk_level: str
-    ) -> bool:
+    ) -> OperationResult:
         """Record a successful migration
         
         Returns:
-            True if recorded successfully, False if recording failed
+            OperationResult with success status
         """
         try:
             with self.engine.begin() as conn:
@@ -74,7 +76,7 @@ class MigrationStorage:
                         (version, description, applied_at,
                          rollback_sql, risk_level, status)
                         VALUES (:version, :description, :applied_at,
-                                :rollback_sql, :risk_level, 'applied')
+                                :rollback_sql, :risk_level, :status)
                     """),
                     {
                         "version": version,
@@ -82,17 +84,26 @@ class MigrationStorage:
                         "applied_at": datetime.now(),
                         "rollback_sql": rollback_sql,
                         "risk_level": risk_level,
+                        "status": RecordStatus.APPLIED.value,
                     }
                 )
             logger.info(f"📝 Recorded migration: {version}")
-            return True
+            return OperationResult(
+                success=True,
+                data={"version": version},
+                metadata={"idempotent": False}
+            )
 
         except IntegrityError:
             # 迁移已记录，这不是错误（幂等性）
             logger.warning(
                 f"Migration {version} already recorded (idempotent)"
             )
-            return True
+            return OperationResult(
+                success=True,
+                data={"version": version},
+                metadata={"idempotent": True}
+            )
 
         except Exception as e:
             # 记录失败不应阻止迁移
@@ -101,7 +112,11 @@ class MigrationStorage:
                 f"迁移已执行，但历史记录失败。"
                 f"这不会影响迁移本身，但会影响回滚功能。"
             )
-            return False
+            return OperationResult(
+                success=False,
+                errors=[str(e)],
+                metadata={"non_blocking": True}
+            )
     
     def get_applied_versions(self) -> List[str]:
         """Get list of applied migration versions"""
