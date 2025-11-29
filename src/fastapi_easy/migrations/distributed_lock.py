@@ -42,11 +42,13 @@ class LockProvider(ABC):
 class PostgresLockProvider(LockProvider):
     """PostgreSQL 分布式锁提供者"""
 
-    def __init__(self, engine: Engine, lock_id: int = 1):
+    def __init__(self, engine: Engine, lock_id: int = 1, max_connection_age: int = 300):
         self.engine = engine
         self.lock_id = lock_id
         self.acquired = False
         self._connection = None
+        self.max_connection_age = max_connection_age  # 最大连接持有时间（秒）
+        self._connection_created_at = None
 
     async def acquire(self, timeout: int = 30) -> bool:
         """使用 pg_advisory_lock 获取锁"""
@@ -67,6 +69,7 @@ class PostgresLockProvider(LockProvider):
                     if locked:
                         self.acquired = True
                         self._connection = conn  # 保存连接以供释放使用
+                        self._connection_created_at = time.time()  # 记录连接创建时间
                         logger.info(
                             f"✅ PostgreSQL lock acquired (ID: {self.lock_id})"
                         )
@@ -85,7 +88,10 @@ class PostgresLockProvider(LockProvider):
         finally:
             # 如果未获取锁，关闭连接
             if conn and not self.acquired:
-                conn.close()
+                try:
+                    conn.close()
+                except Exception as e:
+                    logger.warning(f"Error closing connection: {e}")
 
     async def release(self) -> bool:
         """释放 PostgreSQL 锁"""
@@ -93,6 +99,15 @@ class PostgresLockProvider(LockProvider):
             return False
 
         try:
+            # 检查连接年龄，防止长期占用
+            if self._connection_created_at:
+                age = time.time() - self._connection_created_at
+                if age > self.max_connection_age:
+                    logger.warning(
+                        f"Connection held for {age}s (max: {self.max_connection_age}s), "
+                        f"forcing close"
+                    )
+            
             self._connection.execute(
                 text(f"SELECT pg_advisory_unlock({self.lock_id})")
             )
@@ -107,8 +122,13 @@ class PostgresLockProvider(LockProvider):
         finally:
             # 释放连接
             if self._connection:
-                self._connection.close()
-                self._connection = None
+                try:
+                    self._connection.close()
+                except Exception as e:
+                    logger.warning(f"Error closing connection: {e}")
+                finally:
+                    self._connection = None
+                    self._connection_created_at = None
 
     async def is_locked(self) -> bool:
         """检查锁状态"""
@@ -224,15 +244,23 @@ class FileLockProvider(LockProvider):
                             lock_age = time.time() - float(timestamp)
                             # 如果锁超过 2 倍超时时间，认为过期
                             if lock_age > timeout * 2:
-                                logger.warning(
-                                    f"Stale lock detected (age: {lock_age}s), "
-                                    f"removing"
-                                )
                                 try:
-                                    os.remove(self.lock_file)
-                                except OSError:
-                                    pass
-                                continue
+                                    # 尝试检查进程是否仍在运行
+                                    # 信号 0 不发送信号，只检查进程是否存在
+                                    os.kill(int(pid), 0)
+                                    logger.warning(
+                                        f"进程 {pid} 仍在运行，不删除锁文件 (age: {lock_age}s)"
+                                    )
+                                except (ProcessLookupError, ValueError, OSError):
+                                    # 进程不存在，可以删除锁文件
+                                    logger.warning(
+                                        f"进程 {pid} 已终止，删除过期锁文件 (age: {lock_age}s)"
+                                    )
+                                    try:
+                                        os.remove(self.lock_file)
+                                    except OSError:
+                                        pass
+                                    continue
                 except (ValueError, OSError):
                     pass
                 # 锁文件已存在且有效，等待后重试
