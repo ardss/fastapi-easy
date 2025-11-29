@@ -12,11 +12,12 @@ __version__ = "0.1.0"
 __author__ = "FastAPI-Easy Team"
 __license__ = "AGPL-3.0"
 
-from .core.crud_router import CRUDRouter
+from .app import FastAPIEasy
 from .core.adapters import ORMAdapter
-from .core.hooks import HookRegistry
-from .core.errors import AppError, ErrorCode
 from .core.config import CRUDConfig
+from .core.crud_router import CRUDRouter
+from .core.errors import AppError, ErrorCode
+from .core.hooks import HookRegistry
 
 __all__ = [
     "CRUDRouter",
@@ -25,4 +26,5 @@ __all__ = [
     "AppError",
     "ErrorCode",
     "CRUDConfig",
+    "FastAPIEasy",
 ]
