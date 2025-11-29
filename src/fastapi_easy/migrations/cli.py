@@ -91,8 +91,10 @@ def plan(database_url: str, dry_run: bool):
         metadata = MetaData()
 
         CLIProgress.show_step(2, 3, "检测 Schema 变更...")
+        # 根据 --dry-run 标志选择执行模式
+        mode = ExecutionMode.DRY_RUN if dry_run else ExecutionMode.SAFE
         migration_engine = MigrationEngine(
-            engine, metadata, mode=ExecutionMode.DRY_RUN
+            engine, metadata, mode=mode
         )
         plan_result = asyncio.run(
             migration_engine.auto_migrate()
