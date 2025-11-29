@@ -23,9 +23,9 @@
 
 ## 高严重程度问题
 
-### 问题 1: SQL 注入风险 - distributed_lock.py
+### 问题 1: SQL 注入风险 - distributed_lock.py ✅ 已完全修复
 
-**位置**: `distributed_lock.py` 第 65, 112, 152, 181 行
+**位置**: `distributed_lock.py` 第 65, 112, 152, 181, 266 行
 
 **问题**: 使用字符串格式化而不是参数化查询
 
@@ -38,6 +38,11 @@ result = conn.execute(
 # 危险代码 - MySQL 锁名称未转义
 result = conn.execute(
     text(f"SELECT GET_LOCK('{self.lock_name}', {timeout})")
+)
+
+# 危险代码 - PostgreSQL release 方法 (初次遗漏)
+self._connection.execute(
+    text(f"SELECT pg_advisory_unlock({self.lock_id})")
 )
 ```
 
@@ -56,9 +61,17 @@ result = conn.execute(
     text("SELECT GET_LOCK(:lock_name, :timeout)"),
     {"lock_name": self.lock_name, "timeout": timeout}
 )
+
+# 安全代码 - PostgreSQL release 方法
+self._connection.execute(
+    text("SELECT pg_advisory_unlock(:lock_id)"),
+    {"lock_id": self.lock_id}
+)
 ```
 
-**优先级**: 🔴 高 (立即修复)
+**修复状态**: ✅ 已完全修复 (包括 acquire 和 release 方法)
+
+**优先级**: 🔴 高 (已修复)
 
 ---
 
