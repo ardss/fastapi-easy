@@ -1,0 +1,3240 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="一个生产级的 FastAPI 开发框架">
+      
+      
+        <meta name="author" content="FastAPI-Easy Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+    
+    
+      
+        <title>数据库Schema迁移最终解决方案 - FastAPI-Easy</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#schema" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="FastAPI-Easy" class="md-header__button md-logo" aria-label="FastAPI-Easy" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            FastAPI-Easy
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              数据库Schema迁移最终解决方案
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="purple"  aria-label="切换到深色模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换到深色模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="purple"  aria-label="切换到浅色模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换到浅色模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ardss/fastapi-easy" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="标签" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  首页
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tutorial/01-quick-start/" class="md-tabs__link">
+          
+  
+  
+  教程
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../guides/querying/" class="md-tabs__link">
+          
+  
+  
+  指南
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../adapters/" class="md-tabs__link">
+          
+  
+  
+  数据库适配器
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../security/" class="md-tabs__link">
+          
+  
+  
+  安全模块
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/architecture/" class="md-tabs__link">
+          
+  
+  
+  参考手册
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../development/contributing/" class="md-tabs__link">
+          
+  
+  
+  开发指南
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="FastAPI-Easy" class="md-nav__button md-logo" aria-label="FastAPI-Easy" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    FastAPI-Easy
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ardss/fastapi-easy" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    首页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    教程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    教程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/01-quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    快速上手
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/02-database-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    数据库集成
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/03-complete-example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    完整示例
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    指南
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/querying/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    查询指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/permissions-basic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    权限控制
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/audit-logging-basic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    审计日志
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/error-handling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    错误处理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/soft-delete/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    软删除
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/bulk-operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    批量操作
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/migrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    数据库迁移
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/graphql/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GraphQL支持
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/websocket/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WebSocket支持
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    最佳实践
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    故障排除
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    数据库适配器
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    数据库适配器
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adapters/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概览
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adapters/sqlalchemy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SQLAlchemy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adapters/tortoise/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tortoise ORM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adapters/mongodb/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MongoDB
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adapters/sqlmodel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SQLModel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安全模块
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    安全模块
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    概览
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/authentication/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    认证
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    权限控制
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/multi-tenancy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    多租户支持
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/audit-logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    审计日志
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/password-rate-limit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    密码与限流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/permission-loader/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    权限加载器
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/resource-checker/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    资源检查器
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/permission-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    权限引擎
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/security-config/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安全配置
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/security-best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    最佳实践
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    参考手册
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    参考手册
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    架构设计
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    数据流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    配置参数
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    钩子系统
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI工具
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    开发指南
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    开发指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    贡献指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../development/testing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    测试指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📋 执行摘要
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🎯 问题定义
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🎯 问题定义">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        当前状态
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        核心痛点
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        💡 解决方案架构
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="💡 解决方案架构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        三层递进式设计 (改进版)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schema_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema 同步模式 (新增)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔧 实现细节
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔧 实现细节">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第 1 层: 自动检测 + 清晰提示 (改进版)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="第 1 层: 自动检测 + 清晰提示 (改进版)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Schema 验证器 (支持异步、类型适配、错误恢复)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-crudrouter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 集成到 CRUDRouter (改进版)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第 2 层: 开发模式支持 (改进版)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="第 2 层: 开发模式支持 (改进版)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 开发环境快速迭代
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 迁移检查器
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第 3 层: 完全控制
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="第 3 层: 完全控制">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 自定义验证器接口
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📚 文档和指南
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📚 文档和指南">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docsusage18-database-migrationsmd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        新增文档: docs/usage/18-database-migrations.md
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🚀 实施计划 (改进版)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🚀 实施计划 (改进版)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第 1 阶段: 核心实现 (1.5 周)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第 2 阶段: 文档和示例 (1 周)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第 3 阶段: 测试和验证 (1.5 周)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        第 4 阶段: 发布 (1 周)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 验收标准 (改进版)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="✅ 验收标准 (改进版)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        功能验收
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        文档验收
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        测试验收
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📊 预期效果
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📊 预期效果">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        开发体验改进
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        生产环境风险降低
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🔄 后续改进方向
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔄 后续改进方向">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        短期 (下一个版本)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        中期 (2-3 个版本后)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        长期 (社区反馈后)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📝 总结
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ⚠️ 潜在问题分析与改进
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚠️ 潜在问题分析与改进">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        高优先级问题 (必须解决)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="高优先级问题 (必须解决)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        问题 1: 缺少异步支持 🔴
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        问题 2: 数据库类型兼容性 🔴
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        问题 3: 缺少错误恢复机制 🔴
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        中优先级问题 (应该解决)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="中优先级问题 (应该解决)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        问题 4: 并发访问竞态条件 🟡
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        问题 5: 性能优化 🟡
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        问题 6: 自定义类型支持 🟡
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_24" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        修改后的工作量估计
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        改进建议
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📞 反馈和讨论
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="schema">数据库Schema迁移最终解决方案<a class="headerlink" href="#schema" title="Permanent link">&para;</a></h1>
+<p><strong>文档版本</strong>: 1.0<br />
+<strong>最后更新</strong>: 2025-11-28<br />
+<strong>优先级</strong>: 🔴 高 (生产环境关键)<br />
+<strong>状态</strong>: ✅ 已批准实施</p>
+<hr />
+<h2 id="_1">📋 执行摘要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<p>本文档提出了一个<strong>三层递进式</strong>的Schema迁移解决方案，旨在：</p>
+<ol>
+<li><strong>保持框架简洁性</strong> - 不过度设计，不集成Alembic</li>
+<li><strong>提高开发体验</strong> - 清晰的错误提示和指导</li>
+<li><strong>确保生产安全</strong> - 启动时验证，快速失败</li>
+<li><strong>给予用户选择</strong> - 从自动检测到完全控制</li>
+</ol>
+<p><strong>核心原则</strong>: 隐藏 = 提供合理默认值 + 清晰错误提示 + 逃生舱口</p>
+<hr />
+<h2 id="_2">🎯 问题定义<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
+<h3 id="_3">当前状态<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>FastAPI-Easy 自动生成 CRUD API (✅ 完成)</li>
+<li>但不处理数据库Schema变更 (❌ 缺失)</li>
+<li>当ORM模型修改时，用户不知道怎么办 (❌ 体验差)</li>
+<li>错误延迟到生产环境 (❌ 风险高)</li>
+</ul>
+<h3 id="_4">核心痛点<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>开发者修改 ORM 模型
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    ↓
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>应用启动时崩溃
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    ↓
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>错误信息不清楚
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    ↓
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>开发者不知道怎么解决
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    ↓
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>生产环境故障 🔥
+</code></pre></div>
+<hr />
+<h2 id="_5">💡 解决方案架构<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h3 id="_6">三层递进式设计 (改进版)<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>┌─────────────────────────────────────────────────────┐
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>│ 第 1 层: 自动检测 + 清晰提示 (所有用户)              │
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>│ - 启动时验证 Schema                                  │
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>│ - 检测列添加、删除、类型修改、约束修改              │
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│ - 提供具体的解决步骤                                 │
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│ - 给出文档链接                                       │
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│ - 支持 schema_sync_mode 配置                         │
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>└─────────────────────────────────────────────────────┘
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>                          ↓
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>┌─────────────────────────────────────────────────────┐
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│ 第 2 层: 开发模式支持 (开发环境)                     │
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│ - schema_sync_mode=&quot;auto_recreate&quot; 自动重建表       │
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│ - 仅用于开发环境，不用于生产                        │
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│ - 自动清理孤立列                                     │
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│ - 支持快速迭代                                       │
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>└─────────────────────────────────────────────────────┘
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>                          ↓
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>┌─────────────────────────────────────────────────────┐
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│ 第 3 层: 完全控制 (高级用户)                         │
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│ - 自定义 Schema 验证器                               │
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>│ - 自定义迁移处理器                                   │
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>│ - 禁用自动检测                                       │
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>│ - 自定义约束验证规则                                 │
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>└─────────────────────────────────────────────────────┘
+</code></pre></div>
+<h3 id="schema_1">Schema 同步模式 (新增)<a class="headerlink" href="#schema_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>环境</th>
+<th>行为</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>validate</code></td>
+<td>生产</td>
+<td>只验证，不修改</td>
+<td>确保 Schema 匹配</td>
+</tr>
+<tr>
+<td><code>auto_recreate</code></td>
+<td>开发</td>
+<td>自动重建表</td>
+<td>快速迭代</td>
+</tr>
+<tr>
+<td><code>validate_lenient</code></td>
+<td>测试</td>
+<td>允许额外列</td>
+<td>灵活测试</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_7">🔧 实现细节<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
+<h3 id="1">第 1 层: 自动检测 + 清晰提示 (改进版)<a class="headerlink" href="#1" title="Permanent link">&para;</a></h3>
+<h4 id="11-schema">1.1 Schema 验证器 (支持异步、类型适配、错误恢复)<a class="headerlink" href="#11-schema" title="Permanent link">&para;</a></h4>
+<p><strong>文件</strong>: <code>src/fastapi_easy/core/schema_validator.py</code></p>
+<p><strong>关键改进</strong> (基于潜在问题分析):
+- ✅ 支持异步验证 (<code>validate_async()</code>)
+- ✅ 数据库类型规范化 (<code>TypeAdapter</code>)
+- ✅ 检测多余列 (<code>_validate_extra_columns()</code>)
+- ✅ 约束验证 (<code>_validate_constraints()</code>)
+- ✅ 开发模式 (<code>_auto_recreate_tables()</code>)
+- ✅ 详细日志记录</p>
+<p><strong>核心功能</strong>:
+- 验证表是否存在
+- 验证列是否存在
+- 验证列类型匹配
+- 验证 nullable 约束
+- 验证 unique 和 default 约束
+- 检测孤立列 (数据库中有但 ORM 中没有)
+- 提供清晰的错误消息和解决方案</p>
+<h4 id="12-crudrouter">1.2 集成到 CRUDRouter (改进版)<a class="headerlink" href="#12-crudrouter" title="Permanent link">&para;</a></h4>
+<p><strong>修改</strong>: <code>src/fastapi_easy/core/crud_router.py</code></p>
+<p><strong>新增参数</strong>:
+- <code>schema_sync_mode</code>: Schema 同步模式 (validate, auto_recreate, validate_lenient)</p>
+<p><strong>新增方法</strong>:
+- <code>validate_schema_async()</code>: 异步验证 Schema
+- <code>_validate_with_lock()</code>: 使用分布式锁进行验证
+- <code>_acquire_schema_lock()</code>: 获取分布式锁
+- <code>_release_schema_lock()</code>: 释放分布式锁</p>
+<p><strong>集成点</strong>:
+- 在 FastAPI 的 <code>lifespan</code> 事件中调用 <code>validate_schema_async()</code>
+- 支持多实例部署 (使用分布式锁)</p>
+<hr />
+<h3 id="2">第 2 层: 开发模式支持 (改进版)<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
+<h4 id="21">2.1 开发环境快速迭代<a class="headerlink" href="#21" title="Permanent link">&para;</a></h4>
+<p><strong>使用场景</strong>:
+- 开发环境中频繁修改模型
+- 不需要保留数据
+- 需要快速迭代</p>
+<p><strong>配置</strong>:
+- 开发环境: <code>schema_sync_mode="auto_recreate"</code> (自动重建表)
+- 生产环境: <code>schema_sync_mode="validate"</code> (只验证，不修改)
+- 测试环境: <code>schema_sync_mode="validate_lenient"</code> (允许额外列)</p>
+<p><strong>工作流</strong>:
+1. 修改 ORM 模型
+2. 应用启动时自动重建表
+3. 无需手动运行迁移命令
+4. 快速测试新功能</p>
+<p><strong>警告</strong>: ⚠️ 仅用于开发环境，生产环境必须使用 <code>validate</code> 模式</p>
+<hr />
+<h4 id="22">2.2 迁移检查器<a class="headerlink" href="#22" title="Permanent link">&para;</a></h4>
+<p><strong>文件</strong>: <code>src/fastapi_easy/core/migration_checker.py</code></p>
+<p><strong>功能</strong>:
+- 检查 Alembic 是否已初始化
+- 获取迁移状态
+- 提供初始化建议</p>
+<p><strong>用途</strong>:
+- 在应用启动时检查迁移配置
+- 为用户提供设置指导</p>
+<hr />
+<h3 id="3">第 3 层: 完全控制<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
+<h4 id="31">3.1 自定义验证器接口<a class="headerlink" href="#31" title="Permanent link">&para;</a></h4>
+<p><strong>功能</strong>:
+- 支持自定义 Schema 验证器
+- 支持自定义约束验证规则
+- 支持禁用自动检测</p>
+<p><strong>实现方式</strong>:
+- 提供 <code>CustomSchemaValidator</code> 抽象基类
+- 用户可以继承并实现自定义逻辑
+- 在 CRUDRouter 中支持 <code>custom_schema_validator</code> 参数</p>
+<hr />
+<h2 id="_8">📚 文档和指南<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h2>
+<h3 id="docsusage18-database-migrationsmd">新增文档: <code>docs/usage/18-database-migrations.md</code><a class="headerlink" href="#docsusage18-database-migrationsmd" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="gh"># 数据库迁移指南</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="gu">## 概述</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>当你修改 ORM 模型的字段时，需要同步更新数据库 Schema。
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>FastAPI-Easy 提供了自动检测和清晰的错误提示来帮助你。
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="gu">## 快速开始</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="gu">### 1. 安装 Alembic</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>\`\`\`bash
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>pip install alembic
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>\`\`\`
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="gu">### 2. 初始化 Alembic</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>\`\`\`bash
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>alembic init alembic
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>\`\`\`
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="gu">### 3. 配置 Alembic</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>编辑 \`alembic/env.py\`:
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>\`\`\`python
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>from sqlalchemy import engine_from_config
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>from sqlalchemy.pool import StaticPool
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>from alembic import context
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>from app.models import Base  # 导入你的 Base
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>target_metadata = Base.metadata
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>def run_migrations_online():
+<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a>    configuration = config.get_section(config.config_ini_section)
+<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a>    configuration[&quot;sqlalchemy.url&quot;] = &quot;your_database_url&quot;
+<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a>
+<a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a>    connectable = engine_from_config(
+<a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a>        configuration,
+<a id="__codelineno-2-40" name="__codelineno-2-40" href="#__codelineno-2-40"></a>        prefix=&quot;sqlalchemy.&quot;,
+<a id="__codelineno-2-41" name="__codelineno-2-41" href="#__codelineno-2-41"></a>        poolclass=StaticPool,
+<a id="__codelineno-2-42" name="__codelineno-2-42" href="#__codelineno-2-42"></a>    )
+<a id="__codelineno-2-43" name="__codelineno-2-43" href="#__codelineno-2-43"></a>
+<a id="__codelineno-2-44" name="__codelineno-2-44" href="#__codelineno-2-44"></a>    with connectable.connect() as connection:
+<a id="__codelineno-2-45" name="__codelineno-2-45" href="#__codelineno-2-45"></a>        context.configure(
+<a id="__codelineno-2-46" name="__codelineno-2-46" href="#__codelineno-2-46"></a>            connection=connection, target_metadata=target_metadata
+<a id="__codelineno-2-47" name="__codelineno-2-47" href="#__codelineno-2-47"></a>        )
+<a id="__codelineno-2-48" name="__codelineno-2-48" href="#__codelineno-2-48"></a>
+<a id="__codelineno-2-49" name="__codelineno-2-49" href="#__codelineno-2-49"></a>        with context.begin_transaction():
+<a id="__codelineno-2-50" name="__codelineno-2-50" href="#__codelineno-2-50"></a>            context.run_migrations()
+<a id="__codelineno-2-51" name="__codelineno-2-51" href="#__codelineno-2-51"></a>\`\`\`
+<a id="__codelineno-2-52" name="__codelineno-2-52" href="#__codelineno-2-52"></a>
+<a id="__codelineno-2-53" name="__codelineno-2-53" href="#__codelineno-2-53"></a><span class="gu">### 4. 创建初始迁移</span>
+<a id="__codelineno-2-54" name="__codelineno-2-54" href="#__codelineno-2-54"></a>
+<a id="__codelineno-2-55" name="__codelineno-2-55" href="#__codelineno-2-55"></a>\`\`\`bash
+<a id="__codelineno-2-56" name="__codelineno-2-56" href="#__codelineno-2-56"></a>alembic revision --autogenerate -m &quot;Initial migration&quot;
+<a id="__codelineno-2-57" name="__codelineno-2-57" href="#__codelineno-2-57"></a>\`\`\`
+<a id="__codelineno-2-58" name="__codelineno-2-58" href="#__codelineno-2-58"></a>
+<a id="__codelineno-2-59" name="__codelineno-2-59" href="#__codelineno-2-59"></a><span class="gu">### 5. 应用迁移</span>
+<a id="__codelineno-2-60" name="__codelineno-2-60" href="#__codelineno-2-60"></a>
+<a id="__codelineno-2-61" name="__codelineno-2-61" href="#__codelineno-2-61"></a>\`\`\`bash
+<a id="__codelineno-2-62" name="__codelineno-2-62" href="#__codelineno-2-62"></a>alembic upgrade head
+<a id="__codelineno-2-63" name="__codelineno-2-63" href="#__codelineno-2-63"></a>\`\`\`
+<a id="__codelineno-2-64" name="__codelineno-2-64" href="#__codelineno-2-64"></a>
+<a id="__codelineno-2-65" name="__codelineno-2-65" href="#__codelineno-2-65"></a><span class="gu">## 常见场景</span>
+<a id="__codelineno-2-66" name="__codelineno-2-66" href="#__codelineno-2-66"></a>
+<a id="__codelineno-2-67" name="__codelineno-2-67" href="#__codelineno-2-67"></a><span class="gu">### 场景 1: 添加新字段</span>
+<a id="__codelineno-2-68" name="__codelineno-2-68" href="#__codelineno-2-68"></a>
+<a id="__codelineno-2-69" name="__codelineno-2-69" href="#__codelineno-2-69"></a>修改 ORM 模型:
+<a id="__codelineno-2-70" name="__codelineno-2-70" href="#__codelineno-2-70"></a>
+<a id="__codelineno-2-71" name="__codelineno-2-71" href="#__codelineno-2-71"></a>\`\`\`python
+<a id="__codelineno-2-72" name="__codelineno-2-72" href="#__codelineno-2-72"></a>class Item(Base):
+<a id="__codelineno-2-73" name="__codelineno-2-73" href="#__codelineno-2-73"></a>    <span class="gs">__tablename__</span> = &quot;items&quot;
+<a id="__codelineno-2-74" name="__codelineno-2-74" href="#__codelineno-2-74"></a>    id = Column(Integer, primary_key=True)
+<a id="__codelineno-2-75" name="__codelineno-2-75" href="#__codelineno-2-75"></a>    name = Column(String)
+<a id="__codelineno-2-76" name="__codelineno-2-76" href="#__codelineno-2-76"></a>    stock = Column(Integer)  # 新增字段
+<a id="__codelineno-2-77" name="__codelineno-2-77" href="#__codelineno-2-77"></a>\`\`\`
+<a id="__codelineno-2-78" name="__codelineno-2-78" href="#__codelineno-2-78"></a>
+<a id="__codelineno-2-79" name="__codelineno-2-79" href="#__codelineno-2-79"></a>生成迁移:
+<a id="__codelineno-2-80" name="__codelineno-2-80" href="#__codelineno-2-80"></a>
+<a id="__codelineno-2-81" name="__codelineno-2-81" href="#__codelineno-2-81"></a>\`\`\`bash
+<a id="__codelineno-2-82" name="__codelineno-2-82" href="#__codelineno-2-82"></a>alembic revision --autogenerate -m &quot;Add stock column&quot;
+<a id="__codelineno-2-83" name="__codelineno-2-83" href="#__codelineno-2-83"></a>\`\`\`
+<a id="__codelineno-2-84" name="__codelineno-2-84" href="#__codelineno-2-84"></a>
+<a id="__codelineno-2-85" name="__codelineno-2-85" href="#__codelineno-2-85"></a>应用迁移:
+<a id="__codelineno-2-86" name="__codelineno-2-86" href="#__codelineno-2-86"></a>
+<a id="__codelineno-2-87" name="__codelineno-2-87" href="#__codelineno-2-87"></a>\`\`\`bash
+<a id="__codelineno-2-88" name="__codelineno-2-88" href="#__codelineno-2-88"></a>alembic upgrade head
+<a id="__codelineno-2-89" name="__codelineno-2-89" href="#__codelineno-2-89"></a>\`\`\`
+<a id="__codelineno-2-90" name="__codelineno-2-90" href="#__codelineno-2-90"></a>
+<a id="__codelineno-2-91" name="__codelineno-2-91" href="#__codelineno-2-91"></a><span class="gu">### 场景 2: 删除字段</span>
+<a id="__codelineno-2-92" name="__codelineno-2-92" href="#__codelineno-2-92"></a>
+<a id="__codelineno-2-93" name="__codelineno-2-93" href="#__codelineno-2-93"></a>修改 ORM 模型:
+<a id="__codelineno-2-94" name="__codelineno-2-94" href="#__codelineno-2-94"></a>
+<a id="__codelineno-2-95" name="__codelineno-2-95" href="#__codelineno-2-95"></a>\`\`\`python
+<a id="__codelineno-2-96" name="__codelineno-2-96" href="#__codelineno-2-96"></a>class Item(Base):
+<a id="__codelineno-2-97" name="__codelineno-2-97" href="#__codelineno-2-97"></a>    <span class="gs">__tablename__</span> = &quot;items&quot;
+<a id="__codelineno-2-98" name="__codelineno-2-98" href="#__codelineno-2-98"></a>    id = Column(Integer, primary_key=True)
+<a id="__codelineno-2-99" name="__codelineno-2-99" href="#__codelineno-2-99"></a>    name = Column(String)
+<a id="__codelineno-2-100" name="__codelineno-2-100" href="#__codelineno-2-100"></a>    # 删除了 description 字段
+<a id="__codelineno-2-101" name="__codelineno-2-101" href="#__codelineno-2-101"></a>\`\`\`
+<a id="__codelineno-2-102" name="__codelineno-2-102" href="#__codelineno-2-102"></a>
+<a id="__codelineno-2-103" name="__codelineno-2-103" href="#__codelineno-2-103"></a>生成迁移:
+<a id="__codelineno-2-104" name="__codelineno-2-104" href="#__codelineno-2-104"></a>
+<a id="__codelineno-2-105" name="__codelineno-2-105" href="#__codelineno-2-105"></a>\`\`\`bash
+<a id="__codelineno-2-106" name="__codelineno-2-106" href="#__codelineno-2-106"></a>alembic revision --autogenerate -m &quot;Remove description column&quot;
+<a id="__codelineno-2-107" name="__codelineno-2-107" href="#__codelineno-2-107"></a>\`\`\`
+<a id="__codelineno-2-108" name="__codelineno-2-108" href="#__codelineno-2-108"></a>
+<a id="__codelineno-2-109" name="__codelineno-2-109" href="#__codelineno-2-109"></a><span class="gs">**重要**</span>: 检查生成的迁移脚本，确保数据备份。
+<a id="__codelineno-2-110" name="__codelineno-2-110" href="#__codelineno-2-110"></a>
+<a id="__codelineno-2-111" name="__codelineno-2-111" href="#__codelineno-2-111"></a>应用迁移:
+<a id="__codelineno-2-112" name="__codelineno-2-112" href="#__codelineno-2-112"></a>
+<a id="__codelineno-2-113" name="__codelineno-2-113" href="#__codelineno-2-113"></a>\`\`\`bash
+<a id="__codelineno-2-114" name="__codelineno-2-114" href="#__codelineno-2-114"></a>alembic upgrade head
+<a id="__codelineno-2-115" name="__codelineno-2-115" href="#__codelineno-2-115"></a>\`\`\`
+<a id="__codelineno-2-116" name="__codelineno-2-116" href="#__codelineno-2-116"></a>
+<a id="__codelineno-2-117" name="__codelineno-2-117" href="#__codelineno-2-117"></a><span class="gu">### 场景 3: 修改字段类型</span>
+<a id="__codelineno-2-118" name="__codelineno-2-118" href="#__codelineno-2-118"></a>
+<a id="__codelineno-2-119" name="__codelineno-2-119" href="#__codelineno-2-119"></a>修改 ORM 模型:
+<a id="__codelineno-2-120" name="__codelineno-2-120" href="#__codelineno-2-120"></a>
+<a id="__codelineno-2-121" name="__codelineno-2-121" href="#__codelineno-2-121"></a>\`\`\`python
+<a id="__codelineno-2-122" name="__codelineno-2-122" href="#__codelineno-2-122"></a>class Item(Base):
+<a id="__codelineno-2-123" name="__codelineno-2-123" href="#__codelineno-2-123"></a>    <span class="gs">__tablename__</span> = &quot;items&quot;
+<a id="__codelineno-2-124" name="__codelineno-2-124" href="#__codelineno-2-124"></a>    id = Column(Integer, primary_key=True)
+<a id="__codelineno-2-125" name="__codelineno-2-125" href="#__codelineno-2-125"></a>    price = Column(Numeric(10, 2))  # 从 Float 改为 Numeric
+<a id="__codelineno-2-126" name="__codelineno-2-126" href="#__codelineno-2-126"></a>\`\`\`
+<a id="__codelineno-2-127" name="__codelineno-2-127" href="#__codelineno-2-127"></a>
+<a id="__codelineno-2-128" name="__codelineno-2-128" href="#__codelineno-2-128"></a>生成迁移:
+<a id="__codelineno-2-129" name="__codelineno-2-129" href="#__codelineno-2-129"></a>
+<a id="__codelineno-2-130" name="__codelineno-2-130" href="#__codelineno-2-130"></a>\`\`\`bash
+<a id="__codelineno-2-131" name="__codelineno-2-131" href="#__codelineno-2-131"></a>alembic revision --autogenerate -m &quot;Change price type to Numeric&quot;
+<a id="__codelineno-2-132" name="__codelineno-2-132" href="#__codelineno-2-132"></a>\`\`\`
+<a id="__codelineno-2-133" name="__codelineno-2-133" href="#__codelineno-2-133"></a>
+<a id="__codelineno-2-134" name="__codelineno-2-134" href="#__codelineno-2-134"></a>应用迁移:
+<a id="__codelineno-2-135" name="__codelineno-2-135" href="#__codelineno-2-135"></a>
+<a id="__codelineno-2-136" name="__codelineno-2-136" href="#__codelineno-2-136"></a>\`\`\`bash
+<a id="__codelineno-2-137" name="__codelineno-2-137" href="#__codelineno-2-137"></a>alembic upgrade head
+<a id="__codelineno-2-138" name="__codelineno-2-138" href="#__codelineno-2-138"></a>\`\`\`
+<a id="__codelineno-2-139" name="__codelineno-2-139" href="#__codelineno-2-139"></a>
+<a id="__codelineno-2-140" name="__codelineno-2-140" href="#__codelineno-2-140"></a><span class="gu">## 错误排查</span>
+<a id="__codelineno-2-141" name="__codelineno-2-141" href="#__codelineno-2-141"></a>
+<a id="__codelineno-2-142" name="__codelineno-2-142" href="#__codelineno-2-142"></a><span class="gu">### 错误: &quot;Column &#39;xxx&#39; not found in table &#39;yyy&#39;&quot;</span>
+<a id="__codelineno-2-143" name="__codelineno-2-143" href="#__codelineno-2-143"></a>
+<a id="__codelineno-2-144" name="__codelineno-2-144" href="#__codelineno-2-144"></a><span class="gs">**原因**</span>: 你修改了 ORM 模型，但没有应用迁移。
+<a id="__codelineno-2-145" name="__codelineno-2-145" href="#__codelineno-2-145"></a>
+<a id="__codelineno-2-146" name="__codelineno-2-146" href="#__codelineno-2-146"></a><span class="gs">**解决方案**</span>:
+<a id="__codelineno-2-147" name="__codelineno-2-147" href="#__codelineno-2-147"></a>
+<a id="__codelineno-2-148" name="__codelineno-2-148" href="#__codelineno-2-148"></a><span class="k">1.</span> 生成迁移: \`alembic revision --autogenerate -m &quot;Fix schema&quot;\`
+<a id="__codelineno-2-149" name="__codelineno-2-149" href="#__codelineno-2-149"></a><span class="k">2.</span> 应用迁移: \`alembic upgrade head\`
+<a id="__codelineno-2-150" name="__codelineno-2-150" href="#__codelineno-2-150"></a><span class="k">3.</span> 重启应用
+<a id="__codelineno-2-151" name="__codelineno-2-151" href="#__codelineno-2-151"></a>
+<a id="__codelineno-2-152" name="__codelineno-2-152" href="#__codelineno-2-152"></a><span class="gu">### 错误: &quot;Alembic is not initialized&quot;</span>
+<a id="__codelineno-2-153" name="__codelineno-2-153" href="#__codelineno-2-153"></a>
+<a id="__codelineno-2-154" name="__codelineno-2-154" href="#__codelineno-2-154"></a><span class="gs">**原因**</span>: 你没有初始化 Alembic。
+<a id="__codelineno-2-155" name="__codelineno-2-155" href="#__codelineno-2-155"></a>
+<a id="__codelineno-2-156" name="__codelineno-2-156" href="#__codelineno-2-156"></a><span class="gs">**解决方案**</span>:
+<a id="__codelineno-2-157" name="__codelineno-2-157" href="#__codelineno-2-157"></a>
+<a id="__codelineno-2-158" name="__codelineno-2-158" href="#__codelineno-2-158"></a><span class="k">1.</span> 安装 Alembic: \`pip install alembic\`
+<a id="__codelineno-2-159" name="__codelineno-2-159" href="#__codelineno-2-159"></a><span class="k">2.</span> 初始化: \`alembic init alembic\`
+<a id="__codelineno-2-160" name="__codelineno-2-160" href="#__codelineno-2-160"></a><span class="k">3.</span> 配置 \`alembic/env.py\`
+<a id="__codelineno-2-161" name="__codelineno-2-161" href="#__codelineno-2-161"></a><span class="k">4.</span> 创建初始迁移: \`alembic revision --autogenerate -m &quot;Initial migration&quot;\`
+<a id="__codelineno-2-162" name="__codelineno-2-162" href="#__codelineno-2-162"></a><span class="k">5.</span> 应用迁移: \`alembic upgrade head\`
+<a id="__codelineno-2-163" name="__codelineno-2-163" href="#__codelineno-2-163"></a>
+<a id="__codelineno-2-164" name="__codelineno-2-164" href="#__codelineno-2-164"></a><span class="gu">## 最佳实践</span>
+<a id="__codelineno-2-165" name="__codelineno-2-165" href="#__codelineno-2-165"></a>
+<a id="__codelineno-2-166" name="__codelineno-2-166" href="#__codelineno-2-166"></a><span class="k">1.</span> <span class="gs">**总是检查生成的迁移脚本**</span> - Alembic 的自动生成不是 100% 准确
+<a id="__codelineno-2-167" name="__codelineno-2-167" href="#__codelineno-2-167"></a><span class="k">2.</span> <span class="gs">**在应用到生产前测试迁移**</span> - 在测试环境先运行一遍
+<a id="__codelineno-2-168" name="__codelineno-2-168" href="#__codelineno-2-168"></a><span class="k">3.</span> <span class="gs">**保持迁移脚本在版本控制中**</span> - 迁移脚本是代码的一部分
+<a id="__codelineno-2-169" name="__codelineno-2-169" href="#__codelineno-2-169"></a><span class="k">4.</span> <span class="gs">**为大型迁移创建备份**</span> - 删除数据前备份数据库
+<a id="__codelineno-2-170" name="__codelineno-2-170" href="#__codelineno-2-170"></a><span class="k">5.</span> <span class="gs">**使用有意义的迁移消息**</span> - 帮助团队理解变更
+<a id="__codelineno-2-171" name="__codelineno-2-171" href="#__codelineno-2-171"></a>
+<a id="__codelineno-2-172" name="__codelineno-2-172" href="#__codelineno-2-172"></a><span class="gu">## 参考资源</span>
+<a id="__codelineno-2-173" name="__codelineno-2-173" href="#__codelineno-2-173"></a>
+<a id="__codelineno-2-174" name="__codelineno-2-174" href="#__codelineno-2-174"></a><span class="k">-</span><span class="w"> </span>[<span class="nt">Alembic 官方文档</span>](<span class="na">https://alembic.sqlalchemy.org/</span>)
+<a id="__codelineno-2-175" name="__codelineno-2-175" href="#__codelineno-2-175"></a><span class="k">-</span><span class="w"> </span>[<span class="nt">SQLAlchemy ORM 文档</span>](<span class="na">https://docs.sqlalchemy.org/en/20/orm/</span>)
+<a id="__codelineno-2-176" name="__codelineno-2-176" href="#__codelineno-2-176"></a><span class="k">-</span><span class="w"> </span>[<span class="nt">FastAPI-Easy Schema 验证</span>](<span class="na">../SCHEMA_MIGRATION_FINAL_SOLUTION.md</span>)
+</code></pre></div>
+<hr />
+<h2 id="_9">🚀 实施计划 (改进版)<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<h3 id="1-15">第 1 阶段: 核心实现 (1.5 周)<a class="headerlink" href="#1-15" title="Permanent link">&para;</a></h3>
+<p><strong>基础功能</strong>:
+- [ ] 实现 <code>SchemaValidator</code> 类 (~200 行)
+- [ ] 实现 <code>TypeAdapter</code> 类 (类型规范化)
+- [ ] 实现 <code>_validate_extra_columns()</code> (检查多余列)
+- [ ] 实现 <code>_validate_constraints()</code> (约束验证)
+- [ ] 实现 <code>_auto_recreate_tables()</code> (开发模式)</p>
+<p><strong>集成和异步</strong>:
+- [ ] 集成到 <code>CRUDRouter</code> (支持 <code>schema_sync_mode</code>)
+- [ ] 实现 <code>validate_schema_async()</code> (异步验证)
+- [ ] 实现分布式锁机制 (多实例支持)
+- [ ] 添加详细日志记录</p>
+<p><strong>测试</strong>:
+- [ ] 单元测试 (~450 行)
+- [ ] 异步验证测试
+- [ ] 多实例竞态条件测试</p>
+<h3 id="2-1">第 2 阶段: 文档和示例 (1 周)<a class="headerlink" href="#2-1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] 创建迁移指南文档</li>
+<li>[ ] 创建示例: <code>examples/10_with_schema_migration.py</code> (开发模式)</li>
+<li>[ ] 创建示例: <code>examples/11_with_schema_validation.py</code> (生产模式)</li>
+<li>[ ] 更新 README.md</li>
+<li>[ ] 更新快速开始指南</li>
+</ul>
+<h3 id="3-15">第 3 阶段: 测试和验证 (1.5 周)<a class="headerlink" href="#3-15" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] 集成测试 (~300 行)</li>
+<li>[ ] 端到端测试 (~200 行)</li>
+<li>[ ] 多数据库兼容性测试 (PostgreSQL, MySQL, SQLite)</li>
+<li>[ ] 性能基准测试 (启动时间)</li>
+<li>[ ] 用户反馈收集</li>
+<li>[ ] 文档审查</li>
+</ul>
+<h3 id="4-1">第 4 阶段: 发布 (1 周)<a class="headerlink" href="#4-1" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] 版本号更新: 0.1.4</li>
+<li>[ ] 发布说明 (包含破坏性变更说明)</li>
+<li>[ ] 社区通知</li>
+<li>[ ] 监控用户反馈</li>
+</ul>
+<hr />
+<h2 id="_10">✅ 验收标准 (改进版)<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h2>
+<h3 id="_11">功能验收<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p><strong>第 1 层 (基础)</strong>:
+- [ ] Schema 验证在启动时执行
+- [ ] 检测列添加、删除、类型修改
+- [ ] 检测约束修改 (nullable, unique, default)
+- [ ] 检测多余列 (孤立列)
+- [ ] 错误消息清晰且可操作
+- [ ] 提供文档链接</p>
+<p><strong>第 2 层 (开发模式)</strong>:
+- [ ] <code>schema_sync_mode="auto_recreate"</code> 自动重建表
+- [ ] 开发模式下无需手动迁移
+- [ ] 自动清理孤立列</p>
+<p><strong>第 3 层 (高级)</strong>:
+- [ ] 支持自定义验证器
+- [ ] 支持自定义约束规则
+- [ ] 支持禁用自动验证</p>
+<p><strong>异步和并发</strong>:
+- [ ] 异步验证 (<code>validate_schema_async()</code>)
+- [ ] 分布式锁支持 (多实例)
+- [ ] 详细日志记录</p>
+<h3 id="_12">文档验收<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] 迁移指南完整 (包括开发模式)</li>
+<li>[ ] 示例代码可运行 (开发和生产)</li>
+<li>[ ] 常见问题已解答</li>
+<li>[ ] 最佳实践已说明</li>
+<li>[ ] 性能基准已说明</li>
+</ul>
+<h3 id="_13">测试验收<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] 单元测试覆盖 &gt; 85%</li>
+<li>[ ] 集成测试通过 (所有 ORM)</li>
+<li>[ ] 端到端测试通过</li>
+<li>[ ] 多数据库兼容性测试通过</li>
+<li>[ ] 性能基准: 启动时间 &lt; 2 秒 (100 个表)</li>
+<li>[ ] 异步验证测试通过</li>
+<li>[ ] 多实例竞态条件测试通过</li>
+</ul>
+<hr />
+<h2 id="_14">📊 预期效果<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h2>
+<h3 id="_15">开发体验改进<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>改进前</th>
+<th>改进后</th>
+<th>提升</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>错误检测时间</td>
+<td>生产环境</td>
+<td>启动时</td>
+<td>立即</td>
+</tr>
+<tr>
+<td>错误信息清晰度</td>
+<td>模糊</td>
+<td>清晰</td>
+<td>⬆️⬆️⬆️</td>
+</tr>
+<tr>
+<td>解决问题时间</td>
+<td>30 分钟</td>
+<td>5 分钟</td>
+<td>6x</td>
+</tr>
+<tr>
+<td>用户困惑度</td>
+<td>高</td>
+<td>低</td>
+<td>⬇️⬇️⬇️</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_16">生产环境风险降低<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>风险</th>
+<th>改进前</th>
+<th>改进后</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Schema 不匹配导致故障</td>
+<td>高</td>
+<td>低</td>
+</tr>
+<tr>
+<td>数据丢失</td>
+<td>中</td>
+<td>低</td>
+</tr>
+<tr>
+<td>停机时间</td>
+<td>长</td>
+<td>短</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_17">🔄 后续改进方向<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h2>
+<h3 id="_18">短期 (下一个版本)<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] 自动迁移建议</li>
+<li>[ ] 迁移前的确认对话</li>
+<li>[ ] 迁移历史追踪</li>
+</ul>
+<h3 id="2-3">中期 (2-3 个版本后)<a class="headerlink" href="#2-3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] 集成 Alembic 初始化</li>
+<li>[ ] 自动生成迁移脚本</li>
+<li>[ ] 迁移测试工具</li>
+</ul>
+<h3 id="_19">长期 (社区反馈后)<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h3>
+<ul>
+<li>[ ] 迁移版本管理</li>
+<li>[ ] 多环境迁移支持</li>
+<li>[ ] 迁移性能优化</li>
+</ul>
+<hr />
+<h2 id="_20">📝 总结<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h2>
+<p>这个三层递进式的解决方案：</p>
+<ol>
+<li><strong>第 1 层</strong> - 为所有用户提供基础保护</li>
+<li><strong>第 2 层</strong> - 为中级用户提供便利</li>
+<li><strong>第 3 层</strong> - 为高级用户提供完全控制</li>
+</ol>
+<p><strong>优点</strong>:
+- ✅ 保持框架简洁
+- ✅ 提高开发体验
+- ✅ 确保生产安全
+- ✅ 给予用户选择</p>
+<p><strong>不足</strong>:
+- 仍需用户学习 Alembic
+- 不能完全自动化迁移
+- 需要用户主动执行迁移</p>
+<p><strong>结论</strong>: 这是在<strong>简洁性</strong>和<strong>完整性</strong>之间的最优平衡。</p>
+<hr />
+<h2 id="_21">⚠️ 潜在问题分析与改进<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h2>
+<h3 id="_22">高优先级问题 (必须解决)<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h3>
+<h4 id="1_1">问题 1: 缺少异步支持 🔴<a class="headerlink" href="#1_1" title="Permanent link">&para;</a></h4>
+<p><strong>问题</strong>: 当前的 <code>validate()</code> 是同步方法，会阻塞异步应用启动。</p>
+<p><strong>影响</strong>: SQLAlchemy 异步、Tortoise ORM、MongoDB 等异步 ORM</p>
+<p><strong>解决方案</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">class</span> <span class="nc">SchemaValidator</span><span class="p">:</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;同步验证&quot;&quot;&quot;</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="k">pass</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">validate_async</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;异步验证 - 支持异步数据库连接&quot;&quot;&quot;</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>        <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">begin</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>            <span class="n">inspector</span> <span class="o">=</span> <span class="n">inspect</span><span class="p">(</span><span class="n">conn</span><span class="p">)</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>            <span class="c1"># ... 验证逻辑</span>
+</code></pre></div></p>
+<p><strong>工作量</strong>: 2-3 小时</p>
+<hr />
+<h4 id="2_1">问题 2: 数据库类型兼容性 🔴<a class="headerlink" href="#2_1" title="Permanent link">&para;</a></h4>
+<p><strong>问题</strong>: 字符串比较 <code>str(orm_type) != str(db_type)</code> 在不同数据库中失败。</p>
+<p><strong>示例</strong>:
+- PostgreSQL: <code>VARCHAR(50)</code> vs <code>character varying(50)</code> ❌
+- MySQL: <code>INTEGER</code> vs <code>int</code> ❌
+- SQLite: <code>TEXT</code> vs <code>text</code> ❌</p>
+<p><strong>解决方案</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">class</span> <span class="nc">TypeAdapter</span><span class="p">:</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;数据库类型适配器&quot;&quot;&quot;</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="nd">@staticmethod</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="k">def</span> <span class="nf">normalize_type</span><span class="p">(</span><span class="n">db_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dialect</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;规范化数据库类型&quot;&quot;&quot;</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>        <span class="n">type_map</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>            <span class="s1">&#39;postgresql&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;character varying&#39;</span><span class="p">:</span> <span class="s1">&#39;VARCHAR&#39;</span><span class="p">,</span> <span class="s1">&#39;integer&#39;</span><span class="p">:</span> <span class="s1">&#39;INTEGER&#39;</span><span class="p">},</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>            <span class="s1">&#39;mysql&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;varchar&#39;</span><span class="p">:</span> <span class="s1">&#39;VARCHAR&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span> <span class="s1">&#39;INTEGER&#39;</span><span class="p">},</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>            <span class="s1">&#39;sqlite&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="s1">&#39;TEXT&#39;</span><span class="p">},</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>        <span class="p">}</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>        <span class="n">mapping</span> <span class="o">=</span> <span class="n">type_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dialect</span><span class="p">,</span> <span class="p">{})</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>        <span class="k">return</span> <span class="n">mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">db_type</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">db_type</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>工作量</strong>: 3-4 小时</p>
+<hr />
+<h4 id="3_1">问题 3: 缺少错误恢复机制 🔴<a class="headerlink" href="#3_1" title="Permanent link">&para;</a></h4>
+<p><strong>问题</strong>: Schema 验证失败时应用立即崩溃，无法恢复。</p>
+<p><strong>场景</strong>:
+- 开发环境: 想快速测试，但 Schema 不匹配
+- 生产环境: Schema 验证失败导致服务中断
+- 测试环境: Schema 可能不完全匹配</p>
+<p><strong>解决方案</strong>:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">class</span> <span class="nc">SchemaValidator</span><span class="p">:</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        <span class="n">engine</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="n">base</span><span class="p">,</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>        <span class="n">strict_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># 严格模式</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        <span class="n">ignore_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># 忽略的字段</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>        <span class="n">allow_extra_columns</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># 允许额外列</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="p">):</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">strict_mode</span> <span class="o">=</span> <span class="n">strict_mode</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">ignore_fields</span> <span class="o">=</span> <span class="n">ignore_fields</span> <span class="ow">or</span> <span class="p">[]</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">allow_extra_columns</span> <span class="o">=</span> <span class="n">allow_extra_columns</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    <span class="k">def</span> <span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ValidationResult</span><span class="p">:</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;返回验证结果，而不是直接抛出异常&quot;&quot;&quot;</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">ValidationResult</span><span class="p">()</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>        <span class="k">for</span> <span class="n">table</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">tables</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>            <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">_validate_table</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>            <span class="k">except</span> <span class="n">SchemaValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict_mode</span><span class="p">:</span>
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>                    <span class="k">raise</span>
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>                <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>                    <span class="n">result</span><span class="o">.</span><span class="n">add_warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>        <span class="k">return</span> <span class="n">result</span>
+</code></pre></div></p>
+<p><strong>工作量</strong>: 4-5 小时</p>
+<hr />
+<h3 id="_23">中优先级问题 (应该解决)<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h3>
+<h4 id="4">问题 4: 并发访问竞态条件 🟡<a class="headerlink" href="#4" title="Permanent link">&para;</a></h4>
+<p><strong>问题</strong>: 多个应用实例同时启动时的竞态条件。</p>
+<p><strong>解决方案</strong>: 使用数据库级别的分布式锁</p>
+<p><strong>工作量</strong>: 2-3 小时</p>
+<hr />
+<h4 id="5">问题 5: 性能优化 🟡<a class="headerlink" href="#5" title="Permanent link">&para;</a></h4>
+<p><strong>问题</strong>: 对每个表和列都进行单独的数据库查询，导致启动缓慢。</p>
+<p><strong>优化</strong>: 批量获取表和列信息</p>
+<p><strong>工作量</strong>: 1-2 小时</p>
+<hr />
+<h4 id="6">问题 6: 自定义类型支持 🟡<a class="headerlink" href="#6" title="Permanent link">&para;</a></h4>
+<p><strong>问题</strong>: 用户自定义的 SQLAlchemy 类型 (TypeDecorator) 无法验证。</p>
+<p><strong>解决方案</strong>: 递归获取实现类型进行比较</p>
+<p><strong>工作量</strong>: 1-2 小时</p>
+<hr />
+<h3 id="_24">修改后的工作量估计<a class="headerlink" href="#_24" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>原始</th>
+<th>改进后</th>
+<th>增加</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>核心代码</td>
+<td>350 行</td>
+<td>550 行</td>
+<td>+200</td>
+</tr>
+<tr>
+<td>单元测试</td>
+<td>300 行</td>
+<td>450 行</td>
+<td>+150</td>
+</tr>
+<tr>
+<td>集成测试</td>
+<td>200 行</td>
+<td>300 行</td>
+<td>+100</td>
+</tr>
+<tr>
+<td>端到端测试</td>
+<td>150 行</td>
+<td>200 行</td>
+<td>+50</td>
+</tr>
+<tr>
+<td>文档</td>
+<td>600 行</td>
+<td>800 行</td>
+<td>+200</td>
+</tr>
+<tr>
+<td><strong>总计</strong></td>
+<td><strong>1600 行</strong></td>
+<td><strong>2300 行</strong></td>
+<td><strong>+700 行</strong></td>
+</tr>
+<tr>
+<td><strong>时间</strong></td>
+<td><strong>2-3 周</strong></td>
+<td><strong>3-4 周</strong></td>
+<td><strong>+1 周</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="_25">改进建议<a class="headerlink" href="#_25" title="Permanent link">&para;</a></h3>
+<p><strong>立即实施</strong> (第 1 阶段前):
+- ✅ 异步支持 (2-3 小时)
+- ✅ 类型兼容性 (3-4 小时)
+- ✅ 错误恢复 (4-5 小时)</p>
+<p><strong>第 1 阶段中进行</strong>:
+- ✅ 性能优化 (1-2 小时)
+- ✅ 自定义类型支持 (1-2 小时)</p>
+<p><strong>后续版本</strong>:
+- 并发访问处理
+- 迁移历史追踪
+- 回滚支持</p>
+<hr />
+<h2 id="_26">📞 反馈和讨论<a class="headerlink" href="#_26" title="Permanent link">&para;</a></h2>
+<p>如有建议或问题，请在以下渠道反馈：</p>
+<ul>
+<li>GitHub Issues: https://github.com/ardss/fastapi-easy/issues</li>
+<li>讨论区: https://github.com/ardss/fastapi-easy/discussions</li>
+<li>邮件: 1339731209@qq.com</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      
+    
+  </body>
+</html>
