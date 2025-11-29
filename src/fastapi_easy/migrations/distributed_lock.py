@@ -12,12 +12,157 @@ import logging
 import os
 import time
 from abc import ABC, abstractmethod
+from contextlib import contextmanager
 from typing import Optional
 
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
 logger = logging.getLogger(__name__)
+
+
+class ConnectionManager:
+    """数据库连接管理器 - 确保连接正确释放"""
+
+    def __init__(self, engine: Engine, max_age: int = 300):
+        """初始化连接管理器
+        
+        Args:
+            engine: SQLAlchemy 引擎
+            max_age: 连接最大持有时间（秒）
+        """
+        self.engine = engine
+        self.max_age = max_age
+        self._connection = None
+        self._created_at = None
+
+    @contextmanager
+    def get_connection(self):
+        """获取连接的上下文管理器
+        
+        Yields:
+            数据库连接
+        """
+        conn = None
+        try:
+            conn = self.engine.connect()
+            self._connection = conn
+            self._created_at = time.time()
+            yield conn
+        except Exception as e:
+            logger.error(f"连接获取失败: {e}")
+            raise
+        finally:
+            if conn:
+                try:
+                    conn.close()
+                except Exception as e:
+                    logger.warning(f"连接关闭失败: {e}")
+            self._connection = None
+            self._created_at = None
+
+    def is_connection_expired(self) -> bool:
+        """检查连接是否过期
+        
+        Returns:
+            True 如果连接已过期，False 否则
+        """
+        if not self._created_at:
+            return False
+        return time.time() - self._created_at > self.max_age
+
+    def close_if_expired(self) -> bool:
+        """如果连接过期则关闭
+        
+        Returns:
+            True 如果连接被关闭，False 否则
+        """
+        if self.is_connection_expired() and self._connection:
+            try:
+                self._connection.close()
+                self._connection = None
+                self._created_at = None
+                logger.info("过期连接已关闭")
+                return True
+            except Exception as e:
+                logger.warning(f"关闭过期连接失败: {e}")
+        return False
+
+
+class ResourceLeakDetector:
+    """资源泄漏检测器 - 监控资源使用情况"""
+
+    def __init__(self):
+        """初始化检测器"""
+        self._resources = {}
+        self._lock = asyncio.Lock()
+
+    async def register(self, resource_id: str, resource_type: str) -> None:
+        """注册资源
+        
+        Args:
+            resource_id: 资源 ID
+            resource_type: 资源类型 (connection, lock, file 等)
+        """
+        async with self._lock:
+            self._resources[resource_id] = {
+                "type": resource_type,
+                "created_at": time.time(),
+                "released": False
+            }
+            logger.debug(f"资源已注册: {resource_id} ({resource_type})")
+
+    async def unregister(self, resource_id: str) -> None:
+        """注销资源
+        
+        Args:
+            resource_id: 资源 ID
+        """
+        async with self._lock:
+            if resource_id in self._resources:
+                self._resources[resource_id]["released"] = True
+                logger.debug(f"资源已注销: {resource_id}")
+
+    async def get_leaked_resources(
+        self,
+        timeout: int = 300
+    ) -> dict:
+        """获取泄漏的资源
+        
+        Args:
+            timeout: 资源泄漏超时时间（秒）
+            
+        Returns:
+            泄漏的资源字典
+        """
+        async with self._lock:
+            current_time = time.time()
+            leaked = {}
+
+            for resource_id, info in self._resources.items():
+                if not info["released"]:
+                    age = current_time - info["created_at"]
+                    if age > timeout:
+                        leaked[resource_id] = {
+                            "type": info["type"],
+                            "age": age
+                        }
+
+            return leaked
+
+    async def report(self) -> None:
+        """生成资源泄漏报告"""
+        leaked = await self.get_leaked_resources()
+
+        if leaked:
+            logger.warning(f"检测到 {len(leaked)} 个泄漏的资源:")
+            for resource_id, info in leaked.items():
+                logger.warning(
+                    f"  - {resource_id} ({info['type']}) "
+                    f"已泄漏 {info['age']:.1f} 秒"
+                )
+        else:
+            logger.info("✅ 未检测到泄漏的资源")
 
 
 class LockProvider(ABC):
