@@ -3,6 +3,34 @@
 
 统一的异常类型，便于错误处理和诊断
 """
+import re
+
+
+def _sanitize_error_message(error: str) -> str:
+    """清理错误消息中的敏感信息
+    
+    Args:
+        error: 原始错误消息
+        
+    Returns:
+        清理后的错误消息
+    """
+    # 移除数据库连接信息
+    sanitized = re.sub(
+        r'(password|passwd|pwd)\s*=\s*[^\s,;]+',
+        r'\1=***',
+        error,
+        flags=re.IGNORECASE
+    )
+
+    # 移除 IP 地址和主机名
+    sanitized = re.sub(
+        r'\b(?:\d{1,3}\.){3}\d{1,3}\b',
+        '***',
+        sanitized
+    )
+
+    return sanitized
 
 
 class MigrationError(Exception):

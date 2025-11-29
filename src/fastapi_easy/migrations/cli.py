@@ -11,6 +11,7 @@
 import asyncio
 import logging
 import sys
+from urllib.parse import urlparse, urlunparse
 
 import click
 from sqlalchemy import MetaData, create_engine
@@ -26,6 +27,39 @@ from .exceptions import MigrationError
 from .types import ExecutionMode
 
 logger = logging.getLogger(__name__)
+
+
+def _mask_database_url(database_url: str) -> str:
+    """隐藏数据库 URL 中的敏感信息
+    
+    Args:
+        database_url: 数据库连接字符串
+        
+    Returns:
+        隐藏敏感信息后的 URL
+    """
+    try:
+        parsed = urlparse(database_url)
+
+        # 隐藏密码
+        if parsed.password:
+            netloc = f"{parsed.username}:***@{parsed.hostname}"
+            if parsed.port:
+                netloc += f":{parsed.port}"
+        else:
+            netloc = parsed.netloc
+
+        masked = urlunparse((
+            parsed.scheme,
+            netloc,
+            parsed.path,
+            parsed.params,
+            parsed.query,
+            parsed.fragment
+        ))
+        return masked
+    except Exception:
+        return "***"
 
 
 @click.group()
@@ -236,7 +270,7 @@ def status(database_url: str):
         click.echo("")
         click.echo("📊 迁移状态:")
         click.echo("")
-        click.echo(f"数据库: {database_url}")
+        click.echo(f"数据库: {_mask_database_url(database_url)}")
         click.echo(f"已应用迁移: {len(history_records)}")
         click.echo("状态: ✅ 已同步")
 

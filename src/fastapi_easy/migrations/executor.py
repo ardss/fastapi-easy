@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import re
 from typing import List
 
 from sqlalchemy import text
@@ -8,6 +9,22 @@ from sqlalchemy.engine import Engine
 from .types import ExecutionMode, Migration, MigrationPlan, RiskLevel
 
 logger = logging.getLogger(__name__)
+
+
+def _mask_sql(sql: str, max_length: int = 100) -> str:
+    """隐藏 SQL 中的敏感信息
+    
+    Args:
+        sql: SQL 语句
+        max_length: 最大显示长度
+        
+    Returns:
+        隐藏敏感信息后的 SQL
+    """
+    # 移除字符串字面量中的内容
+    masked = re.sub(r"'[^']*'", "'***'", sql)
+    masked = re.sub(r'"[^"]*"', '"***"', masked)
+    return masked[:max_length]
 
 class MigrationExecutor:
     """Executes migrations with transaction safety"""
