@@ -65,32 +65,32 @@ class MigrationEngine:
         """Automatically detect and apply migrations"""
         
         # 1. Acquire Lock
-        logger.info("🔒 Acquiring migration lock...")
+        logger.info("获取迁移锁...")
         if not await self.lock.acquire():
-            logger.warning("⏳ Could not acquire lock, assuming another instance is migrating.")
+            logger.warning("无法获取锁，假设另一个实例正在迁移")
             return MigrationPlan(migrations=[], status="locked")
-            
+
         try:
-            logger.info("🔄 Checking for schema changes...")
-            
+            logger.info("检测 Schema 变更...")
+
             # 2. Detect changes
             changes = await self.detector.detect_changes()
-            
+
             if not changes:
-                logger.info("✅ Schema is up to date")
+                logger.info("Schema 已同步")
                 return MigrationPlan(migrations=[], status="up_to_date")
-                
-            logger.info(f"⚠️ Detected {len(changes)} schema changes")
-            
+
+            logger.info(f"检测到 {len(changes)} 个变更")
+
             # 3. Generate plan
             plan = self.generator.generate_plan(changes)
-            
+
             # 4. Log plan
             for migration in plan.migrations:
                 logger.info(f"  [{migration.risk_level.value}] {migration.description}")
-            
+
             # 5. Execute migrations
-            logger.info(f"🚀 Executing migrations in '{self.mode}' mode...")
+            logger.info(f"执行迁移 (模式: {self.mode})")
             plan, executed_migrations = await self.executor.execute_plan(plan, mode=self.mode)
             
             # 6. Record successfully executed migrations
