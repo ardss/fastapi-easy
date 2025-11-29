@@ -63,7 +63,7 @@ class MigrationEngine:
         
     async def auto_migrate(self) -> MigrationPlan:
         """Automatically detect and apply migrations"""
-        
+
         # 1. Acquire Lock
         logger.info("获取迁移锁...")
         if not await self.lock.acquire():
@@ -71,9 +71,16 @@ class MigrationEngine:
             return MigrationPlan(migrations=[], status="locked")
 
         try:
+            # 2. Execute BEFORE_DDL Hook
+            hook_registry = get_hook_registry()
+            await hook_registry.execute_hooks(
+                HookTrigger.BEFORE_DDL,
+                context={"mode": self.mode}
+            )
+
             logger.info("检测 Schema 变更...")
 
-            # 2. Detect changes
+            # 3. Detect changes
             changes = await self.detector.detect_changes()
 
             if not changes:
@@ -82,18 +89,33 @@ class MigrationEngine:
 
             logger.info(f"检测到 {len(changes)} 个变更")
 
-            # 3. Generate plan
+            # 4. Generate plan
             plan = self.generator.generate_plan(changes)
 
-            # 4. Log plan
+            # 5. Log plan
             for migration in plan.migrations:
-                logger.info(f"  [{migration.risk_level.value}] {migration.description}")
+                logger.info(
+                    f"  [{migration.risk_level.value}] "
+                    f"{migration.description}"
+                )
 
-            # 5. Execute migrations
+            # 6. Execute migrations
             logger.info(f"执行迁移 (模式: {self.mode})")
-            plan, executed_migrations = await self.executor.execute_plan(plan, mode=self.mode)
-            
-            # 6. Record successfully executed migrations
+            plan, executed_migrations = await self.executor.execute_plan(
+                plan, mode=self.mode
+            )
+
+            # 7. Execute AFTER_DDL Hook
+            await hook_registry.execute_hooks(
+                HookTrigger.AFTER_DDL,
+                context={
+                    "plan": plan,
+                    "executed": executed_migrations,
+                    "status": plan.status
+                }
+            )
+
+            # 8. Record successfully executed migrations
             for migration in executed_migrations:
                 self.storage.record_migration(
                     version=migration.version,
@@ -101,18 +123,18 @@ class MigrationEngine:
                     rollback_sql=migration.downgrade_sql,
                     risk_level=migration.risk_level.value
                 )
-            
-            logger.info(f"✅ Migration completed: {plan.status}")
+
+            logger.info(f"迁移完成: {plan.status}")
             return plan
-            
+
         except Exception as e:
             error_msg = str(e)
             logger.error(
-                f"❌ 迁移失败: {error_msg}\n"
-                f"\n调试步骤:\n"
-                f"  1. 检查数据库连接: fastapi-easy migrate status\n"
+                f"迁移失败: {error_msg}\n"
+                f"调试步骤:\n"
+                f"  1. 检查数据库连接\n"
                 f"  2. 查看详细日志: 设置 LOG_LEVEL=DEBUG\n"
-                f"  3. 运行 dry-run: fastapi-easy migrate plan --dry-run\n"
+                f"  3. 运行 dry-run 模式\n"
                 f"  4. 查看完整错误: {error_msg}",
                 exc_info=True
             )
