@@ -136,3 +136,76 @@ class MigrationEngine:
     def get_history(self, limit: int = 10):
         """Get migration history"""
         return self.storage.get_migration_history(limit)
+    
+    async def rollback(self, steps: int = 1) -> bool:
+        """
+        回滚指定数量的迁移
+        
+        Args:
+            steps: 要回滚的迁移数量
+        
+        Returns:
+            是否成功
+        """
+        # 验证参数
+        if steps <= 0:
+            logger.error("❌ 回滚步数必须大于 0")
+            return False
+        
+        # 获取迁移历史
+        history = self.storage.get_migration_history(limit=steps)
+        
+        if not history:
+            logger.warning("⚠️ 没有可回滚的迁移")
+            return False
+        
+        # 获取锁
+        logger.info(f"🔒 获取迁移锁...")
+        if not await self.lock.acquire():
+            logger.warning("⏳ 无法获取锁，假设另一个实例正在迁移")
+            return False
+        
+        try:
+            logger.info(f"⏮️ 准备回滚 {len(history)} 个迁移...")
+            
+            # 按相反顺序执行回滚
+            for record in reversed(history):
+                version = record.get("version")
+                description = record.get("description", "Unknown")
+                rollback_sql = record.get("rollback_sql")
+                
+                if not rollback_sql:
+                    logger.warning(f"⚠️ 迁移 {version} 没有回滚 SQL，跳过")
+                    continue
+                
+                try:
+                    logger.info(f"  回滚 {version}: {description}")
+                    
+                    # 执行回滚 SQL
+                    from sqlalchemy import text
+                    with self.engine.begin() as conn:
+                        for statement in rollback_sql.split(";"):
+                            statement = statement.strip()
+                            if statement:
+                                conn.execute(text(statement))
+                    
+                    logger.info(f"  ✅ 成功回滚 {version}")
+                
+                except Exception as e:
+                    logger.error(f"  ❌ 回滚 {version} 失败: {e}")
+                    raise
+            
+            logger.info(f"✅ 成功回滚 {len(history)} 个迁移")
+            return True
+        
+        except Exception as e:
+            logger.error(f"❌ 回滚失败: {e}", exc_info=True)
+            return False
+        
+        finally:
+            # 释放锁
+            logger.info("🔓 释放迁移锁...")
+            try:
+                await self.lock.release()
+            except Exception as e:
+                logger.error(f"❌ 锁释放失败: {e}")
