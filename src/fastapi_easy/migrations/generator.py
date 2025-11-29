@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import List, Tuple
+from typing import Any, List, Tuple
 
 from sqlalchemy.engine import Engine
 from sqlalchemy.schema import CreateTable
@@ -85,8 +85,15 @@ class MigrationGenerator:
             return "-- Cannot auto-rollback column drop without backup"
         return ""
 
-    def _get_column_definition(self, column) -> str:
-        # Compile column definition using SQLAlchemy
+    def _get_column_definition(self, column: Any) -> str:
+        """获取列定义的 SQL 字符串
+        
+        Args:
+            column: SQLAlchemy Column 对象
+            
+        Returns:
+            列定义的 SQL 字符串
+        """
         from sqlalchemy.schema import CreateColumn
         return str(CreateColumn(column).compile(self.engine))
 
