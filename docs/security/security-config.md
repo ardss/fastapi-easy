@@ -1,289 +1,174 @@
-# 安全配置指南
+# 安全配置
 
-安全配置用于统一管理所有安全相关的组件。
-
----
-
-## 概述
-
-### 什么是安全配置？
-
-安全配置是一个中央配置类，用于管理 JWT 认证、权限加载、资源检查和审计日志等所有安全组件。
-
-### 为什么需要安全配置？
-
-- **集中管理**: 所有安全组件在一个地方
-- **易于使用**: 简化安全组件的初始化
-- **可维护性**: 便于修改和扩展
-- **一致性**: 确保安全配置的一致性
-
-### 何时使用安全配置？
-
-- 需要管理多个安全组件
-- 需要支持多环境配置
-- 需要动态配置安全组件
-- 需要集中管理安全策略
+安全配置用于管理 FastAPI-Easy 的所有安全相关设置。本文档介绍如何配置安全选项。
 
 ---
 
-## 基础使用
-
-### 创建配置
+## 基础配置
 
 ```python
-from fastapi_easy.security import (
-    SecurityConfig,
-    JWTAuth,
-    StaticPermissionLoader,
-    StaticResourceChecker,
-    AuditLogger
-)
+from fastapi_easy.security import SecurityConfig
 
-# 创建 JWT 认证
-jwt_auth = JWTAuth(secret_key="your-secret-key")
-
-# 创建权限加载器
-permissions_map = {
-    "user1": ["read", "write"],
-    "user2": ["read"]
-}
-permission_loader = StaticPermissionLoader(permissions_map)
-
-# 创建资源检查器
-resources_map = {
-    "post_1": {
-        "owner_id": "user1",
-        "permissions": {}
-    }
-}
-resource_checker = StaticResourceChecker(resources_map)
-
-# 创建审计日志
-audit_logger = AuditLogger()
-
-# 创建安全配置
 config = SecurityConfig(
-    jwt_auth=jwt_auth,
-    permission_loader=permission_loader,
-    resource_checker=resource_checker,
-    audit_logger=audit_logger
+    # 认证配置
+    enable_auth=True,
+    auth_scheme="bearer",
+    
+    # 权限配置
+    enable_permissions=True,
+    default_permission="read",
+    
+    # 速率限制
+    enable_rate_limit=True,
+    rate_limit_requests=100,
+    rate_limit_period=3600,
+    
+    # 密码配置
+    password_min_length=8,
+    password_require_uppercase=True,
+    password_require_numbers=True,
+    password_require_special=True,
 )
 ```
 
-### 从环境变量创建配置
+---
+
+## 认证配置
 
 ```python
-# 从环境变量创建配置
-config = SecurityConfig.from_env()
-
-# 环境变量：
-# JWT_SECRET_KEY=your-secret-key
-```
-
-### 访问组件
-
-```python
-# 获取 JWT 认证
-jwt_auth = config.get_jwt_auth()
-
-# 获取权限加载器
-permission_loader = config.get_permission_loader()
-
-# 获取资源检查器
-resource_checker = config.get_resource_checker()
-
-# 获取审计日志
-audit_logger = config.get_audit_logger()
+config = SecurityConfig(
+    enable_auth=True,
+    auth_scheme="bearer",
+    jwt_secret="your-secret-key",
+    jwt_algorithm="HS256",
+    jwt_expiration=3600,
+)
 ```
 
 ---
 
-## 高级用法
-
-### 多环境配置
+## 权限配置
 
 ```python
-import os
-
-def get_security_config():
-    """根据环境创建安全配置"""
-    env = os.getenv("ENV", "development")
-    
-    if env == "production":
-        # 生产环境配置
-        jwt_auth = JWTAuth(secret_key=os.getenv("JWT_SECRET_KEY"))
-        permission_loader = DatabasePermissionLoader(db_session=db_session)
-        resource_checker = DatabaseResourceChecker(db_session=db_session)
-    else:
-        # 开发环境配置
-        jwt_auth = JWTAuth(secret_key="dev-secret-key")
-        permission_loader = StaticPermissionLoader(DEV_PERMISSIONS)
-        resource_checker = StaticResourceChecker(DEV_RESOURCES)
-    
-    return SecurityConfig(
-        jwt_auth=jwt_auth,
-        permission_loader=permission_loader,
-        resource_checker=resource_checker
-    )
-
-config = get_security_config()
-```
-
-### 配置验证
-
-```python
-# 验证配置
-config.validate()
-
-# 如果配置无效，会抛出异常
-```
-
-### 配置扩展
-
-```python
-# 创建基础配置
-config = SecurityConfig(jwt_auth=jwt_auth)
-
-# 添加权限加载器
-config.permission_loader = permission_loader
-
-# 添加资源检查器
-config.resource_checker = resource_checker
+config = SecurityConfig(
+    enable_permissions=True,
+    default_permission="read",
+    permission_loader=DatabasePermissionLoader(),
+    cache_permissions=True,
+    cache_ttl=3600,
+)
 ```
 
 ---
 
-## 常见问题
-
-### Q: 如何处理配置错误？
-
-A: 使用 try-except 捕获异常：
+## 速率限制配置
 
 ```python
-try:
-    config = SecurityConfig(jwt_auth=None)
-except ValueError as e:
-    logger.error(f"Configuration error: {e}")
+config = SecurityConfig(
+    enable_rate_limit=True,
+    rate_limit_requests=100,
+    rate_limit_period=3600,  # 1 小时
+    rate_limit_storage="memory",  # 或 "redis"
+)
 ```
 
-### Q: 如何从环境变量读取配置？
+---
 
-A: 使用 `from_env()` 方法：
+## 密码策略
 
 ```python
-# 设置环境变量
-os.environ["JWT_SECRET_KEY"] = "your-secret-key"
-
-# 创建配置
-config = SecurityConfig.from_env()
+config = SecurityConfig(
+    password_min_length=12,
+    password_require_uppercase=True,
+    password_require_lowercase=True,
+    password_require_numbers=True,
+    password_require_special=True,
+    password_special_chars="!@#$%^&*",
+)
 ```
 
-### Q: 如何支持多个安全配置？
+---
 
-A: 创建多个配置实例：
+## 应用配置
 
 ```python
-# 配置 1
-config1 = SecurityConfig(jwt_auth=jwt_auth1)
+from fastapi import FastAPI
+from fastapi_easy import CRUDRouter
 
-# 配置 2
-config2 = SecurityConfig(jwt_auth=jwt_auth2)
+app = FastAPI()
+
+router = CRUDRouter(
+    schema=Item,
+    adapter=adapter,
+    security_config=config
+)
+
+app.include_router(router)
 ```
 
 ---
 
 ## 最佳实践
 
-1. **集中管理**: 在一个地方创建和管理安全配置
-2. **环境变量**: 使用环境变量存储敏感信息
-3. **验证配置**: 在应用启动时验证配置
-4. **错误处理**: 处理配置错误
-5. **日志记录**: 记录配置操作
-
----
-
-## 完整示例
+### 1. 使用环境变量
 
 ```python
-from fastapi import FastAPI
-from fastapi_easy.security import (
-    SecurityConfig,
-    JWTAuth,
-    StaticPermissionLoader,
-    StaticResourceChecker,
-    PermissionEngine,
-    require_permission
-)
-
-app = FastAPI()
-
-# 1. 创建安全配置
-permissions_map = {
-    "user1": ["read", "write"],
-    "user2": ["read"],
-    "admin": ["read", "write", "delete", "admin"]
-}
-permission_loader = StaticPermissionLoader(permissions_map)
-
-resources_map = {
-    "post_1": {
-        "owner_id": "user1",
-        "permissions": {}
-    }
-}
-resource_checker = StaticResourceChecker(resources_map)
-
-jwt_auth = JWTAuth(secret_key="your-secret-key")
+import os
+from fastapi_easy.security import SecurityConfig
 
 config = SecurityConfig(
-    jwt_auth=jwt_auth,
-    permission_loader=permission_loader,
-    resource_checker=resource_checker
+    jwt_secret=os.getenv("JWT_SECRET"),
+    jwt_algorithm=os.getenv("JWT_ALGORITHM", "HS256"),
+    jwt_expiration=int(os.getenv("JWT_EXPIRATION", "3600")),
 )
+```
 
-# 2. 验证配置
-config.validate()
+### 2. 分环境配置
 
-# 3. 创建权限引擎
-engine = PermissionEngine(
-    permission_loader=config.get_permission_loader(),
-    resource_checker=config.get_resource_checker(),
-    enable_cache=True
-)
+```python
+from enum import Enum
 
-# 4. 使用配置
-@app.get("/data")
-async def get_data(current_user: dict = Depends(require_permission("read"))):
-    # 使用权限引擎检查权限
-    has_permission = await engine.check_permission(
-        current_user["user_id"],
-        "read"
-    )
-    
-    if not has_permission:
-        raise HTTPException(status_code=403, detail="No permission")
-    
-    # 记录审计日志
-    config.get_audit_logger().log(
-        event_type="data_access",
-        user_id=current_user["user_id"],
-        action="read",
-        status="success"
-    )
-    
-    return {"data": "sensitive data"}
+class Environment(str, Enum):
+    DEV = "dev"
+    PROD = "prod"
 
-@app.on_event("startup")
-async def startup():
-    """应用启动时验证配置"""
-    try:
-        config.validate()
-        print("Security configuration is valid")
-    except Exception as e:
-        print(f"Configuration error: {e}")
-        raise
+def get_security_config(env: Environment) -> SecurityConfig:
+    if env == Environment.PROD:
+        return SecurityConfig(
+            enable_auth=True,
+            enable_permissions=True,
+            enable_rate_limit=True,
+            password_min_length=12,
+        )
+    else:
+        return SecurityConfig(
+            enable_auth=False,
+            password_min_length=6,
+        )
+```
+
+### 3. 定期更新密钥
+
+```python
+# 定期轮换 JWT 密钥
+import asyncio
+
+async def rotate_jwt_secret():
+    while True:
+        await asyncio.sleep(86400)  # 每天轮换一次
+        new_secret = generate_new_secret()
+        config.jwt_secret = new_secret
 ```
 
 ---
 
-**安全配置指南完成** ✅
+## 常见问题
+
+### Q: 如何更改 JWT 密钥？
+A: 更新 `config.jwt_secret` 并重启应用。
+
+### Q: 如何禁用某个安全功能？
+A: 在 SecurityConfig 中设置相应的 `enable_*` 为 False。
+
+### Q: 如何自定义密码策略？
+A: 继承 SecurityConfig 并覆盖 `validate_password` 方法。

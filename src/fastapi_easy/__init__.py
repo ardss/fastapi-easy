@@ -8,7 +8,7 @@ License: AGPL-3.0
 For commercial licensing, please contact: 1339731209@qq.com
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.3"
 __author__ = "FastAPI-Easy Team"
 __license__ = "AGPL-3.0"
 

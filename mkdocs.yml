@@ -1,0 +1,175 @@
+site_name: FastAPI-Easy
+site_description: 一个生产级的 FastAPI 开发框架
+site_author: FastAPI-Easy Team
+site_url: https://ardss.github.io/fastapi-easy/
+repo_url: https://github.com/ardss/fastapi-easy
+repo_name: fastapi-easy
+edit_uri: edit/main/docs/
+docs_dir: docs
+site_dir: site
+use_directory_urls: true
+strict: false
+dev_addr: 127.0.0.1:8000
+copyright: Copyright &copy; 2025 FastAPI-Easy Team
+
+theme:
+  name: material
+  language: zh
+  logo: assets/logo.png
+  favicon: assets/favicon.png
+  
+  # 颜色方案 - 使用更具科技感的 Indigo
+  palette:
+    # 浅色模式
+    - scheme: default
+      primary: indigo
+      accent: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: 切换到深色模式
+    # 深色模式
+    - scheme: slate
+      primary: indigo
+      accent: deep purple
+      toggle:
+        icon: material/brightness-4
+        name: 切换到浅色模式
+  
+  # 字体配置
+  font:
+    text: Inter
+    code: JetBrains Mono
+
+  # 功能配置 - 左侧导航为主（不显示顶部标签页）
+  features:
+    # 导航配置 - 关键：只启用 navigation.sections，不启用 navigation.tabs
+    # 这样一级菜单会显示在左侧侧边栏作为分组，而不是顶部标签页
+    - navigation.sections                # ⭐ 左侧侧边栏分组（一级菜单显示为分组）
+    - navigation.expand                  # 默认展开侧边栏所有分组
+    - navigation.top                     # 返回顶部按钮
+    - navigation.instant                 # 即时加载页面（SPA 效果）
+    - navigation.instant.prefetch        # 预加载链接
+    - navigation.instant.progress        # 加载进度条
+    - navigation.tracking                # 跟踪导航位置
+    - navigation.path                    # 显示导航路径（面包屑）
+    - navigation.indexes                 # 允许文件夹作为页面
+    - navigation.footer                  # 页面底部前后导航
+    
+    # 搜索功能
+    - search.suggest                     # 搜索建议
+    - search.highlight                   # 搜索高亮
+    - search.share                       # 搜索分享
+    
+    # 内容功能
+    - content.code.copy                  # 代码块复制按钮
+    - content.code.select                # 代码块选择
+    - content.code.annotate              # 代码注释
+    - content.tabs.link                  # 记住标签页选择
+    - content.tooltips                   # 工具提示
+    - content.action.edit                # 编辑按钮
+    - content.action.view                # 查看源码按钮
+
+# 自定义样式
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  # 基础扩展
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 2-4
+  
+  # pymdownx 扩展
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - search:
+      lang: zh
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ardss/fastapi-easy
+      name: GitHub
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com
+      name: Twitter
+    - icon: fontawesome/solid/globe
+      link: https://fastapi-easy.readthedocs.io
+      name: 文档
+
+nav:
+  - 首页: index.md
+  - 教程:
+    - 快速上手: tutorial/01-quick-start.md
+    - 数据库集成: tutorial/02-database-integration.md
+    - 完整示例: tutorial/03-complete-example.md
+  - 指南:
+    - 查询指南: guides/querying.md
+    - 权限控制: guides/permissions-basic.md
+    - 审计日志: guides/audit-logging-basic.md
+    - 错误处理: guides/error-handling.md
+    - 软删除: guides/soft-delete.md
+    - 批量操作: guides/bulk-operations.md
+    - 数据库迁移: guides/migrations.md
+    - GraphQL支持: guides/graphql.md
+    - WebSocket支持: guides/websocket.md
+    - 最佳实践: guides/best-practices.md
+    - 故障排除: guides/troubleshooting.md
+  - 数据库适配器:
+    - 概览: adapters/index.md
+    - SQLAlchemy: adapters/sqlalchemy.md
+    - Tortoise ORM: adapters/tortoise.md
+    - MongoDB: adapters/mongodb.md
+    - SQLModel: adapters/sqlmodel.md
+  - 安全模块:
+    - 概览: security/index.md
+    - 认证: security/authentication.md
+    - 权限控制: security/permissions.md
+    - 多租户支持: security/multi-tenancy.md
+    - 审计日志: security/audit-logging.md
+    - 密码与限流: security/password-rate-limit.md
+    - 权限加载器: security/permission-loader.md
+    - 资源检查器: security/resource-checker.md
+    - 权限引擎: security/permission-engine.md
+    - 安全配置: security/security-config.md
+    - 最佳实践: security/security-best-practices.md
+  - 参考手册:
+    - API参考: reference/api.md
+    - 架构设计: reference/architecture.md
+    - 数据流: reference/data-flow.md
+    - 配置参数: reference/configuration.md
+    - 钩子系统: reference/hooks.md
+    - CLI工具: reference/cli.md
+  - 开发指南:
+    - 贡献指南: development/contributing.md
+    - 测试指南: development/testing.md

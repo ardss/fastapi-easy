@@ -1,10 +1,10 @@
 # 批量操作
 
-批量操作允许在单个请求中对多个记录进行 CRUD 操作。本指南介绍如何使用批量操作功能。
+批量操作允许在单个请求中对多个记录进行 CRUD 操作。本文档介绍如何使用批量操作功能。
 
 ---
 
-## 什么是批量操作？
+## 什么是批量操作
 
 批量操作可以：
 
@@ -29,7 +29,7 @@ config = BulkOperationConfig(
 
 router = CRUDRouter(
     schema=ItemSchema,
-    backend=backend,
+    adapter=adapter,
     bulk_operation_config=config,
 )
 ```
@@ -55,12 +55,10 @@ router = CRUDRouter(
 
 ### 响应
 
-```python
+```json
 {
-    "success_count": 3,
-    "failure_count": 0,
-    "errors": [],
-    "results": [
+    "created": 3,
+    "items": [
         {"id": 1, "name": "Item 1", "price": 10.0},
         {"id": 2, "name": "Item 2", "price": 20.0},
         {"id": 3, "name": "Item 3", "price": 30.0}
@@ -88,12 +86,10 @@ router = CRUDRouter(
 
 ### 响应
 
-```python
+```json
 {
-    "success_count": 2,
-    "failure_count": 0,
-    "errors": [],
-    "results": [
+    "updated": 2,
+    "items": [
         {"id": 1, "name": "Updated Item 1", "price": 15.0},
         {"id": 2, "name": "Updated Item 2", "price": 25.0}
     ]
@@ -117,162 +113,145 @@ router = CRUDRouter(
 
 ### 响应
 
-```python
+```json
 {
-    "success_count": 3,
-    "failure_count": 0,
-    "errors": [],
-    "deleted_count": 3
+    "deleted": 3
 }
 ```
 
 ---
 
-## 高级用法
+## 事务模式
 
-### 处理部分失败
+### 原子模式（推荐）
+
+所有操作成功或全部失败：
 
 ```python
-# 当某些操作失败时
+transaction_mode="atomic"
+```
+
+### 部分模式
+
+允许部分操作失败：
+
+```python
+transaction_mode="partial"
+```
+
+响应示例：
+
+```json
 {
-    "success_count": 2,
-    "failure_count": 1,
+    "created": 2,
+    "failed": 1,
     "errors": [
         {
             "index": 2,
-            "error": "Validation error",
-            "details": "Price must be positive"
+            "error": "Duplicate entry"
         }
-    ],
-    "results": [
-        {"id": 1, "name": "Item 1"},
-        {"id": 2, "name": "Item 2"}
     ]
 }
 ```
 
-### 事务模式
+---
+
+## 性能优化
+
+### 1. 合理设置批量大小
 
 ```python
-# 原子模式：全部成功或全部失败
-config = BulkOperationConfig(
-    transaction_mode="atomic"
-)
+# 不好：一次创建 10000 条
+POST /items/batch with 10000 items
 
-# 部分模式：继续处理其他记录
-config = BulkOperationConfig(
-    transaction_mode="partial"
-)
+# 好：分批创建
+POST /items/batch with 1000 items (10 次)
 ```
 
-### 获取批量操作结果
+### 2. 使用批量操作而不是单个请求
 
 ```python
-from fastapi_easy.core.bulk_operations import BulkOperationAdapter
+# 不好：10 个单独的 POST 请求
+for item in items:
+    POST /items
 
-adapter = BulkOperationAdapter(Item, session)
+# 好：1 个批量请求
+POST /items/batch with 10 items
+```
 
-# 执行批量创建
-result = await adapter.bulk_create(
-    items=[
-        {"name": "Item 1"},
-        {"name": "Item 2"}
-    ]
-)
+### 3. 监控性能
 
-print(f"成功: {result.success_count}")
-print(f"失败: {result.failure_count}")
-print(f"错误: {result.errors}")
+```python
+import time
+
+start = time.time()
+response = client.post("/items/batch", json={"items": items})
+duration = time.time() - start
+
+print(f"Created {response.json()['created']} items in {duration}s")
+```
+
+---
+
+## 错误处理
+
+### 处理批量操作错误
+
+```python
+from fastapi import HTTPException
+
+try:
+    response = client.post("/items/batch", json={"items": items})
+    if response.status_code == 200:
+        result = response.json()
+        print(f"Created {result['created']} items")
+    else:
+        raise HTTPException(status_code=response.status_code)
+except Exception as e:
+    print(f"Error: {e}")
 ```
 
 ---
 
 ## 最佳实践
 
-### 1. 检查批量大小
+### 1. 验证数据
 
 ```python
-# ✅ 推荐：检查大小
-if len(items) > max_batch_size:
-    raise ValueError(f"批量大小超过限制: {max_batch_size}")
-
-# 执行批量操作
-result = await adapter.bulk_create(items)
+# 在发送批量请求前验证数据
+for item in items:
+    if not item.get("name"):
+        raise ValueError("Name is required")
 ```
 
-### 2. 处理错误
+### 2. 使用适当的批量大小
 
 ```python
-# ✅ 推荐：处理错误
-result = await adapter.bulk_create(items)
-
-if result.failure_count > 0:
-    for error in result.errors:
-        logger.error(f"批量操作错误: {error}")
+# 根据数据库性能调整
+max_batch_size = 1000  # 对大多数数据库足够
 ```
 
-### 3. 使用事务
+### 3. 监控和日志
 
 ```python
-# ✅ 推荐：使用事务
-config = BulkOperationConfig(
-    transaction_mode="atomic"
-)
+import logging
 
-# 确保全部成功或全部失败
-result = await adapter.bulk_create(items)
-```
+logger = logging.getLogger(__name__)
 
-### 4. 监控性能
-
-```python
-import time
-
-start = time.time()
-result = await adapter.bulk_create(items)
-elapsed = time.time() - start
-
-logger.info(f"批量创建耗时: {elapsed:.2f}s")
-logger.info(f"成功: {result.success_count}, 失败: {result.failure_count}")
+logger.info(f"Creating {len(items)} items")
+response = client.post("/items/batch", json={"items": items})
+logger.info(f"Created {response.json()['created']} items")
 ```
 
 ---
 
 ## 常见问题
 
-**Q: 批量操作的最大大小是多少？**
+### Q: 批量操作的最大大小是多少？
+A: 由 `max_batch_size` 配置决定，默认为 1000。
 
-A: 默认为 1000，可在 `BulkOperationConfig` 中配置。
+### Q: 如果批量操作中有错误会怎样？
+A: 取决于 `transaction_mode`。原子模式会回滚所有操作。
 
-**Q: 如果批量操作部分失败怎么办？**
-
-A: 取决于事务模式。原子模式会回滚所有更改，部分模式会继续处理。
-
-**Q: 批量操作支持哪些操作？**
-
-A: 支持创建、更新、删除。
-
-**Q: 如何提高批量操作的性能？**
-
-A: 增加批量大小（在数据库限制范围内），使用原子事务模式。
-
----
-
-## 总结
-
-批量操作可以显著提高性能：
-
-- ✅ 减少网络往返
-- ✅ 提高数据库效率
-- ✅ 简化客户端代码
-
-使用批量操作时，记住：
-
-1. 检查批量大小
-2. 处理错误
-3. 使用事务
-4. 监控性能
-
----
-
-**下一步**: [权限控制](11-permissions.md) →
+### Q: 批量操作是否支持关联数据？
+A: 支持，但需要在 Schema 中正确定义关系。

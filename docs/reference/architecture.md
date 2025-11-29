@@ -1,661 +1,282 @@
-# 架构设计和扩展
+# 架构设计
 
-本文档介绍 fastapi-easy 的架构设计，以及如何进行扩展和定制。
+本文档介绍 FastAPI-Easy 的整体架构设计。
 
 ---
 
 ## 核心架构
 
-### 分离的职责
-
-fastapi-easy 采用分离职责的设计，将路由生成和路由管理分开：
+FastAPI-Easy 采用分层架构设计：
 
 ```
-┌─────────────────────────────────────────┐
-│         CRUDGenerator                   │
-│  (负责生成路由和操作)                   │
-└──────────────┬──────────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────────┐
-│         OperationRegistry               │
-│  (管理所有操作：CRUD、搜索、排序等)     │
-└──────────────┬──────────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────────┐
-│         APIRouter                       │
-│  (FastAPI 路由管理)                     │
-└─────────────────────────────────────────┘
-```
-
-**优势**:
-- ✅ 职责清晰
-- ✅ 易于测试
-- ✅ 易于扩展
-- ✅ 易于维护
-
----
-
-## 操作系统（Operation System）
-
-### 基础操作接口
-
-```python
-from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, Any, Dict
-
-T = TypeVar('T')
-
-class Operation(ABC, Generic[T]):
-    """所有操作的基类"""
-    
-    name: str
-    method: str  # GET, POST, PUT, DELETE
-    path: str
-    
-    @abstractmethod
-    async def before_execute(self, context: 'ExecutionContext') -> None:
-        """操作前的钩子"""
-        pass
-    
-    @abstractmethod
-    async def execute(self, context: 'ExecutionContext') -> T:
-        """执行操作"""
-        pass
-    
-    @abstractmethod
-    async def after_execute(self, context: 'ExecutionContext') -> T:
-        """操作后的钩子"""
-        pass
-
-class ExecutionContext:
-    """执行上下文"""
-    schema: Type[T]
-    adapter: 'ORMAdapter'
-    request: 'Request'
-    filters: Dict[str, Any]
-    sorts: Dict[str, Any]
-    pagination: Dict[str, Any]
-    user: Any  # 当前用户
-    result: Any  # 操作结果
-```
-
-### 内置操作
-
-```python
-class GetAllOperation(Operation):
-    """获取所有项目"""
-    name = "get_all"
-    method = "GET"
-    path = ""
-    
-    async def before_execute(self, context):
-        # 权限检查
-        pass
-    
-    async def execute(self, context):
-        return await context.adapter.get_all(
-            filters=context.filters,
-            sorts=context.sorts,
-            pagination=context.pagination
-        )
-    
-    async def after_execute(self, context):
-        # 审计日志
-        pass
-
-class CreateOperation(Operation):
-    """创建项目"""
-    name = "create"
-    method = "POST"
-    path = ""
-    
-    async def before_execute(self, context):
-        # 验证数据
-        pass
-    
-    async def execute(self, context):
-        return await context.adapter.create(context.data)
-    
-    async def after_execute(self, context):
-        # 发送通知
-        pass
-
-# 其他操作：GetOne、Update、DeleteOne、DeleteAll、Search、Sort、Paginate、BulkCreate、BulkUpdate、BulkDelete
-```
-
-### 自定义操作
-
-```python
-class CustomSearchOperation(Operation):
-    """自定义搜索操作"""
-    name = "advanced_search"
-    method = "POST"
-    path = "/search"
-    
-    async def before_execute(self, context):
-        # 验证搜索参数
-        if not context.search_query:
-            raise ValidationError("Search query is required")
-    
-    async def execute(self, context):
-        # 调用搜索引擎（如 Elasticsearch）
-        results = await elasticsearch.search(
-            index="items",
-            query=context.search_query
-        )
-        return results
-    
-    async def after_execute(self, context):
-        # 记录搜索日志
-        await log_search(context.user, context.search_query)
-
-# 注册自定义操作
-router = CRUDRouter(schema=Item, adapter=adapter)
-router.register_operation(CustomSearchOperation())
+┌─────────────────────────────────────┐
+│         FastAPI 应用                 │
+├─────────────────────────────────────┤
+│         CRUDRouter 层                │
+│  (自动生成 CRUD 路由)                 │
+├─────────────────────────────────────┤
+│         中间件层                      │
+│  (认证、权限、速率限制等)             │
+├─────────────────────────────────────┤
+│         业务逻辑层                    │
+│  (Hook、过滤、排序、分页等)           │
+├─────────────────────────────────────┤
+│         适配器层                      │
+│  (ORM 适配器接口)                     │
+├─────────────────────────────────────┤
+│         数据库层                      │
+│  (SQLAlchemy、Tortoise、MongoDB等)   │
+└─────────────────────────────────────┘
 ```
 
 ---
 
-## ORM 适配器（ORM Adapter）
+## 组件设计
 
-### 统一的 ORM 接口
+### 1. CRUDRouter
+
+主要职责：
+- 自动生成 CRUD 路由
+- 管理路由配置
+- 集成中间件和 Hook
 
 ```python
-from abc import ABC, abstractmethod
-from typing import List, Any, Dict, Optional
+class CRUDRouter:
+    def __init__(self, schema, adapter, **config):
+        self.schema = schema
+        self.adapter = adapter
+        self.config = config
+        self._setup_routes()
+```
 
+### 2. ORMAdapter
+
+抽象基类，定义 ORM 操作接口：
+
+```python
 class ORMAdapter(ABC):
-    """ORM 适配器基类"""
-    
     @abstractmethod
-    async def get_all(
-        self,
-        filters: Dict[str, Any],
-        sorts: Dict[str, Any],
-        pagination: Dict[str, Any]
-    ) -> List[Any]:
-        """获取所有项目"""
+    async def get_all(self, **filters) -> List:
         pass
     
     @abstractmethod
-    async def get_one(self, id: Any) -> Optional[Any]:
-        """获取单个项目"""
+    async def get_one(self, id) -> Optional:
         pass
     
     @abstractmethod
-    async def create(self, data: Dict[str, Any]) -> Any:
-        """创建项目"""
+    async def create(self, data) -> Any:
         pass
     
     @abstractmethod
-    async def update(self, id: Any, data: Dict[str, Any]) -> Any:
-        """更新项目"""
+    async def update(self, id, data) -> Any:
         pass
     
     @abstractmethod
-    async def delete_one(self, id: Any) -> Any:
-        """删除单个项目"""
-        pass
-    
-    @abstractmethod
-    async def delete_all(self) -> List[Any]:
-        """删除所有项目"""
-        pass
-    
-    @abstractmethod
-    async def count(self, filters: Dict[str, Any]) -> int:
-        """计数"""
+    async def delete(self, id) -> bool:
         pass
 ```
 
-### SQLAlchemy 适配器实现
+### 3. Hook 系统
 
-```python
-class SQLAlchemyAdapter(ORMAdapter):
-    """SQLAlchemy 异步适配器"""
-    
-    def __init__(self, model: Type[Base], session_factory):
-        self.model = model
-        self.session_factory = session_factory
-    
-    async def get_all(self, filters, sorts, pagination):
-        async with self.session_factory() as session:
-            query = select(self.model)
-            
-            # 应用过滤
-            for field, value in filters.items():
-                query = query.where(getattr(self.model, field) == value)
-            
-            # 应用排序
-            for field, direction in sorts.items():
-                col = getattr(self.model, field)
-                query = query.order_by(col.desc() if direction == 'desc' else col)
-            
-            # 应用分页
-            query = query.offset(pagination['skip']).limit(pagination['limit'])
-            
-            result = await session.execute(query)
-            return result.scalars().all()
-    
-    async def get_one(self, id):
-        async with self.session_factory() as session:
-            return await session.get(self.model, id)
-    
-    # ... 其他方法
-```
-
-### Tortoise 适配器实现
-
-```python
-class TortoiseAdapter(ORMAdapter):
-    """Tortoise ORM 适配器"""
-    
-    def __init__(self, model: Type[Model]):
-        self.model = model
-    
-    async def get_all(self, filters, sorts, pagination):
-        query = self.model.all()
-        
-        # 应用过滤
-        for field, value in filters.items():
-            query = query.filter(**{field: value})
-        
-        # 应用排序
-        for field, direction in sorts.items():
-            if direction == 'desc':
-                query = query.order_by(f"-{field}")
-            else:
-                query = query.order_by(field)
-        
-        # 应用分页
-        query = query.offset(pagination['skip']).limit(pagination['limit'])
-        
-        return await query
-    
-    # ... 其他方法
-```
-
----
-
-## 错误处理系统
-
-### 结构化错误
-
-```python
-from enum import Enum
-
-class ErrorCode(str, Enum):
-    """错误代码"""
-    NOT_FOUND = "NOT_FOUND"
-    VALIDATION_ERROR = "VALIDATION_ERROR"
-    PERMISSION_DENIED = "PERMISSION_DENIED"
-    CONFLICT = "CONFLICT"
-    INTERNAL_ERROR = "INTERNAL_ERROR"
-
-class AppError(Exception):
-    """应用错误基类"""
-    
-    code: ErrorCode
-    status_code: int
-    message: str
-    details: Dict[str, Any]
-    
-    def __init__(
-        self,
-        code: ErrorCode,
-        status_code: int,
-        message: str,
-        details: Dict[str, Any] = None
-    ):
-        self.code = code
-        self.status_code = status_code
-        self.message = message
-        self.details = details or {}
-    
-    def to_dict(self):
-        return {
-            "code": self.code,
-            "message": self.message,
-            "details": self.details
-        }
-
-class NotFoundError(AppError):
-    """资源不存在"""
-    def __init__(self, resource: str, id: Any):
-        super().__init__(
-            code=ErrorCode.NOT_FOUND,
-            status_code=404,
-            message=f"{resource} with id {id} not found",
-            details={"resource": resource, "id": id}
-        )
-
-class ValidationError(AppError):
-    """验证错误"""
-    def __init__(self, field: str, message: str):
-        super().__init__(
-            code=ErrorCode.VALIDATION_ERROR,
-            status_code=422,
-            message=f"Validation error in field {field}",
-            details={"field": field, "message": message}
-        )
-
-class PermissionDeniedError(AppError):
-    """权限不足"""
-    def __init__(self, action: str):
-        super().__init__(
-            code=ErrorCode.PERMISSION_DENIED,
-            status_code=403,
-            message=f"Permission denied for action {action}",
-            details={"action": action}
-        )
-```
-
-### 错误处理中间件
-
-```python
-from fastapi import Request
-from fastapi.responses import JSONResponse
-
-@app.exception_handler(AppError)
-async def app_error_handler(request: Request, exc: AppError):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content=exc.to_dict()
-    )
-
-@app.exception_handler(Exception)
-async def general_exception_handler(request: Request, exc: Exception):
-    return JSONResponse(
-        status_code=500,
-        content={
-            "code": "INTERNAL_ERROR",
-            "message": "Internal server error",
-            "details": {}
-        }
-    )
-```
-
----
-
-## 钩子系统（Hook System）
-
-### 全局钩子
+支持 10 种 Hook 事件：
 
 ```python
 class HookRegistry:
-    """钩子注册表"""
-    
-    def __init__(self):
-        self.hooks = {}
-    
-    def register(self, event: str, callback):
-        """注册钩子"""
-        if event not in self.hooks:
-            self.hooks[event] = []
-        self.hooks[event].append(callback)
-    
-    async def trigger(self, event: str, context: ExecutionContext):
-        """触发钩子"""
-        if event in self.hooks:
-            for callback in self.hooks[event]:
-                await callback(context)
-
-# 支持的钩子事件
-HOOK_EVENTS = {
-    "before_create": "创建前",
-    "after_create": "创建后",
-    "before_update": "更新前",
-    "after_update": "更新后",
-    "before_delete": "删除前",
-    "after_delete": "删除后",
-    "before_get": "获取前",
-    "after_get": "获取后",
-}
-```
-
-### 使用钩子
-
-```python
-async def send_email_on_create(context: ExecutionContext):
-    """创建后发送邮件"""
-    await send_email(
-        to=context.result.email,
-        subject="Welcome!",
-        body="Thank you for signing up!"
-    )
-
-async def check_permission_before_delete(context: ExecutionContext):
-    """删除前检查权限"""
-    if not context.user.is_admin:
-        raise PermissionDeniedError("delete")
-
-# 注册钩子
-router = CRUDRouter(schema=Item, adapter=adapter)
-router.hooks.register("after_create", send_email_on_create)
-router.hooks.register("before_delete", check_permission_before_delete)
-```
-
----
-
-## 响应格式系统
-
-### 自定义响应格式
-
-```python
-from typing import Generic, TypeVar, List
-
-T = TypeVar('T')
-
-class PaginatedResponse(Generic[T]):
-    """分页响应"""
-    data: List[T]
-    total: int
-    page: int
-    pages: int
-    limit: int
-    skip: int
-
-class CustomResponse(Generic[T]):
-    """自定义响应"""
-    items: List[T]
-    meta: Dict[str, Any]
-    links: Dict[str, str]
-
-class ResponseFormatter(ABC):
-    """响应格式化器"""
-    
-    @abstractmethod
-    def format_list(self, items: List[T], total: int, pagination: Dict) -> Any:
-        """格式化列表响应"""
+    def register(self, event: str, callback: Callable):
         pass
     
-    @abstractmethod
-    def format_single(self, item: T) -> Any:
-        """格式化单个项目响应"""
+    async def trigger(self, event: str, *args, **kwargs):
         pass
-    
-    @abstractmethod
-    def format_error(self, error: AppError) -> Any:
-        """格式化错误响应"""
-        pass
-
-class DefaultResponseFormatter(ResponseFormatter):
-    """默认响应格式化器"""
-    
-    def format_list(self, items, total, pagination):
-        return {
-            "data": items,
-            "total": total,
-            "page": pagination['page'],
-            "pages": pagination['pages'],
-            "limit": pagination['limit'],
-            "skip": pagination['skip']
-        }
-    
-    def format_single(self, item):
-        return {"data": item}
-    
-    def format_error(self, error):
-        return error.to_dict()
 ```
 
-### 使用自定义响应格式
+Hook 事件：
+- before_get_all / after_get_all
+- before_get_one / after_get_one
+- before_create / after_create
+- before_update / after_update
+- before_delete / after_delete
+
+### 4. 配置系统
 
 ```python
-class CustomResponseFormatter(ResponseFormatter):
-    def format_list(self, items, total, pagination):
-        return {
-            "items": items,
-            "meta": {
-                "total": total,
-                "page": pagination['page'],
-                "pages": pagination['pages']
-            },
-            "links": {
-                "self": f"/items?page={pagination['page']}",
-                "next": f"/items?page={pagination['page'] + 1}" if pagination['page'] < pagination['pages'] else None,
-                "prev": f"/items?page={pagination['page'] - 1}" if pagination['page'] > 1 else None
-            }
-        }
-    
-    # ... 其他方法
-
-router = CRUDRouter(
-    schema=Item,
-    adapter=adapter,
-    response_formatter=CustomResponseFormatter()
-)
-```
-
----
-
-## 配置系统
-
-### 集中配置
-
-```python
-from dataclasses import dataclass
-from typing import List, Type
-
 @dataclass
 class CRUDConfig:
-    """CRUD 配置"""
-    # 功能开关
     enable_filters: bool = True
     enable_sorters: bool = True
     enable_pagination: bool = True
     enable_soft_delete: bool = False
     enable_audit: bool = False
     enable_bulk_operations: bool = False
-    
-    # 过滤配置
     filter_fields: List[str] = None
-    
-    # 排序配置
     sort_fields: List[str] = None
-    default_sort: str = None
-    
-    # 分页配置
     default_limit: int = 10
     max_limit: int = 100
-    
-    # 软删除配置
-    deleted_at_field: str = "deleted_at"
-    
-    # 响应格式
-    response_formatter: Type[ResponseFormatter] = DefaultResponseFormatter
-    
-    # 错误处理
-    include_error_details: bool = True
-    log_errors: bool = True
-
-# 使用配置
-config = CRUDConfig(
-    enable_filters=True,
-    filter_fields=["name", "price"],
-    enable_sorters=True,
-    sort_fields=["name", "created_at"],
-    enable_soft_delete=True,
-    enable_audit=True,
-    default_limit=20,
-    max_limit=100
-)
-
-router = CRUDRouter(schema=Item, adapter=adapter, config=config)
 ```
 
 ---
 
-## 完整示例：扩展系统
+## 数据流
+
+### 请求处理流程
+
+```
+1. 客户端发送 HTTP 请求
+   ↓
+2. FastAPI 路由匹配
+   ↓
+3. 中间件处理（认证、权限等）
+   ↓
+4. CRUDRouter 处理
+   ↓
+5. 触发 before_* Hook
+   ↓
+6. 业务逻辑处理（过滤、排序、分页）
+   ↓
+7. 调用 ORM 适配器
+   ↓
+8. 数据库查询
+   ↓
+9. 触发 after_* Hook
+   ↓
+10. 返回响应
+```
+
+### 数据转换流程
+
+```
+HTTP Request
+    ↓
+Pydantic Schema 验证
+    ↓
+业务逻辑处理
+    ↓
+ORM 模型转换
+    ↓
+数据库操作
+    ↓
+ORM 模型转换
+    ↓
+Pydantic Schema 序列化
+    ↓
+HTTP Response
+```
+
+---
+
+## 设计模式
+
+### 1. 适配器模式
+
+使用 ORMAdapter 抽象不同 ORM 的差异：
 
 ```python
-# 1. 定义自定义操作
-class ExportOperation(Operation):
-    name = "export"
-    method = "GET"
-    path = "/export"
-    
-    async def before_execute(self, context):
-        if not context.user.is_admin:
-            raise PermissionDeniedError("export")
-    
-    async def execute(self, context):
-        items = await context.adapter.get_all(
-            filters=context.filters,
-            sorts=context.sorts,
-            pagination={"skip": 0, "limit": None}
-        )
-        return self._to_csv(items)
-    
-    async def after_execute(self, context):
-        await log_export(context.user, len(context.result))
+# SQLAlchemy 适配器
+class SQLAlchemyAdapter(ORMAdapter):
+    async def get_all(self, **filters):
+        query = self.session.query(self.model)
+        for key, value in filters.items():
+            query = query.filter(getattr(self.model, key) == value)
+        return await query.all()
 
-# 2. 定义自定义适配器
-class ElasticsearchAdapter(ORMAdapter):
-    async def get_all(self, filters, sorts, pagination):
-        # 使用 Elasticsearch 搜索
-        pass
+# MongoDB 适配器
+class MongoAdapter(ORMAdapter):
+    async def get_all(self, **filters):
+        return await self.collection.find(filters).to_list(None)
+```
 
-# 3. 定义自定义响应格式
-class GraphQLResponseFormatter(ResponseFormatter):
-    def format_list(self, items, total, pagination):
-        return {
-            "data": {
-                "items": items,
-                "pageInfo": {
-                    "total": total,
-                    "hasNextPage": pagination['skip'] + pagination['limit'] < total
-                }
-            }
-        }
+### 2. Hook 模式
 
-# 4. 创建路由
-config = CRUDConfig(
-    enable_filters=True,
-    enable_sorters=True,
-    response_formatter=GraphQLResponseFormatter
-)
+支持在关键点插入自定义逻辑：
 
-router = CRUDRouter(
-    schema=Item,
-    adapter=SQLAlchemyAdapter(ItemDB, get_db),
-    config=config
-)
+```python
+@migration_hook("before_create")
+async def validate_before_create(data):
+    # 自定义验证逻辑
+    pass
 
-# 5. 注册自定义操作
-router.register_operation(ExportOperation())
+@migration_hook("after_create", priority=10)
+async def log_after_create(data):
+    # 自定义日志逻辑
+    pass
+```
 
-# 6. 注册钩子
-router.hooks.register("after_create", send_email_on_create)
-router.hooks.register("before_delete", check_permission_before_delete)
+### 3. 中间件模式
+
+使用中间件处理横切关注点：
+
+```python
+app.add_middleware(AuthenticationMiddleware)
+app.add_middleware(PermissionMiddleware)
+app.add_middleware(RateLimitMiddleware)
 ```
 
 ---
 
-## 下一步
+## 扩展点
 
-- 学习[搜索和过滤](04-filters.md)
-- 了解[排序功能](05-sorting.md)
-- 查看[完整示例](06-complete-example.md)
+### 1. 自定义适配器
+
+```python
+class CustomAdapter(ORMAdapter):
+    async def get_all(self, **filters):
+        # 自定义实现
+        pass
+```
+
+### 2. 自定义 Hook
+
+```python
+@migration_hook("before_create")
+async def custom_hook(data):
+    # 自定义逻辑
+    pass
+```
+
+### 3. 自定义中间件
+
+```python
+class CustomMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        # 自定义逻辑
+        response = await call_next(request)
+        return response
+```
+
+---
+
+## 性能考虑
+
+### 1. 缓存
+
+- 查询结果缓存
+- 权限缓存
+- Schema 缓存
+
+### 2. 异步
+
+- 所有数据库操作都是异步的
+- 支持并发请求
+
+### 3. 批量操作
+
+- 支持批量创建、更新、删除
+- 减少数据库往返次数
+
+---
+
+## 安全考虑
+
+### 1. 输入验证
+
+- Pydantic Schema 自动验证
+- 自定义验证器支持
+
+### 2. 权限控制
+
+- 端点级权限
+- 字段级权限
+
+### 3. 审计日志
+
+- 自动记录所有操作
+- 支持追踪数据变更

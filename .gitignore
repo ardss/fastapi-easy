@@ -80,3 +80,10 @@ docs/archive/
 # OS
 Thumbs.db
 .DS_Store
+
+# MkDocs
+site/
+.FullName
+
+# 过时文档
+docs/过时/
