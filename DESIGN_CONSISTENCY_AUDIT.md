@@ -1001,67 +1001,188 @@ AFTER_DML: 在执行数据迁移后 (如果有)
 - ⏳ 在关键点触发 BEFORE_DDL/AFTER_DDL/BEFORE_DML/AFTER_DML
 - ⏳ 更新相关测试
 
+### 🔍 代码审查发现的新问题
+
+#### 问题 1: rollback 方法返回类型不统一 🔴
+**位置**: `engine.py` 第 140 行
+**问题**: 返回 `dict` 而不是 `OperationResult`
+```python
+async def rollback(self, steps: int = 1, continue_on_error: bool = False) -> dict:
+    results = {
+        'success': False,
+        'rolled_back': 0,
+        'failed': 0,
+        'errors': []
+    }
+    return results
+```
+**建议**: 改为返回 `OperationResult`
+
+#### 问题 2: executor.py 使用字符串 mode 参数 🟡
+**位置**: `executor.py` 第 20 行
+**问题**: 使用字符串 `mode` 而不是 `ExecutionMode` 枚举
+```python
+async def execute_plan(self, plan: MigrationPlan, mode: str = "safe") -> tuple[MigrationPlan, List[Migration]]:
+```
+**建议**: 改为 `mode: ExecutionMode = ExecutionMode.SAFE`
+
+#### 问题 3: detector.py 参数命名不一致 🟡
+**位置**: `detector.py` 第 21 行
+**问题**: 使用 `timeout: int` 而不是 `timeout_seconds: int`
+```python
+async def detect_changes(self, timeout: int = 60) -> List[SchemaChange]:
+```
+**建议**: 改为 `timeout_seconds: int = 60` (明确单位)
+
+#### 问题 4: engine.py 参数命名不一致 🟡
+**位置**: `engine.py` 第 136 行
+**问题**: 使用 `limit: int` 而不是 `max_items: int`
+```python
+def get_history(self, limit: int = 10):
+```
+**建议**: 统一参数命名
+
+#### 问题 5: CLI 中 mode 参数使用字符串 🟡
+**位置**: `cli.py` 第 92-95 行
+**问题**: CLI 选项使用字符串而不是枚举
+```python
+@click.option(
+    "--mode",
+    type=click.Choice(["safe", "auto", "aggressive"]),
+    default="safe",
+    help="执行模式",
+)
+```
+**建议**: 应该验证并转换为 `ExecutionMode` 枚举
+
+#### 问题 6: 日志记录格式不统一 🟡
+**位置**: 多个文件
+**问题**: 日志格式混合了 emoji、中文、英文
+```python
+logger.info("🔒 Acquiring migration lock...")  # 英文
+logger.error("❌ 迁移失败: {error_msg}")  # 中文
+logger.warning("⏳ Could not acquire lock...")  # 英文
+```
+**建议**: 统一日志格式和语言
+
+#### 问题 7: 配置参数分散 🟡
+**位置**: 多个类
+**问题**: 配置参数分散在不同类中
+- `SchemaDetector.__init__`: `timeout=60`
+- `MigrationEngine.__init__`: `mode="safe"`, `auto_backup=False`
+- `MigrationStorage.initialize`: `max_retries=3`
+- `PostgresLockProvider.__init__`: `max_connection_age=300`
+
+**建议**: 创建统一的 `MigrationConfig` 类
+
+#### 问题 8: 未使用的 pre_hook/post_hook 🟢
+**位置**: `types.py` 第 154-155 行
+**问题**: Migration 类中定义但未使用
+```python
+pre_hook: Optional[str] = None
+post_hook: Optional[str] = None
+```
+**建议**: 要么使用，要么删除
+
 ### ⏳ 待完成的修复
 
-#### 第四步: 统一配置管理
-- 创建 MigrationConfig 类
-- 迁移所有配置参数
-- 添加配置验证
+#### 第四步: 统一 rollback 返回类型 (新增)
+- 改为返回 `OperationResult`
+- 更新相关测试
 
-#### 第五步: 统一参数命名
-- 统一 timeout 参数
-- 统一 limit/max_items 参数
-- 统一 mode 参数
+#### 第五步: 统一参数类型和命名
+- 使用 `ExecutionMode` 枚举而不是字符串
+- 统一参数命名 (timeout_seconds, max_items)
+- 更新 CLI 和所有调用处
 
 #### 第六步: 统一日志记录
 - 创建 LogFormatter 类
 - 统一日志格式
-- 统一日志级别
+- 统一日志级别和语言
+
+#### 第七步: 统一配置管理
+- 创建 MigrationConfig 类
+- 迁移所有配置参数
+- 添加配置验证
+
+#### 第八步: 清理未使用功能
+- 删除或实现 pre_hook/post_hook
 
 ---
 
 ## 📊 修复统计
 
-| 修复项 | 状态 | 完成度 | 测试 |
-|--------|------|--------|------|
-| 类型定义澄清 | ✅ | 100% | 187/187 ✅ |
-| 返回类型统一 | ✅ | 100% | 187/187 ✅ |
-| Hook 系统集成 | 🔄 | 0% | - |
-| 配置管理统一 | ⏳ | 0% | - |
-| 参数命名统一 | ⏳ | 0% | - |
-| 日志记录统一 | ⏳ | 0% | - |
+| 修复项 | 状态 | 完成度 | 测试 | 新增问题 |
+|--------|------|--------|------|---------|
+| 类型定义澄清 | ✅ | 100% | 187/187 ✅ | - |
+| 返回类型统一 | ✅ | 100% | 187/187 ✅ | - |
+| rollback 返回类型 | ⏳ | 0% | - | 🔴 高 |
+| 参数类型统一 | ⏳ | 0% | - | 🟡 中 (3 个) |
+| 参数命名统一 | ⏳ | 0% | - | 🟡 中 (2 个) |
+| 日志记录统一 | ⏳ | 0% | - | 🟡 中 |
+| 配置管理统一 | ⏳ | 0% | - | 🟡 中 |
+| 清理未使用功能 | ⏳ | 0% | - | 🟢 低 |
 
-**总体完成度**: 33% (2/6 完成)
+**总体完成度**: 25% (2/8 完成)
+
+### 新增问题统计
+- 🔴 高优先级: 1 个 (rollback 返回类型)
+- 🟡 中优先级: 6 个 (参数类型、参数命名、日志、配置)
+- 🟢 低优先级: 1 个 (未使用功能)
 
 ---
 
 ## 📝 总结
 
-**系统存在多个设计不统一的问题，正在逐步修复。**
+**系统存在多个设计不统一的问题，已发现 8 个新问题，正在逐步修复。**
 
 ### 关键问题
-- 🟢 返回类型不一致 (已修复)
-- 🟡 错误处理模式不统一 (进行中)
-- 🟡 配置管理分散 (待修复)
-- 🟡 关键功能集成不完善 (进行中)
-- 🟡 多个概念存在歧义 (已部分澄清)
+- 🟢 返回类型不一致 (已修复 storage.py)
+- 🔴 rollback 返回类型不统一 (新发现)
+- 🟡 参数类型不统一 (mode 使用字符串)
+- 🟡 参数命名不一致 (timeout vs timeout_seconds)
+- 🟡 日志记录格式混乱 (emoji + 中英文混合)
+- 🟡 配置参数分散 (需要统一)
+- 🟢 未使用功能 (pre_hook/post_hook)
 
 ### 改进方向
 1. ✅ 统一 API 设计 (进行中)
+   - ✅ 返回类型统一 (storage.py)
+   - ⏳ rollback 返回类型 (新增)
+   - ⏳ 参数类型统一 (mode 枚举)
+
 2. 🔄 完善功能集成 (进行中)
-3. 🟢 澄清概念和歧义 (已部分完成)
+   - ⏳ Hook 系统集成
+   - ⏳ 缓存系统集成
+
+3. 🟡 澄清概念和歧义 (已部分完成)
+   - ✅ ExecutionMode 枚举定义
+   - ✅ RiskLevel 定义
+   - ✅ PlanStatus vs RecordStatus 分离
+
 4. ⏳ 改进文档 (待完成)
+   - ⏳ 参数命名规范
+   - ⏳ 日志记录规范
+   - ⏳ 配置管理指南
 
 ### 工作量估计
-- **已完成**: 1-2 周
-- **进行中**: 1 周
-- **待完成**: 3-4 周
+- **已完成**: 1-2 周 (2/8 修复项)
+- **进行中**: 1 周 (Hook 系统)
+- **待完成**: 4-5 周 (6 个修复项)
 - **总计**: 6-9 周
+
+### 代码审查发现
+- **扫描范围**: 11 个文件
+- **发现问题**: 8 个
+- **高优先级**: 1 个
+- **中优先级**: 6 个
+- **低优先级**: 1 个
 
 ---
 
-**最后更新**: 2025-11-29 12:15 UTC+8  
+**最后更新**: 2025-11-29 12:20 UTC+8  
+**审查方式**: 代码审查 + 静态扫描  
 **修复工具**: Cascade AI  
-**修复状态**: 🔄 进行中  
-**总体评分**: 7.5/10 → 8.0/10 (改进中)  
-**建议**: 继续按优先级逐步改进
+**修复状态**: 🔄 进行中 (2/8 完成)  
+**总体评分**: 7.5/10 → 7.8/10 (发现新问题)  
+**建议**: 优先修复高优先级问题，然后按优先级逐步改进
