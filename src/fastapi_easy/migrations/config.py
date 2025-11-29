@@ -176,5 +176,98 @@ class MigrationConfig:
         return f"MigrationConfig({items})"
 
 
+    @classmethod
+    def from_file(cls, filepath: str) -> "MigrationConfig":
+        """从配置文件加载配置
+        
+        Args:
+            filepath: 配置文件路径 (JSON 或 YAML)
+        
+        Returns:
+            MigrationConfig 实例
+            
+        Raises:
+            FileNotFoundError: 文件不存在
+            ValueError: 文件格式不支持
+        """
+        import json
+        import os
+        
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"配置文件不存在: {filepath}")
+        
+        # 根据文件扩展名选择解析方式
+        if filepath.endswith('.json'):
+            with open(filepath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        elif filepath.endswith(('.yaml', '.yml')):
+            try:
+                import yaml
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    data = yaml.safe_load(f)
+            except ImportError:
+                raise ValueError(
+                    "YAML 支持需要安装 PyYAML: pip install pyyaml"
+                )
+        else:
+            raise ValueError(
+                f"不支持的文件格式: {filepath}. "
+                f"支持的格式: .json, .yaml, .yml"
+            )
+        
+        return cls.from_dict(data)
+    
+    def to_file(self, filepath: str) -> None:
+        """保存配置到文件
+        
+        Args:
+            filepath: 配置文件路径 (JSON 或 YAML)
+            
+        Raises:
+            ValueError: 文件格式不支持
+        """
+        import json
+        import os
+        
+        # 创建目录如果不存在
+        os.makedirs(os.path.dirname(filepath) or '.', exist_ok=True)
+        
+        # 根据文件扩展名选择保存方式
+        if filepath.endswith('.json'):
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(self.to_dict(), f, indent=2, ensure_ascii=False)
+        elif filepath.endswith(('.yaml', '.yml')):
+            try:
+                import yaml
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    yaml.dump(self.to_dict(), f, default_flow_style=False)
+            except ImportError:
+                raise ValueError(
+                    "YAML 支持需要安装 PyYAML: pip install pyyaml"
+                )
+        else:
+            raise ValueError(
+                f"不支持的文件格式: {filepath}. "
+                f"支持的格式: .json, .yaml, .yml"
+            )
+    
+    def merge(self, other: "MigrationConfig") -> "MigrationConfig":
+        """合并两个配置
+        
+        Args:
+            other: 另一个配置对象
+        
+        Returns:
+            合并后的新配置对象 (当前配置作为基础)
+        """
+        merged_dict = self.to_dict()
+        other_dict = other.to_dict()
+        
+        # 合并配置，other 的值覆盖 self 的值
+        merged_dict.update(other_dict)
+        
+        return self.from_dict(merged_dict)
+
+
 # 默认配置实例
 DEFAULT_CONFIG = MigrationConfig()

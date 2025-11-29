@@ -73,8 +73,14 @@ class FileSchemaCacheProvider(SchemaCacheProvider):
             else:
                 logger.debug(f"Cache miss: {key}")
                 return None
+        except (IOError, OSError) as e:
+            logger.error(f"文件读取失败: {e}")
+            return None
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON 解析失败: {e}")
+            return None
         except Exception as e:
-            logger.error(f"Error reading cache: {e}")
+            logger.error(f"缓存读取失败: {e}")
             return None
 
     async def set(self, key: str, value: Dict[str, Any]) -> bool:
@@ -85,8 +91,14 @@ class FileSchemaCacheProvider(SchemaCacheProvider):
                 json.dump(value, f, indent=2)
             logger.debug(f"Cache set: {key}")
             return True
+        except (IOError, OSError) as e:
+            logger.error(f"文件写入失败: {e}")
+            return False
+        except (TypeError, ValueError) as e:
+            logger.error(f"数据序列化失败: {e}")
+            return False
         except Exception as e:
-            logger.error(f"Error writing cache: {e}")
+            logger.error(f"缓存写入失败: {e}")
             return False
 
     async def delete(self, key: str) -> bool:
@@ -97,8 +109,11 @@ class FileSchemaCacheProvider(SchemaCacheProvider):
                 cache_file.unlink()
                 logger.debug(f"Cache deleted: {key}")
             return True
+        except (IOError, OSError) as e:
+            logger.error(f"文件删除失败: {e}")
+            return False
         except Exception as e:
-            logger.error(f"Error deleting cache: {e}")
+            logger.error(f"缓存删除失败: {e}")
             return False
 
     async def clear(self) -> bool:
