@@ -104,7 +104,8 @@ def plan(database_url: str, dry_run: bool):
 
         if dry_run:
             click.echo("")
-            CLIProgress.show_info("Dry-run 模式: 不执行任何操作")
+            logger.info("干运行模式: 不执行任何操作")
+            CLIProgress.show_info("干运行模式: 不执行任何操作")
 
     except MigrationError as e:
         click.echo("")
