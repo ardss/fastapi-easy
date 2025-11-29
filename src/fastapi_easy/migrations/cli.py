@@ -2,10 +2,12 @@
 迁移 CLI 工具链
 
 支持:
-- 迁移计划查看
-- 迁移执行
-- 迁移回滚
-- 迁移历史查看
+- 迁移计划查看 (plan 命令)
+- 迁移执行 (apply 命令)
+- 迁移回滚 (rollback 命令)
+- 迁移历史查看 (history 命令)
+- 迁移状态检查 (status 命令)
+- 系统初始化 (init 命令)
 """
 
 import asyncio
@@ -148,23 +150,54 @@ def apply(database_url: str, mode: str, force: bool):
         engine = create_engine(database_url)
         metadata = MetaData()
         migration_engine = MigrationEngine(engine, metadata, mode=mode_enum)
-        plan_result = asyncio.run(
-            migration_engine.auto_migrate()
+        
+        # 步骤 1: 检测变更 (不执行)
+        CLIProgress.show_step(1, 3, "检测 Schema 变更...")
+        changes = asyncio.run(
+            migration_engine.detector.detect_changes()
         )
+        
+        if not changes:
+            click.echo("")
+            CLIProgress.show_success("Schema 已是最新")
+            return
+        
+        # 步骤 2: 生成迁移计划
+        CLIProgress.show_step(2, 3, "生成迁移计划...")
+        plan_result = migration_engine.generator.generate_plan(changes)
+        
+        click.echo("")
+        click.echo(CLIFormatter.format_plan(plan_result))
+        click.echo("")
 
-        # 显示迁移计划并确认
+        # 步骤 3: 显示迁移计划并确认
         if not CLIConfirm.confirm_migration(plan_result, force):
             CLIProgress.show_warning("已取消")
             return
 
-        # 执行迁移
+        # 步骤 4: 执行迁移
+        click.echo("")
+        CLIProgress.show_step(3, 3, "执行迁移...")
+        plan_result, executed_migrations = asyncio.run(
+            migration_engine.executor.execute_plan(plan_result, mode=mode_enum)
+        )
+        
+        # 记录已执行的迁移
+        for migration in executed_migrations:
+            migration_engine.storage.record_migration(
+                version=migration.version,
+                description=migration.description,
+                rollback_sql=migration.downgrade_sql,
+                risk_level=migration.risk_level.value
+            )
+
+        # 显示结果
         click.echo("")
         CLIProgress.show_success("迁移完成")
         click.echo("")
         click.echo("📊 执行结果:")
-        click.echo(
-            f"  - 已执行 {len(plan_result.migrations)} 个迁移"
-        )
+        click.echo(f"  - 已执行 {len(executed_migrations)} 个迁移")
+        click.echo(f"  - 状态: {plan_result.status}")
 
     except MigrationError as e:
         click.echo("")
@@ -204,7 +237,29 @@ def rollback(database_url: str, steps: int, force: bool):
             click.echo("❌ 已取消")
             return
 
-        CLIProgress.show_success("回滚完成")
+        # 执行回滚
+        engine = create_engine(database_url)
+        migration_engine = MigrationEngine(engine, MetaData())
+        result = asyncio.run(
+            migration_engine.rollback(steps=steps, continue_on_error=False)
+        )
+
+        # 显示结果
+        click.echo("")
+        if result.success:
+            CLIProgress.show_success(
+                f"成功回滚 {result.data['rolled_back']} 个迁移"
+            )
+        else:
+            CLIProgress.show_warning(
+                f"回滚完成: {result.data['rolled_back']} 成功, "
+                f"{result.data['failed']} 失败"
+            )
+            if result.errors:
+                click.echo("")
+                click.echo("错误详情:")
+                for error in result.errors:
+                    click.echo(f"  - {error}")
 
     except MigrationError as e:
         click.echo("")
