@@ -12,7 +12,7 @@
         <meta name="author" content="FastAPI-Easy Team">
       
       
-        <link rel="canonical" href="https://ardss.github.io/fastapi-easy/FEATURES/">
+        <link rel="canonical" href="https://ardss.github.io/fastapi-easy/DOCUMENTATION_REFACTOR_PLAN/">
       
       
       
@@ -25,7 +25,7 @@
     
     
       
-        <title>FastAPI-Easy 功能清单 - FastAPI-Easy</title>
+        <title>FastAPI-Easy 文档重构计划 - FastAPI-Easy</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#_1" class="md-skip">
+        <a href="#1" class="md-skip">
           跳转至
         </a>
       
@@ -113,7 +113,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              FastAPI-Easy 功能清单
+              FastAPI-Easy 文档重构计划
             
           </span>
         </div>
@@ -1764,149 +1764,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        核心功能
+        1. 现状分析与问题诊断
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="核心功能">
+    <nav class="md-nav" aria-label="1. 现状分析与问题诊断">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-crudrouter" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. CRUDRouter（主类）
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-crud-6" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. CRUD 操作（6 种）
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-orm" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        3. ORM 适配器
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. 过滤系统
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        5. 排序系统
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#6" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6. 分页系统
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        高级功能
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="高级功能">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        7. 软删除
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#8" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        8. 批量操作
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#9" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        9. 权限控制
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#10" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        10. 审计日志
-      
-    </span>
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#11" class="md-nav__link">
     <span class="md-ellipsis">
       
-        11. 钩子系统
+        1.1 致命的准确性问题
       
     </span>
   </a>
@@ -1917,7 +1790,7 @@
   <a href="#12" class="md-nav__link">
     <span class="md-ellipsis">
       
-        12. 错误处理
+        1.2 结构性混乱
       
     </span>
   </a>
@@ -1930,22 +1803,44 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+  <a href="#2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        系统功能
+        2. 重构目标
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="系统功能">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 新文档架构设计
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-action-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 执行计划 (Action Items)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. 执行计划 (Action Items)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#13" class="md-nav__link">
+  <a href="#p0-" class="md-nav__link">
     <span class="md-ellipsis">
       
-        13. 配置系统
+        第一阶段：清理与修正 (P0 - 立即执行)
       
     </span>
   </a>
@@ -1953,10 +1848,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#14" class="md-nav__link">
+  <a href="#p1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        14. 响应格式化器
+        第二阶段：结构重组 (P1)
       
     </span>
   </a>
@@ -1964,65 +1859,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#15" class="md-nav__link">
+  <a href="#p2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        15. 日志系统
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#16" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        16. 输入验证
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#17" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        17. 类型定义
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#18" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        18. 中间件系统
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#19" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        19. 缓存支持
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#20" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        20. 速率限制
+        第三阶段：内容增强 (P2)
       
     </span>
   </a>
@@ -2035,60 +1875,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+  <a href="#5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        扩展功能
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="扩展功能">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#21-graphql" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        21. GraphQL 支持
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#22-websocket" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        22. WebSocket 支持
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#23-cli" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        23. CLI 工具
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        功能覆盖总结
+        5. 核心概念映射表 (用于文档编写)
       
     </span>
   </a>
@@ -2096,21 +1886,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_6" class="md-nav__link">
+  <a href="#6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        文档覆盖
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_7" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        完成状态
+        6. 总结
       
     </span>
   </a>
@@ -2142,7 +1921,7 @@
 
 
   
-    <a href="https://github.com/ardss/fastapi-easy/edit/main/docs/FEATURES.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/ardss/fastapi-easy/edit/main/docs/DOCUMENTATION_REFACTOR_PLAN.md" title="编辑此页" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -2151,242 +1930,159 @@
     
       
     
-    <a href="https://github.com/ardss/fastapi-easy/raw/main/docs/FEATURES.md" title="查看本页的源代码" class="md-content__button md-icon">
+    <a href="https://github.com/ardss/fastapi-easy/raw/main/docs/DOCUMENTATION_REFACTOR_PLAN.md" title="查看本页的源代码" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
     </a>
   
 
 
-<h1 id="fastapi-easy">FastAPI-Easy 功能清单<a class="headerlink" href="#fastapi-easy" title="Permanent link">&para;</a></h1>
-<p>本文档列出 FastAPI-Easy 库的所有实现功能及其文档位置。</p>
-<blockquote>
-<p><strong>说明</strong>: ✅ = 已完成 | ⏳ = 待办 | 📝 = 需要文档</p>
-</blockquote>
-<hr />
-<h2 id="_1">核心功能<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<h3 id="1-crudrouter">1. CRUDRouter（主类）<a class="headerlink" href="#1-crudrouter" title="Permanent link">&para;</a></h3>
+<h1 id="fastapi-easy">FastAPI-Easy 文档重构计划<a class="headerlink" href="#fastapi-easy" title="Permanent link">&para;</a></h1>
+<h2 id="1">1. 现状分析与问题诊断<a class="headerlink" href="#1" title="Permanent link">&para;</a></h2>
+<p>经过对 <code>docs/</code> 目录和 <code>src/</code> 源码的深入对比分析，发现当前文档体系存在以下严重问题：</p>
+<h3 id="11">1.1 致命的准确性问题<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>描述</strong>：自动生成 CRUD 路由的核心类</li>
-<li><strong>文档</strong>：01-quick-start.md, 07-architecture.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/core/crud_router.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
+<li><strong>虚假功能宣传</strong>：<code>docs/usage/02-databases.md</code> 宣称支持 <strong>Gino</strong> 和 <strong>Ormar</strong>，并提供了详细代码示例，但源码 <code>src/fastapi_easy/backends/</code> 中根本不存在这些实现。这会直接导致用户信任崩塌。</li>
+<li><strong>术语混乱</strong>：文档中混用 "Backend" 和 "Adapter"。<ul>
+<li>代码事实：<code>CRUDRouter.__init__</code> 的参数名为 <code>adapter</code>，基类为 <code>ORMAdapter</code>。</li>
+<li>结论：应统一使用 <strong>Adapter (适配器)</strong> 作为标准术语，"Backend" 仅用于指代底层技术（如 SQLAlchemy Backend）。</li>
 </ul>
-<h3 id="2-crud-6">2. CRUD 操作（6 种）<a class="headerlink" href="#2-crud-6" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：GetAll、GetOne、Create、Update、DeleteOne、DeleteAll</li>
-<li><strong>文档</strong>：01-quick-start.md, 07-architecture.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/operations/</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
+</li>
 </ul>
-<h3 id="3-orm">3. ORM 适配器<a class="headerlink" href="#3-orm" title="Permanent link">&para;</a></h3>
+<h3 id="12">1.2 结构性混乱<a class="headerlink" href="#12" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>描述</strong>：支持 SQLAlchemy、Tortoise、MongoDB、SQLModel（4 种 ORM）</li>
-<li><strong>文档</strong>：02-databases.md, 07-architecture.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/backends/</code>, <code>src/fastapi_easy/core/adapters.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="4">4. 过滤系统<a class="headerlink" href="#4" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：9 种过滤操作符（eq, ne, gt, gte, lt, lte, like, in, between）</li>
-<li><strong>文档</strong>：04-filters.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/utils/filters.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="5">5. 排序系统<a class="headerlink" href="#5" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：升序、降序、多字段排序</li>
-<li><strong>文档</strong>：05-sorting.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/utils/sorters.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="6">6. 分页系统<a class="headerlink" href="#6" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：Skip/Limit 分页</li>
-<li><strong>文档</strong>：03-data-flow.md, 06-complete-example.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/utils/pagination.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
+<li><strong>文件冲突</strong>：<code>docs/usage/</code> 下同时存在 <code>02-database-quick-guide.md</code> (教程) 和 <code>02-databases.md</code> (手册)，内容重叠且编号冲突。</li>
+<li><strong>信息孤岛</strong>：<code>docs/security/</code> 包含 9 份高质量文档，但在主目录 <code>docs/usage/</code> 中几乎没有入口，导致这部分核心价值被埋没。</li>
+<li><strong>编号断层</strong>：文件编号不连续（如缺 <code>08</code>），且缺乏逻辑分组。</li>
+<li><strong>冗余导航</strong>：多个 <code>README.md</code> (根目录, <code>docs/</code>, <code>docs/usage/</code>) 都在做导航，维护成本高且易不同步。</li>
 </ul>
 <hr />
-<h2 id="_2">高级功能<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<h3 id="7">7. 软删除<a class="headerlink" href="#7" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：标记删除而不是永久删除，支持恢复</li>
-<li><strong>文档</strong>：10-soft-delete.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/core/soft_delete.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="8">8. 批量操作<a class="headerlink" href="#8" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：批量创建、更新、删除，支持事务</li>
-<li><strong>文档</strong>：11-batch-operations.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/core/bulk_operations.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="9">9. 权限控制<a class="headerlink" href="#9" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：RBAC（基于角色）和 ABAC（基于属性）</li>
-<li><strong>文档</strong>：12-permissions.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/core/permissions.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="10">10. 审计日志<a class="headerlink" href="#10" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：记录所有操作，追踪数据变化</li>
-<li><strong>文档</strong>：13-audit-logging.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/core/audit_log.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="11">11. 钩子系统<a class="headerlink" href="#11" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：before/after 钩子，支持自定义逻辑</li>
-<li><strong>文档</strong>：07-architecture.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/core/hooks.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="12">12. 错误处理<a class="headerlink" href="#12" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：结构化错误，自定义错误类型</li>
-<li><strong>文档</strong>：09-error-handling.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/core/errors.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
+<h2 id="2">2. 重构目标<a class="headerlink" href="#2" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>单一事实来源 (Single Source of Truth)</strong>：确保文档描述与代码实现（特别是 <code>CRUDRouter</code> 和 <code>CRUDConfig</code>）完全一致。</li>
+<li><strong>术语标准化</strong>：全局统一使用代码中的术语（如 <code>Adapter</code>, <code>Schema</code>, <code>Config</code>）。</li>
+<li><strong>结构模块化</strong>：采用 <strong>Diátaxis</strong> 框架思想（教程、指南、参考、解释），将文档按功能而非编号分组。</li>
+<li><strong>清理与瘦身</strong>：删除不存在的功能文档，归档过时的过程性文档。</li>
+</ol>
 <hr />
-<h2 id="_3">系统功能<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
-<h3 id="13">13. 配置系统<a class="headerlink" href="#13" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：集中配置，功能开关</li>
-<li><strong>文档</strong>：14-configuration.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/core/config.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="14">14. 响应格式化器<a class="headerlink" href="#14" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：JSON、分页、信封格式，自定义格式</li>
-<li><strong>文档</strong>：14-configuration.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/core/formatters.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="15">15. 日志系统<a class="headerlink" href="#15" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：结构化日志，JSON 格式，多级别</li>
-<li><strong>文档</strong>：16-best-practices.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/core/logger.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="16">16. 输入验证<a class="headerlink" href="#16" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：字段验证，SQL 注入防护</li>
-<li><strong>文档</strong>：09-error-handling.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/core/validators.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="17">17. 类型定义<a class="headerlink" href="#17" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：类型别名、协议定义，IDE 支持</li>
-<li><strong>文档</strong>：07-architecture.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/core/types.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="18">18. 中间件系统<a class="headerlink" href="#18" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：错误处理、日志、监控中间件</li>
-<li><strong>文档</strong>：16-best-practices.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/middleware/</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="19">19. 缓存支持<a class="headerlink" href="#19" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：内存缓存，TTL 支持，装饰器</li>
-<li><strong>文档</strong>：14-configuration.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/core/cache.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
-<h3 id="20">20. 速率限制<a class="headerlink" href="#20" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：滑动窗口算法，内存后端</li>
-<li><strong>文档</strong>：14-configuration.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/core/rate_limit.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
-</ul>
+<h2 id="3">3. 新文档架构设计<a class="headerlink" href="#3" title="Permanent link">&para;</a></h2>
+<p>建议废弃扁平的 <code>docs/usage/01...20</code> 结构，采用语义化目录结构：</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docs/
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── index.md                     # 文档总入口 (原 docs/README.md)
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── tutorial/                    # 教程：手把手教学
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│   ├── 01-quick-start.md        # 5分钟上手 (原 usage/01)
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│   └── 02-database-integration.md # 数据库集成 (合并原 usage/02 两个文件)
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>├── guides/                      # 指南：特定任务的解决方案
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│   ├── querying.md              # 搜索、过滤与排序 (合并 usage/04, 05)
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│   ├── pagination.md            # 分页详解
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│   ├── error-handling.md        # 错误处理与自定义
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│   ├── bulk-operations.md       # 批量操作
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│   └── soft-delete.md           # 软删除
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>├── security/                    # 安全：整合现有的 security 目录
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│   ├── index.md                 # 安全概览 (引导至子文档)
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│   ├── authentication.md
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│   ├── permissions.md           # 权限控制 (整合 usage/12)
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│   └── audit-logging.md         # 审计日志 (整合 usage/13)
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>├── adapters/                    # 适配器：数据库支持详解
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│   ├── index.md                 # 适配器概览 &amp; 选择指南
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>│   ├── sqlalchemy.md            # SQLAlchemy (Async)
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>│   ├── tortoise.md              # Tortoise ORM
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>│   ├── mongodb.md               # MongoDB (Motor)
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│   └── sqlmodel.md              # SQLModel
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>├── reference/                   # 参考：API 与配置手册
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>│   ├── configuration.md         # CRUDConfig 完整参数详解
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>│   ├── architecture.md          # 架构设计 (原 usage/07)
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>│   └── hooks.md                 # 钩子系统详解
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>│
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>└── development/                 # 开发：贡献与测试
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>    ├── contributing.md          # (原 DEVELOPMENT.md)
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>    └── testing.md               # (原 usage/15)
+</span></code></pre></div>
 <hr />
-<h2 id="_4">扩展功能<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<h3 id="21-graphql">21. GraphQL 支持<a class="headerlink" href="#21-graphql" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：GraphQL 查询、变更、自动 schema</li>
-<li><strong>文档</strong>：18-graphql.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/graphql.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
+<h2 id="4-action-items">4. 执行计划 (Action Items)<a class="headerlink" href="#4-action-items" title="Permanent link">&para;</a></h2>
+<h3 id="p0-">第一阶段：清理与修正 (P0 - 立即执行)<a class="headerlink" href="#p0-" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>删除虚假内容</strong>：<ul>
+<li>编辑 <code>docs/usage/02-databases.md</code>，<strong>彻底删除</strong> Gino 和 Ormar 的所有章节。</li>
+<li>修正 <code>README.md</code> 中的支持列表。</li>
 </ul>
-<h3 id="22-websocket">22. WebSocket 支持<a class="headerlink" href="#22-websocket" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：实时通信，房间管理，消息路由</li>
-<li><strong>文档</strong>：19-websocket.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/websocket.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
+</li>
+<li><strong>术语统一</strong>：<ul>
+<li>全局搜索 "Backend"，在指代 <code>CRUDRouter</code> 参数或类实例时，替换为 "Adapter"。</li>
+<li>明确 <code>ORMAdapter</code> 是核心接口。</li>
 </ul>
-<h3 id="23-cli">23. CLI 工具<a class="headerlink" href="#23-cli" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>描述</strong>：项目初始化、代码生成、版本查看</li>
-<li><strong>文档</strong>：20-cli.md</li>
-<li><strong>实现</strong>：<code>src/fastapi_easy/cli.py</code></li>
-<li><strong>状态</strong>：✅ 完整</li>
+</li>
+</ol>
+<h3 id="p1">第二阶段：结构重组 (P1)<a class="headerlink" href="#p1" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>创建新目录</strong>：建立 <code>tutorial</code>, <code>guides</code>, <code>adapters</code>, <code>reference</code> 目录。</li>
+<li><strong>文件迁移与合并</strong>：<ul>
+<li><code>usage/04-filters.md</code> + <code>usage/05-sorting.md</code> -&gt; <code>guides/querying.md</code></li>
+<li><code>usage/02-*.md</code> -&gt; <code>tutorial/02-database-integration.md</code> (保留教程部分，提取手册部分到 <code>adapters/</code>)</li>
+<li>将 <code>docs/security/</code> 下的文件整理，并在 <code>docs/index.md</code> 建立索引。</li>
 </ul>
+</li>
+</ol>
+<h3 id="p2">第三阶段：内容增强 (P2)<a class="headerlink" href="#p2" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>配置详解</strong>：基于 <code>src/fastapi_easy/core/config.py</code>，在 <code>reference/configuration.md</code> 中生成一份自动化的配置参数表。</li>
+<li><strong>钩子文档</strong>：专门编写 <code>reference/hooks.md</code>，列出所有可用钩子（<code>before_create</code>, <code>after_get_all</code> 等）及其上下文对象 <code>ExecutionContext</code> 的属性。</li>
+</ol>
 <hr />
-<h2 id="_5">功能覆盖总结<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h2 id="5">5. 核心概念映射表 (用于文档编写)<a class="headerlink" href="#5" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>类别</th>
-<th>数量</th>
-<th>完成</th>
-<th>待办</th>
+<th style="text-align: left;">文档术语</th>
+<th style="text-align: left;">代码对应</th>
+<th style="text-align: left;">说明</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>核心功能</td>
-<td>6</td>
-<td>✅ 6</td>
-<td>⏳ 0</td>
+<td style="text-align: left;"><strong>Router</strong></td>
+<td style="text-align: left;"><code>CRUDRouter</code></td>
+<td style="text-align: left;">核心入口类</td>
 </tr>
 <tr>
-<td>高级功能</td>
-<td>6</td>
-<td>✅ 6</td>
-<td>⏳ 0</td>
+<td style="text-align: left;"><strong>Adapter</strong></td>
+<td style="text-align: left;"><code>ORMAdapter</code></td>
+<td style="text-align: left;">数据库适配层 (原 Backend)</td>
 </tr>
 <tr>
-<td>系统功能</td>
-<td>8</td>
-<td>✅ 8</td>
-<td>⏳ 0</td>
+<td style="text-align: left;"><strong>Config</strong></td>
+<td style="text-align: left;"><code>CRUDConfig</code></td>
+<td style="text-align: left;">集中配置对象</td>
 </tr>
 <tr>
-<td>扩展功能</td>
-<td>3</td>
-<td>✅ 3</td>
-<td>⏳ 0</td>
+<td style="text-align: left;"><strong>Schema</strong></td>
+<td style="text-align: left;"><code>pydantic.BaseModel</code></td>
+<td style="text-align: left;">数据模型 (API 层)</td>
 </tr>
 <tr>
-<td><strong>总计</strong></td>
-<td><strong>23</strong></td>
-<td><strong>✅ 23</strong></td>
-<td><strong>⏳ 0</strong></td>
+<td style="text-align: left;"><strong>Model</strong></td>
+<td style="text-align: left;">(Depends on ORM)</td>
+<td style="text-align: left;">数据库模型 (ORM 层)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Hook</strong></td>
+<td style="text-align: left;"><code>HookRegistry</code></td>
+<td style="text-align: left;">生命周期钩子</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Context</strong></td>
+<td style="text-align: left;"><code>ExecutionContext</code></td>
+<td style="text-align: left;">钩子传递的上下文</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="_6">文档覆盖<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
-<ul>
-<li>✅ 所有核心功能都有文档</li>
-<li>✅ 所有高级功能都有文档</li>
-<li>✅ 所有系统功能都有文档</li>
-<li>✅ 所有扩展功能都有详细文档</li>
-</ul>
-<hr />
-<h2 id="_7">完成状态<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h2>
-<p>✅ <strong>所有 23 个功能都已完整实现并有详细文档说明。</strong></p>
+<h2 id="6">6. 总结<a class="headerlink" href="#6" title="Permanent link">&para;</a></h2>
+<p>目前的文档虽然内容丰富，但缺乏维护和系统性规划。通过这次重构，我们将从“堆砌功能介绍”转变为“以用户为中心的文档体系”，确保新手能看懂教程，专家能查到手册，且所有信息真实可靠。</p>
 
 
 

@@ -25,7 +25,7 @@
     
     
       
-        <title>代码质量审查报告 - 精简版 - FastAPI-Easy</title>
+        <title>代码质量审查报告 - 用户体验与信任影响分析 - FastAPI-Easy</title>
       
     
     
@@ -113,7 +113,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              代码质量审查报告 - 精简版
+              代码质量审查报告 - 用户体验与信任影响分析
             
           </span>
         </div>
@@ -1767,19 +1767,19 @@
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        问题汇总
+        📋 执行摘要
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="问题汇总">
+    <nav class="md-nav" aria-label="📋 执行摘要">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#4" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        已修复 (4 个)
+        关键发现
       
     </span>
   </a>
@@ -1792,22 +1792,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+  <a href="#-_1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        新发现的问题 (深入审查)
+        🔴 高风险问题 - 影响用户信任
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="新发现的问题 (深入审查)">
+    <nav class="md-nav" aria-label="🔴 高风险问题 - 影响用户信任">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1" class="md-nav__link">
+  <a href="#1-cli" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. 类型注解不完整 (🟡 中)
+        1. CLI 工具完全不可用 ⚠️ 严重
       
     </span>
   </a>
@@ -1815,10 +1815,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2" class="md-nav__link">
+  <a href="#2-" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. 异常处理过于宽泛 (🟡 中)
+        2. 错误消息不清晰 - 用户无法自助解决
       
     </span>
   </a>
@@ -1829,18 +1829,35 @@
   <a href="#3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. 日志记录不一致 (🟡 中)
+        3. 存储记录异常处理有缺陷
       
     </span>
   </a>
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#4_1" class="md-nav__link">
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#-_2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. 错误恢复机制缺失 (🟡 中)
+        🟠 中风险问题 - 影响用户体验
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🟠 中风险问题 - 影响用户体验">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 超时错误消息不友好
       
     </span>
   </a>
@@ -1851,7 +1868,7 @@
   <a href="#5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. 资源清理不完整 (🟡 中)
+        5. 锁获取失败没有清晰提示
       
     </span>
   </a>
@@ -1862,7 +1879,7 @@
   <a href="#6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        6. 并发控制不完善 (🟡 中)
+        6. 缓存错误被静默忽略
       
     </span>
   </a>
@@ -1873,18 +1890,35 @@
   <a href="#7" class="md-nav__link">
     <span class="md-ellipsis">
       
-        7. 性能优化缺失 (🟢 低)
+        7. 风险规则异常处理过于保守
       
     </span>
   </a>
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#-_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        🟡 低风险问题 - 代码质量
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🟡 低风险问题 - 代码质量">
+      <ul class="md-nav__list">
+        
           <li class="md-nav__item">
   <a href="#8" class="md-nav__link">
     <span class="md-ellipsis">
       
-        8. 测试覆盖不全 (🟡 中)
+        8. 日志级别不一致
       
     </span>
   </a>
@@ -1895,7 +1929,7 @@
   <a href="#9" class="md-nav__link">
     <span class="md-ellipsis">
       
-        9. 文档缺失 (🟡 中)
+        9. 缺少操作确认
       
     </span>
   </a>
@@ -1906,7 +1940,7 @@
   <a href="#10" class="md-nav__link">
     <span class="md-ellipsis">
       
-        10. 配置管理不完善 (🟡 中)
+        10. 缺少健康检查
       
     </span>
   </a>
@@ -1922,7 +1956,7 @@
   <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       
-        评分详情
+        📊 问题优先级矩阵
       
     </span>
   </a>
@@ -1933,19 +1967,19 @@
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       
-        修复优先级
+        🎯 改进建议
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="修复优先级">
+    <nav class="md-nav" aria-label="🎯 改进建议">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#p0" class="md-nav__link">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       
-        P0 (立即修复)
+        立即行动 (本周)
       
     </span>
   </a>
@@ -1956,7 +1990,7 @@
   <a href="#p1" class="md-nav__link">
     <span class="md-ellipsis">
       
-        P1 (本周修复)
+        本月行动 (P1)
       
     </span>
   </a>
@@ -1967,7 +2001,7 @@
   <a href="#p2" class="md-nav__link">
     <span class="md-ellipsis">
       
-        P2 (本月改进)
+        后续改进 (P2)
       
     </span>
   </a>
@@ -1980,10 +2014,99 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       
-        预期改进
+        📈 预期改进效果
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📈 预期改进效果">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        用户信任度提升
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        代码质量提升
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ✅ 总体建议
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="✅ 总体建议">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        现状评估
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        核心问题
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        建议
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        📝 结论
       
     </span>
   </a>
@@ -2031,399 +2154,611 @@
   
 
 
-<h1 id="-">代码质量审查报告 - 精简版<a class="headerlink" href="#-" title="Permanent link">&para;</a></h1>
-<p><strong>审查时间</strong>: 2025-11-29 16:45 UTC+8<br />
-<strong>审查范围</strong>: 19 个迁移系统文件<br />
-<strong>总体评分</strong>: 8.7/10 (良好)</p>
+<h1 id="-">代码质量审查报告 - 用户体验与信任影响分析<a class="headerlink" href="#-" title="Permanent link">&para;</a></h1>
+<p><strong>审查日期</strong>: 2025-11-29<br />
+<strong>审查范围</strong>: 迁移引擎核心模块 (11 个文件)<br />
+<strong>审查重点</strong>: 影响用户体验和用户信任的问题</p>
 <hr />
-<h2 id="_1">问题汇总<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
-<h3 id="4">已修复 (4 个)<a class="headerlink" href="#4" title="Permanent link">&para;</a></h3>
+<h2 id="_1">📋 执行摘要<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h3 id="_2">关键发现<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p><strong>高风险问题 (影响用户信任)</strong>: 3 个<br />
+<strong>中风险问题 (影响用户体验)</strong>: 5 个<br />
+<strong>低风险问题 (代码质量)</strong>: 4 个</p>
+<p><strong>总体评分</strong>: 8.2/10 (需要改进)</p>
+<hr />
+<h2 id="-_1">🔴 高风险问题 - 影响用户信任<a class="headerlink" href="#-_1" title="Permanent link">&para;</a></h2>
+<h3 id="1-cli">1. CLI 工具完全不可用 ⚠️ 严重<a class="headerlink" href="#1-cli" title="Permanent link">&para;</a></h3>
+<p><strong>文件</strong>: <code>cli.py</code> (第 43-223 行)<br />
+<strong>问题</strong>: CLI 命令是空壳实现，没有实际功能</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># 当前实现 - 完全不工作</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="n">database_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">models_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;查看迁移计划&quot;&quot;&quot;</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;📋 检测 Schema 变更...&quot;</span><span class="p">)</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        <span class="c1"># 这里需要动态导入模型</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>        <span class="c1"># 为了演示，我们使用简化的实现</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;✅ 检测完成&quot;</span><span class="p">)</span>  <span class="c1"># 虚假成功提示！</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;  - 无待处理的迁移&quot;</span><span class="p">)</span>  <span class="c1"># 总是显示无迁移</span>
+</span></code></pre></div>
+<p><strong>影响</strong>:
+- ❌ 用户运行 CLI 命令时完全不工作
+- ❌ 显示虚假的成功消息
+- ❌ 严重损害用户信任</p>
+<p><strong>建议修复</strong>:
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">def</span> <span class="nf">plan</span><span class="p">(</span><span class="n">database_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">models_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;查看迁移计划&quot;&quot;&quot;</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;📋 检测 Schema 变更...&quot;</span><span class="p">)</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>        <span class="c1"># 实际导入模型和检测变更</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="n">database_url</span><span class="p">)</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="n">metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">()</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="c1"># 动态导入模型...</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>        <span class="n">detector</span> <span class="o">=</span> <span class="n">SchemaDetector</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>        <span class="n">changes</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">detect_changes</span><span class="p">())</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">changes</span><span class="p">:</span>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;✅ Schema 已同步，无待处理的迁移&quot;</span><span class="p">)</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>            <span class="k">return</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⚠️ 检测到 </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">changes</span><span class="p">)</span><span class="si">}</span><span class="s2"> 个 Schema 变更:&quot;</span><span class="p">)</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>        <span class="k">for</span> <span class="n">change</span> <span class="ow">in</span> <span class="n">changes</span><span class="p">:</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>            <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - [</span><span class="si">{</span><span class="n">change</span><span class="o">.</span><span class="n">risk_level</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">change</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ 错误: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CLI error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-1-25"><a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></code></pre></div></p>
+<p><strong>优先级</strong>: 🔴 P0 - 立即修复<br />
+<strong>工作量</strong>: 4-6 小时</p>
+<hr />
+<h3 id="2-">2. 错误消息不清晰 - 用户无法自助解决<a class="headerlink" href="#2-" title="Permanent link">&para;</a></h3>
+<p><strong>文件</strong>: <code>engine.py</code> (第 108-110 行)<br />
+<strong>问题</strong>: 迁移失败时错误消息不够详细</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># 当前实现 - 错误消息太简洁</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Migration failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="k">raise</span>
+</span></code></pre></div>
+<p><strong>问题分析</strong>:
+- 用户看到 "Migration failed" 但不知道原因
+- 没有提供解决步骤
+- 没有区分不同类型的错误</p>
+<p><strong>建议修复</strong>:
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">error_msg</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="c1"># 根据错误类型提供具体建议</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="k">if</span> <span class="s2">&quot;permission denied&quot;</span> <span class="ow">in</span> <span class="n">error_msg</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>            <span class="s2">&quot;❌ 迁移失败: 数据库权限不足</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>            <span class="s2">&quot;解决方案:</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>            <span class="s2">&quot;  1. 检查数据库用户权限</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>            <span class="s2">&quot;  2. 确保用户有 ALTER TABLE 权限</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>            <span class="s2">&quot;  3. 重新运行迁移&quot;</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>        <span class="p">)</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    <span class="k">elif</span> <span class="s2">&quot;table does not exist&quot;</span> <span class="ow">in</span> <span class="n">error_msg</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>            <span class="s2">&quot;❌ 迁移失败: 表不存在</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>            <span class="s2">&quot;解决方案:</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>            <span class="s2">&quot;  1. 运行 &#39;fastapi-easy migrate init&#39; 初始化</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>            <span class="s2">&quot;  2. 检查数据库连接</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>            <span class="s2">&quot;  3. 重新运行迁移&quot;</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>        <span class="p">)</span>
+</span><span id="__span-3-21"><a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>    <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-3-22"><a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+</span><span id="__span-3-23"><a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>            <span class="sa">f</span><span class="s2">&quot;❌ 迁移失败: </span><span class="si">{</span><span class="n">error_msg</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-3-24"><a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>            <span class="s2">&quot;调试步骤:</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-3-25"><a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>            <span class="s2">&quot;  1. 检查数据库连接: fastapi-easy migrate status</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-3-26"><a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>            <span class="s2">&quot;  2. 查看详细日志: 设置 LOG_LEVEL=DEBUG</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-3-27"><a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>            <span class="s2">&quot;  3. 运行 dry-run: fastapi-easy migrate plan --dry-run&quot;</span>
+</span><span id="__span-3-28"><a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>        <span class="p">)</span>
+</span><span id="__span-3-29"><a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>
+</span><span id="__span-3-30"><a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>    <span class="k">raise</span>
+</span></code></pre></div></p>
+<p><strong>优先级</strong>: 🔴 P0 - 严重影响用户体验<br />
+<strong>工作量</strong>: 2-3 小时</p>
+<hr />
+<h3 id="3">3. 存储记录异常处理有缺陷<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
+<p><strong>文件</strong>: <code>storage.py</code> (第 84-93 行)<br />
+<strong>问题</strong>: 异常处理逻辑有矛盾</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># 当前实现 - 有问题</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">except</span> <span class="n">IntegrityError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Migration </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2"> already recorded: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="k">raise</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to record migration </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="k">raise</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="c1"># Don&#39;t raise - recording failure shouldn&#39;t block migration  # ← 这行永远不会执行！</span>
+</span></code></pre></div>
+<p><strong>问题分析</strong>:
+- 注释说 "不应该 raise"，但代码实际上 raise 了
+- 用户会看到迁移失败，但实际上迁移可能已经成功
+- 造成用户困惑</p>
+<p><strong>建议修复</strong>:
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span> <span class="nf">record_migration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rollback_sql</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">risk_level</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Record a successful migration&quot;&quot;&quot;</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">begin</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>            <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>                <span class="n">text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="s2">                    INSERT INTO </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">TABLE_NAME</span><span class="si">}</span>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="s2">                    (version, description, applied_at, rollback_sql, risk_level, status)</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="s2">                    VALUES (:version, :description, :applied_at, :rollback_sql, :risk_level, &#39;applied&#39;)</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="s2">                &quot;&quot;&quot;</span><span class="p">),</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>                <span class="p">{</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>                    <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">version</span><span class="p">,</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">description</span><span class="p">,</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>                    <span class="s2">&quot;applied_at&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>                    <span class="s2">&quot;rollback_sql&quot;</span><span class="p">:</span> <span class="n">rollback_sql</span><span class="p">,</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>                    <span class="s2">&quot;risk_level&quot;</span><span class="p">:</span> <span class="n">risk_level</span><span class="p">,</span>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>                <span class="p">}</span>
+</span><span id="__span-5-18"><a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>            <span class="p">)</span>
+</span><span id="__span-5-19"><a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📝 Recorded migration: </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-5-20"><a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>        <span class="k">return</span> <span class="kc">True</span>
+</span><span id="__span-5-21"><a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>
+</span><span id="__span-5-22"><a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>    <span class="k">except</span> <span class="n">IntegrityError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-5-23"><a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>        <span class="c1"># 迁移已记录，这不是错误</span>
+</span><span id="__span-5-24"><a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Migration </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2"> already recorded (idempotent)&quot;</span><span class="p">)</span>
+</span><span id="__span-5-25"><a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>        <span class="k">return</span> <span class="kc">True</span>
+</span><span id="__span-5-26"><a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a>
+</span><span id="__span-5-27"><a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-5-28"><a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a>        <span class="c1"># 记录失败不应该阻止迁移</span>
+</span><span id="__span-5-29"><a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+</span><span id="__span-5-30"><a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a>            <span class="sa">f</span><span class="s2">&quot;Failed to record migration </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2"> in history: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-5-31"><a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a>            <span class="s2">&quot;⚠️ 迁移已执行，但历史记录失败。&quot;</span>
+</span><span id="__span-5-32"><a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a>            <span class="s2">&quot;这不会影响迁移本身，但会影响回滚功能。&quot;</span>
+</span><span id="__span-5-33"><a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a>        <span class="p">)</span>
+</span><span id="__span-5-34"><a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a>        <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># 返回 False 而不是 raise</span>
+</span></code></pre></div></p>
+<p><strong>优先级</strong>: 🔴 P0 - 影响用户信任<br />
+<strong>工作量</strong>: 1-2 小时</p>
+<hr />
+<h2 id="-_2">🟠 中风险问题 - 影响用户体验<a class="headerlink" href="#-_2" title="Permanent link">&para;</a></h2>
+<h3 id="4">4. 超时错误消息不友好<a class="headerlink" href="#4" title="Permanent link">&para;</a></h3>
+<p><strong>文件</strong>: <code>detector.py</code> (第 30-35 行)<br />
+<strong>问题</strong>: 超时时错误消息没有提供解决方案</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># 当前实现</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">:</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>        <span class="sa">f</span><span class="s2">&quot;Schema detection timed out after </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s. &quot;</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>        <span class="sa">f</span><span class="s2">&quot;Consider increasing timeout or checking database performance.&quot;</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="p">)</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="k">raise</span>
+</span></code></pre></div>
+<p><strong>问题分析</strong>:
+- 用户不知道如何增加超时
+- 没有提供具体的配置方法
+- 没有性能诊断建议</p>
+<p><strong>建议修复</strong>:
+<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">:</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>        <span class="sa">f</span><span class="s2">&quot;❌ Schema 检测超时 (超过 </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s)</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">解决方案:</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>        <span class="s2">&quot;1. 增加超时时间:</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>        <span class="s2">&quot;   detector = SchemaDetector(engine, metadata)</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>        <span class="s2">&quot;   changes = await detector.detect_changes(timeout=120)</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">2. 检查数据库性能:</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>        <span class="s2">&quot;   - 运行 SELECT COUNT(*) FROM information_schema.tables</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>        <span class="s2">&quot;   - 检查数据库连接数</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>        <span class="s2">&quot;   - 检查网络延迟</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">3. 如果问题持续，请报告 issue:</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>        <span class="s2">&quot;   https://github.com/fastapi-easy/issues&quot;</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>    <span class="p">)</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    <span class="k">raise</span>
+</span></code></pre></div></p>
+<p><strong>优先级</strong>: 🟠 P1 - 影响用户体验<br />
+<strong>工作量</strong>: 1 小时</p>
+<hr />
+<h3 id="5">5. 锁获取失败没有清晰提示<a class="headerlink" href="#5" title="Permanent link">&para;</a></h3>
+<p><strong>文件</strong>: <code>engine.py</code> (第 68-71 行)<br />
+<strong>问题</strong>: 锁获取失败时提示不清晰</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 当前实现</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">():</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;⏳ Could not acquire lock, assuming another instance is migrating.&quot;</span><span class="p">)</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="k">return</span> <span class="n">MigrationPlan</span><span class="p">(</span><span class="n">migrations</span><span class="o">=</span><span class="p">[],</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;locked&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<p><strong>问题分析</strong>:
+- 用户不知道应该等待还是手动清理
+- 没有提供锁文件位置信息
+- 没有手动清理的说明</p>
+<p><strong>建议修复</strong>:
+<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="k">if</span> <span class="ow">not</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">():</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>    <span class="n">lock_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">get_lock_info</span><span class="p">()</span>  <span class="c1"># 需要实现此方法</span>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>        <span class="sa">f</span><span class="s2">&quot;❌ 无法获取迁移锁</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">原因: 另一个实例正在执行迁移</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>        <span class="sa">f</span><span class="s2">&quot;锁信息: </span><span class="si">{</span><span class="n">lock_info</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">解决方案:</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>        <span class="sa">f</span><span class="s2">&quot;1. 等待另一个实例完成 (通常需要几分钟)</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>        <span class="sa">f</span><span class="s2">&quot;2. 如果卡住，手动清理锁:</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>        <span class="sa">f</span><span class="s2">&quot;   - 文件锁: rm </span><span class="si">{</span><span class="n">lock_info</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>        <span class="sa">f</span><span class="s2">&quot;   - PostgreSQL: SELECT pg_advisory_unlock(</span><span class="si">{</span><span class="n">lock_info</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>        <span class="sa">f</span><span class="s2">&quot;   - MySQL: SELECT RELEASE_LOCK(&#39;</span><span class="si">{</span><span class="n">lock_info</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;)</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>        <span class="sa">f</span><span class="s2">&quot;3. 重新运行迁移&quot;</span>
+</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>    <span class="p">)</span>
+</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>    <span class="k">return</span> <span class="n">MigrationPlan</span><span class="p">(</span><span class="n">migrations</span><span class="o">=</span><span class="p">[],</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;locked&quot;</span><span class="p">)</span>
+</span></code></pre></div></p>
+<p><strong>优先级</strong>: 🟠 P1 - 影响用户体验<br />
+<strong>工作量</strong>: 2-3 小时</p>
+<hr />
+<h3 id="6">6. 缓存错误被静默忽略<a class="headerlink" href="#6" title="Permanent link">&para;</a></h3>
+<p><strong>文件</strong>: <code>schema_cache.py</code> (第 76-78, 88-90 行)<br />
+<strong>问题</strong>: 缓存错误被记录但不影响功能，用户无法知道</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># 当前实现 - 静默失败</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="k">async</span> <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>        <span class="c1"># ...</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error reading cache: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>        <span class="k">return</span> <span class="kc">None</span>  <span class="c1"># 静默返回 None</span>
+</span></code></pre></div>
+<p><strong>问题分析</strong>:
+- 用户不知道缓存是否工作
+- 性能问题难以诊断
+- 无法区分"缓存未命中"和"缓存错误"</p>
+<p><strong>建议修复</strong>:
+<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="k">async</span> <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>        <span class="n">cache_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_cache_file</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>        <span class="k">if</span> <span class="n">cache_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cache_file</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>                <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Cache hit: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>            <span class="k">return</span> <span class="n">data</span>
+</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>        <span class="k">else</span><span class="p">:</span>
+</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;⏭️ Cache miss: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>            <span class="k">return</span> <span class="kc">None</span>
+</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>
+</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>            <span class="sa">f</span><span class="s2">&quot;⚠️ 缓存文件损坏: </span><span class="si">{</span><span class="n">cache_file</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>            <span class="sa">f</span><span class="s2">&quot;错误: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a>            <span class="sa">f</span><span class="s2">&quot;解决方案: 运行 &#39;fastapi-easy cache clear&#39; 清理缓存&quot;</span>
+</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>        <span class="p">)</span>
+</span><span id="__span-11-19"><a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>        <span class="k">return</span> <span class="kc">None</span>
+</span><span id="__span-11-20"><a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>
+</span><span id="__span-11-21"><a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>    <span class="k">except</span> <span class="ne">PermissionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-11-22"><a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+</span><span id="__span-11-23"><a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a>            <span class="sa">f</span><span class="s2">&quot;❌ 缓存权限错误: </span><span class="si">{</span><span class="n">cache_file</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-11-24"><a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a>            <span class="sa">f</span><span class="s2">&quot;错误: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-11-25"><a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a>            <span class="sa">f</span><span class="s2">&quot;解决方案: 检查文件权限或缓存目录权限&quot;</span>
+</span><span id="__span-11-26"><a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a>        <span class="p">)</span>
+</span><span id="__span-11-27"><a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a>        <span class="k">return</span> <span class="kc">None</span>
+</span><span id="__span-11-28"><a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a>
+</span><span id="__span-11-29"><a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-11-30"><a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+</span><span id="__span-11-31"><a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a>            <span class="sa">f</span><span class="s2">&quot;❌ 缓存读取错误: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-11-32"><a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a>            <span class="sa">f</span><span class="s2">&quot;缓存将被禁用，但迁移将继续进行&quot;</span>
+</span><span id="__span-11-33"><a id="__codelineno-11-33" name="__codelineno-11-33" href="#__codelineno-11-33"></a>        <span class="p">)</span>
+</span><span id="__span-11-34"><a id="__codelineno-11-34" name="__codelineno-11-34" href="#__codelineno-11-34"></a>        <span class="k">return</span> <span class="kc">None</span>
+</span></code></pre></div></p>
+<p><strong>优先级</strong>: 🟠 P1 - 影响用户体验<br />
+<strong>工作量</strong>: 2 小时</p>
+<hr />
+<h3 id="7">7. 风险规则异常处理过于保守<a class="headerlink" href="#7" title="Permanent link">&para;</a></h3>
+<p><strong>文件</strong>: <code>risk_engine.py</code> (第 165-171 行)<br />
+<strong>问题</strong>: 规则异常时直接返回 HIGH，可能阻止必要的迁移</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># 当前实现 - 过于保守</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error evaluating rule </span><span class="si">{</span><span class="n">rule</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>    <span class="k">return</span> <span class="n">RiskLevel</span><span class="o">.</span><span class="n">HIGH</span>  <span class="c1"># 直接返回 HIGH，可能阻止迁移</span>
+</span></code></pre></div>
+<p><strong>问题分析</strong>:
+- 一个规则的错误会导致所有迁移被标记为高风险
+- 用户无法执行必要的迁移
+- 没有降级方案</p>
+<p><strong>建议修复</strong>:
+<div class="language-python highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>        <span class="sa">f</span><span class="s2">&quot;❌ 风险规则 &#39;</span><span class="si">{</span><span class="n">rule</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; 执行失败: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>        <span class="sa">f</span><span class="s2">&quot;堆栈: </span><span class="si">{</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>        <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">处理方式: 跳过此规则，继续评估其他规则</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>        <span class="sa">f</span><span class="s2">&quot;建议: 检查规则实现是否正确&quot;</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>    <span class="p">)</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a>    <span class="c1"># 跳过此规则，继续评估其他规则</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a>    <span class="k">continue</span>  <span class="c1"># 而不是 return RiskLevel.HIGH</span>
+</span></code></pre></div></p>
+<p><strong>优先级</strong>: 🟠 P1 - 影响用户体验<br />
+<strong>工作量</strong>: 1-2 小时</p>
+<hr />
+<h2 id="-_3">🟡 低风险问题 - 代码质量<a class="headerlink" href="#-_3" title="Permanent link">&para;</a></h2>
+<h3 id="8">8. 日志级别不一致<a class="headerlink" href="#8" title="Permanent link">&para;</a></h3>
+<p><strong>问题</strong>: 某些重要信息使用 debug 级别，用户看不到</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># 不好的例子</span>
+</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Migration history table &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">TABLE_NAME</span><span class="si">}</span><span class="s2">&#39; ready&quot;</span><span class="p">)</span>
+</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="c1"># 应该是</span>
+</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Migration history table &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">TABLE_NAME</span><span class="si">}</span><span class="s2">&#39; ready&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<p><strong>建议</strong>: 
+- INFO: 用户需要知道的重要信息
+- DEBUG: 开发者调试信息
+- WARNING: 需要注意的问题
+- ERROR: 错误信息</p>
+<p><strong>工作量</strong>: 1 小时</p>
+<hr />
+<h3 id="9">9. 缺少操作确认<a class="headerlink" href="#9" title="Permanent link">&para;</a></h3>
+<p><strong>文件</strong>: <code>cli.py</code> (第 99-103 行)<br />
+<strong>问题</strong>: 虽然有确认，但没有显示将要执行的迁移</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-15-1"><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1"># 当前实现</span>
+</span><span id="__span-15-2"><a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="k">if</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
+</span><span id="__span-15-3"><a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;⚠️  这将修改数据库 Schema&quot;</span><span class="p">)</span>
+</span><span id="__span-15-4"><a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">click</span><span class="o">.</span><span class="n">confirm</span><span class="p">(</span><span class="s2">&quot;是否继续?&quot;</span><span class="p">):</span>
+</span><span id="__span-15-5"><a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;❌ 已取消&quot;</span><span class="p">)</span>
+</span><span id="__span-15-6"><a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>        <span class="k">return</span>
+</span></code></pre></div>
+<p><strong>建议修复</strong>:
+<div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">if</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
+</span><span id="__span-16-2"><a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    <span class="c1"># 显示将要执行的迁移</span>
+</span><span id="__span-16-3"><a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;⚠️  这将执行以下迁移:&quot;</span><span class="p">)</span>
+</span><span id="__span-16-4"><a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>    <span class="k">for</span> <span class="n">migration</span> <span class="ow">in</span> <span class="n">plan</span><span class="o">.</span><span class="n">migrations</span><span class="p">:</span>
+</span><span id="__span-16-5"><a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - [</span><span class="si">{</span><span class="n">migration</span><span class="o">.</span><span class="n">risk_level</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">migration</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-16-6"><a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span><span id="__span-16-7"><a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>
+</span><span id="__span-16-8"><a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">click</span><span class="o">.</span><span class="n">confirm</span><span class="p">(</span><span class="s2">&quot;是否继续?&quot;</span><span class="p">):</span>
+</span><span id="__span-16-9"><a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;❌ 已取消&quot;</span><span class="p">)</span>
+</span><span id="__span-16-10"><a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>        <span class="k">return</span>
+</span></code></pre></div></p>
+<p><strong>工作量</strong>: 1 小时</p>
+<hr />
+<h3 id="10">10. 缺少健康检查<a class="headerlink" href="#10" title="Permanent link">&para;</a></h3>
+<p><strong>问题</strong>: 没有简单的方式验证系统是否正常工作</p>
+<p><strong>建议</strong>: 添加健康检查命令</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-17-1"><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nd">@cli</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
+</span><span id="__span-17-2"><a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="k">def</span> <span class="nf">health</span><span class="p">():</span>
+</span><span id="__span-17-3"><a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;检查迁移系统健康状态&quot;&quot;&quot;</span>
+</span><span id="__span-17-4"><a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>    <span class="k">try</span><span class="p">:</span>
+</span><span id="__span-17-5"><a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;🏥 检查迁移系统健康状态...&quot;</span><span class="p">)</span>
+</span><span id="__span-17-6"><a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>
+</span><span id="__span-17-7"><a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>        <span class="c1"># 检查数据库连接</span>
+</span><span id="__span-17-8"><a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;  ✓ 数据库连接&quot;</span><span class="p">,</span> <span class="n">nl</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-17-9"><a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>        <span class="c1"># ...</span>
+</span><span id="__span-17-10"><a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>
+</span><span id="__span-17-11"><a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>        <span class="c1"># 检查迁移表</span>
+</span><span id="__span-17-12"><a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;  ✓ 迁移表存在&quot;</span><span class="p">,</span> <span class="n">nl</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-17-13"><a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a>        <span class="c1"># ...</span>
+</span><span id="__span-17-14"><a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a>
+</span><span id="__span-17-15"><a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a>        <span class="c1"># 检查锁机制</span>
+</span><span id="__span-17-16"><a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;  ✓ 锁机制正常&quot;</span><span class="p">,</span> <span class="n">nl</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="__span-17-17"><a id="__codelineno-17-17" name="__codelineno-17-17" href="#__codelineno-17-17"></a>        <span class="c1"># ...</span>
+</span><span id="__span-17-18"><a id="__codelineno-17-18" name="__codelineno-17-18" href="#__codelineno-17-18"></a>
+</span><span id="__span-17-19"><a id="__codelineno-17-19" name="__codelineno-17-19" href="#__codelineno-17-19"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✅ 系统健康状态良好&quot;</span><span class="p">)</span>
+</span><span id="__span-17-20"><a id="__codelineno-17-20" name="__codelineno-17-20" href="#__codelineno-17-20"></a>
+</span><span id="__span-17-21"><a id="__codelineno-17-21" name="__codelineno-17-21" href="#__codelineno-17-21"></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="__span-17-22"><a id="__codelineno-17-22" name="__codelineno-17-22" href="#__codelineno-17-22"></a>        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">❌ 系统检查失败: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-17-23"><a id="__codelineno-17-23" name="__codelineno-17-23" href="#__codelineno-17-23"></a>        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span></code></pre></div>
+<p><strong>工作量</strong>: 2-3 小时</p>
+<hr />
+<h2 id="_3">📊 问题优先级矩阵<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>问题</th>
-<th>位置</th>
+<th>影响范围</th>
 <th>严重程度</th>
-<th>状态</th>
+<th>优先级</th>
+<th>工作量</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>apply 命令虚假实现</td>
-<td>cli.py:137-176</td>
-<td>🔴 高</td>
-<td>✅ 已修复</td>
+<td>CLI 完全不可用</td>
+<td>所有用户</td>
+<td>严重</td>
+<td>P0</td>
+<td>4-6h</td>
 </tr>
 <tr>
-<td>rollback 命令虚假实现</td>
-<td>cli.py:197-216</td>
-<td>🔴 高</td>
-<td>✅ 已修复</td>
+<td>错误消息不清晰</td>
+<td>所有用户</td>
+<td>严重</td>
+<td>P0</td>
+<td>2-3h</td>
 </tr>
 <tr>
-<td>_mask_sql 未使用</td>
-<td>executor.py:14-27</td>
-<td>🟡 中</td>
-<td>✅ 已删除</td>
+<td>存储异常处理缺陷</td>
+<td>部分用户</td>
+<td>严重</td>
+<td>P0</td>
+<td>1-2h</td>
 </tr>
 <tr>
-<td>auto_backup 未实现</td>
-<td>executor.py:32-34</td>
-<td>🟡 中</td>
-<td>✅ 已标记</td>
+<td>超时错误提示</td>
+<td>部分用户</td>
+<td>中等</td>
+<td>P1</td>
+<td>1h</td>
+</tr>
+<tr>
+<td>锁获取失败提示</td>
+<td>部分用户</td>
+<td>中等</td>
+<td>P1</td>
+<td>2-3h</td>
+</tr>
+<tr>
+<td>缓存错误被忽略</td>
+<td>部分用户</td>
+<td>中等</td>
+<td>P1</td>
+<td>2h</td>
+</tr>
+<tr>
+<td>风险规则异常</td>
+<td>部分用户</td>
+<td>中等</td>
+<td>P1</td>
+<td>1-2h</td>
+</tr>
+<tr>
+<td>日志级别不一致</td>
+<td>所有用户</td>
+<td>低</td>
+<td>P2</td>
+<td>1h</td>
+</tr>
+<tr>
+<td>缺少操作确认</td>
+<td>所有用户</td>
+<td>低</td>
+<td>P2</td>
+<td>1h</td>
+</tr>
+<tr>
+<td>缺少健康检查</td>
+<td>所有用户</td>
+<td>低</td>
+<td>P2</td>
+<td>2-3h</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="_2">新发现的问题 (深入审查)<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h2>
-<h3 id="1">1. 类型注解不完整 (🟡 中)<a class="headerlink" href="#1" title="Permanent link">&para;</a></h3>
-<p><strong>位置</strong>: 多个文件</p>
-<p><strong>问题</strong>:
-- <code>generator.py</code> 第 88 行: <code>_get_column_definition()</code> 缺少返回类型
-- <code>cli_helpers.py</code> 第 71 行: <code>format_history()</code> 返回类型不完整
-- <code>type_comparator.py</code> 第 206-218 行: 多个函数缺少返回类型
-- <code>checkpoint.py</code> 第 25 行: <code>to_dict()</code> 返回类型不完整</p>
-<p><strong>代码示例</strong>:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># 问题代码</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">def</span> <span class="nf">_get_column_definition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>  <span class="c1"># ✅ 有返回类型</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="c1"># 但参数 column 缺少类型注解</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="kn">from</span> <span class="nn">sqlalchemy.schema</span> <span class="kn">import</span> <span class="n">CreateColumn</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">CreateColumn</span><span class="p">(</span><span class="n">column</span><span class="p">)</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="p">))</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># 改进方案</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="k">def</span> <span class="nf">_get_column_definition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">:</span> <span class="n">Column</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="kn">from</span> <span class="nn">sqlalchemy.schema</span> <span class="kn">import</span> <span class="n">CreateColumn</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">CreateColumn</span><span class="p">(</span><span class="n">column</span><span class="p">)</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="p">))</span>
-</span></code></pre></div></p>
-<p><strong>影响</strong>: 
-- IDE 类型检查不完整
-- 代码维护困难
-- 类型安全性降低</p>
-<p><strong>修复工作量</strong>: 1-2 小时</p>
+<h2 id="_4">🎯 改进建议<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
+<h3 id="_5">立即行动 (本周)<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>修复 CLI 工具</strong> (P0)</li>
+<li>实现实际的迁移检测和执行</li>
+<li>添加真实的错误处理</li>
+<li>
+<p>预计: 4-6 小时</p>
+</li>
+<li>
+<p><strong>改进错误消息</strong> (P0)</p>
+</li>
+<li>添加具体的解决步骤</li>
+<li>根据错误类型提供建议</li>
+<li>
+<p>预计: 2-3 小时</p>
+</li>
+<li>
+<p><strong>修复存储异常处理</strong> (P0)</p>
+</li>
+<li>修正异常处理逻辑</li>
+<li>添加清晰的日志</li>
+<li>预计: 1-2 小时</li>
+</ol>
+<h3 id="p1">本月行动 (P1)<a class="headerlink" href="#p1" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>改进用户提示</strong> (P1)</li>
+<li>超时错误提示</li>
+<li>锁获取失败提示</li>
+<li>缓存错误处理</li>
+<li>风险规则异常处理</li>
+<li>预计: 6-8 小时</li>
+</ol>
+<h3 id="p2">后续改进 (P2)<a class="headerlink" href="#p2" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>代码质量改进</strong> (P2)</li>
+<li>日志级别一致性</li>
+<li>操作确认</li>
+<li>健康检查</li>
+<li>预计: 4-6 小时</li>
+</ol>
 <hr />
-<h3 id="2">2. 异常处理过于宽泛 (🟡 中)<a class="headerlink" href="#2" title="Permanent link">&para;</a></h3>
-<p><strong>位置</strong>: checkpoint.py, schema_cache.py, storage.py</p>
-<p><strong>问题</strong>:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># checkpoint.py 第 101-109 行</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">except</span> <span class="p">(</span><span class="ne">IOError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;文件操作失败: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="k">return</span> <span class="kc">False</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JSON 解析失败: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="k">return</span> <span class="kc">False</span>
-</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;数据验证失败: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="k">return</span> <span class="kc">False</span>
-</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># ❌ 过于宽泛</span>
-</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;加载检查点失败: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="k">return</span> <span class="kc">None</span>
-</span></code></pre></div></p>
-<p><strong>问题分析</strong>:
-- 最后的 <code>except Exception</code> 捕获所有异常
-- 可能隐藏系统异常 (SystemExit, KeyboardInterrupt)
-- 难以调试</p>
-<p><strong>改进方案</strong>:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">except</span> <span class="p">(</span><span class="ne">IOError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;文件操作失败: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="k">return</span> <span class="kc">None</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;JSON 解析失败: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="k">return</span> <span class="kc">None</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;数据验证失败: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="k">return</span> <span class="kc">None</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1"># 移除最后的 except Exception，让系统异常传播</span>
-</span></code></pre></div></p>
-<p><strong>影响</strong>: 
-- 异常处理不清晰
-- 调试困难
-- 可能隐藏严重错误</p>
-<p><strong>修复工作量</strong>: 1 小时</p>
-<hr />
-<h3 id="3">3. 日志记录不一致 (🟡 中)<a class="headerlink" href="#3" title="Permanent link">&para;</a></h3>
-<p><strong>位置</strong>: cli.py, executor.py, engine.py</p>
-<p><strong>问题</strong>:
-- 日志消息混合中英文 (cli.py 第 107 行: "Dry-run 模式")
-- 日志级别不一致 (有的用 info，有的用 warning)
-- 缺少关键操作的日志 (某些错误路径无日志)
-- CLI 使用 click.echo 而不是 logger</p>
-<p><strong>示例</strong>:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># cli.py 第 143-145 行 - 不推荐</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s2">&quot;🚀 开始执行迁移...&quot;</span><span class="p">)</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;📝 模式: </span><span class="si">{</span><span class="n">mode_enum</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># 应该使用 logger</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># 改进方案</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;开始执行迁移...&quot;</span><span class="p">)</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;执行模式: </span><span class="si">{</span><span class="n">mode_enum</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></code></pre></div></p>
-<p><strong>影响</strong>: 
-- 日志追踪困难
-- 无法集中管理日志
-- 日志级别混乱</p>
-<p><strong>修复工作量</strong>: 1 小时</p>
-<hr />
-<h3 id="4_1">4. 错误恢复机制缺失 (🟡 中)<a class="headerlink" href="#4_1" title="Permanent link">&para;</a></h3>
-<p><strong>位置</strong>: engine.py 第 106-117 行, executor.py 第 64-66 行</p>
-<p><strong>问题</strong>:
-- 迁移失败时没有自动回滚机制
-- 没有部分失败的恢复策略
-- 没有重试机制
-- 没有故障转移</p>
-<p><strong>代码示例</strong>:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># executor.py 第 64-66 行</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  ❌ 迁移失败，停止执行: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="k">raise</span>  <span class="c1"># 直接抛出，没有恢复</span>
-</span></code></pre></div></p>
-<p><strong>改进方案</strong>:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;迁移失败: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="c1"># 1. 尝试回滚</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rollback_migration</span><span class="p">(</span><span class="n">migration</span><span class="p">)</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">rollback_error</span><span class="p">:</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;回滚失败: </span><span class="si">{</span><span class="n">rollback_error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="k">raise</span>
-</span></code></pre></div></p>
-<p><strong>影响</strong>: 
-- 迁移失败导致数据库不一致
-- 无法自动恢复
-- 需要手动干预</p>
-<p><strong>修复工作量</strong>: 2-3 小时</p>
-<hr />
-<h3 id="5">5. 资源清理不完整 (🟡 中)<a class="headerlink" href="#5" title="Permanent link">&para;</a></h3>
-<p><strong>位置</strong>: engine.py 第 118-132 行</p>
-<p><strong>问题</strong>:
-- 锁释放失败没有重试机制
-- 没有超时控制
-- 没有清理临时资源</p>
-<p><strong>代码示例</strong>:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># engine.py 第 118-132 行</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="k">finally</span><span class="p">:</span>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;🔓 释放迁移锁...&quot;</span><span class="p">)</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="k">try</span><span class="p">:</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>  <span class="c1"># 只记录，没有重试</span>
-</span></code></pre></div></p>
-<p><strong>改进方案</strong>:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">finally</span><span class="p">:</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;释放迁移锁...&quot;</span><span class="p">)</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="n">max_retries</span> <span class="o">=</span> <span class="mi">3</span>
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_retries</span><span class="p">):</span>
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>        <span class="k">try</span><span class="p">:</span>
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
-</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>            <span class="k">break</span>
-</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>            <span class="k">if</span> <span class="n">attempt</span> <span class="o">&lt;</span> <span class="n">max_retries</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>                <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>            <span class="k">else</span><span class="p">:</span>
-</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;锁释放失败: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></code></pre></div></p>
-<p><strong>影响</strong>: 
-- 锁可能未正确释放
-- 后续迁移被阻塞
-- 系统卡死</p>
-<p><strong>修复工作量</strong>: 1-2 小时</p>
-<hr />
-<h3 id="6">6. 并发控制不完善 (🟡 中)<a class="headerlink" href="#6" title="Permanent link">&para;</a></h3>
-<p><strong>位置</strong>: distributed_lock.py, engine.py</p>
-<p><strong>问题</strong>:
-- 没有死锁检测
-- 没有锁超时自动释放
-- 没有锁冲突的详细日志
-- 没有锁持有时间监控</p>
-<p><strong>影响</strong>: 
-- 长时间锁定导致系统卡死
-- 无法诊断死锁问题
-- 并发性能差</p>
-<p><strong>改进方案</strong>:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># 添加锁持有时间监控</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="k">class</span> <span class="nc">LockMonitor</span><span class="p">:</span>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout_seconds</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">timeout_seconds</span> <span class="o">=</span> <span class="n">timeout_seconds</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">monitor_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lock_id</span><span class="p">,</span> <span class="n">acquired_time</span><span class="p">):</span>
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>        <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">acquired_time</span>
-</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>        <span class="k">if</span> <span class="n">elapsed</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout_seconds</span><span class="p">:</span>
-</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;锁持有过长: </span><span class="si">{</span><span class="n">elapsed</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
-</span></code></pre></div></p>
-<p><strong>修复工作量</strong>: 2-3 小时</p>
-<hr />
-<h3 id="7">7. 性能优化缺失 (🟢 低)<a class="headerlink" href="#7" title="Permanent link">&para;</a></h3>
-<p><strong>位置</strong>: detector.py, storage.py</p>
-<p><strong>问题</strong>:
-- Schema 检测没有缓存 (每次都重新检测)
-- 数据库查询没有索引提示
-- 没有批量操作优化
-- 没有性能监控</p>
-<p><strong>影响</strong>: 
-- 大规模迁移性能差
-- 重复检测浪费资源
-- 无法诊断性能问题</p>
-<p><strong>改进方案</strong>:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># 添加 Schema 检测缓存</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="k">class</span> <span class="nc">SchemaDetectorWithCache</span><span class="p">:</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cache_ttl</span><span class="o">=</span><span class="mi">300</span><span class="p">):</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span> <span class="o">=</span> <span class="n">cache_ttl</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">detect_changes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>        <span class="n">cache_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>        <span class="k">if</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
-</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>            <span class="n">cached_time</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span>
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>            <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">cached_time</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_ttl</span><span class="p">:</span>
-</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>                <span class="k">return</span> <span class="n">result</span>
-</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>        <span class="c1"># 执行检测</span>
-</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>        <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detect_changes_impl</span><span class="p">()</span>
-</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span> <span class="n">result</span><span class="p">)</span>
-</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a>        <span class="k">return</span> <span class="n">result</span>
-</span></code></pre></div></p>
-<p><strong>修复工作量</strong>: 2-3 小时</p>
-<hr />
-<h3 id="8">8. 测试覆盖不全 (🟡 中)<a class="headerlink" href="#8" title="Permanent link">&para;</a></h3>
-<p><strong>位置</strong>: tests/ 目录</p>
-<p><strong>问题</strong>:
-- 缺少集成测试 (多个组件协作)
-- 缺少错误场景测试 (网络中断、权限错误等)
-- 缺少并发测试 (多个迁移同时运行)
-- 缺少性能测试 (大规模迁移)
-- 缺少回滚测试</p>
-<p><strong>影响</strong>: 
-- 某些边界情况未被测试
-- 生产环境可能出现未知问题
-- 无法保证代码质量</p>
-<p><strong>修复工作量</strong>: 3-4 小时</p>
-<hr />
-<h3 id="9">9. 文档缺失 (🟡 中)<a class="headerlink" href="#9" title="Permanent link">&para;</a></h3>
-<p><strong>位置</strong>: generator.py, risk_engine.py, distributed_lock.py</p>
-<p><strong>问题</strong>:
-- Copy-Swap-Drop 算法没有详细解释 (generator.py 第 93-161 行)
-- 风险评估规则没有文档 (risk_engine.py)
-- 分布式锁机制没有说明 (distributed_lock.py)
-- 没有架构文档
-- 没有最佳实践指南</p>
-<p><strong>影响</strong>: 
-- 维护困难
-- 新开发者学习成本高
-- 容易引入 bug</p>
-<p><strong>修复工作量</strong>: 2-3 小时</p>
-<hr />
-<h3 id="10">10. 配置管理不完善 (🟡 中)<a class="headerlink" href="#10" title="Permanent link">&para;</a></h3>
-<p><strong>位置</strong>: config.py</p>
-<p><strong>问题</strong>:
-- 配置验证不完整 (某些参数没有范围检查)
-- 没有默认值文档
-- 没有配置示例文件
-- 没有配置迁移指南
-- 没有环境变量覆盖说明</p>
-<p><strong>代码示例</strong>:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># config.py 第 50-60 行</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="nd">@dataclass</span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">class</span> <span class="nc">MigrationConfig</span><span class="p">:</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="n">timeout_seconds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span>  <span class="c1"># 没有范围检查</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>    <span class="n">lock_timeout_seconds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">60</span>  <span class="c1"># 没有最小值检查</span>
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1"># 没有最大值检查</span>
-</span></code></pre></div></p>
-<p><strong>改进方案</strong>:
-<div class="language-python highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nd">@dataclass</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="k">class</span> <span class="nc">MigrationConfig</span><span class="p">:</span>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>    <span class="n">timeout_seconds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout_seconds</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;timeout_seconds 必须大于 0&quot;</span><span class="p">)</span>
-</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeout_seconds</span> <span class="o">&gt;</span> <span class="mi">3600</span><span class="p">:</span>
-</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;timeout_seconds 不能超过 3600 秒&quot;</span><span class="p">)</span>
-</span></code></pre></div></p>
-<p><strong>影响</strong>: 
-- 用户配置困难
-- 容易配置错误
-- 无法诊断配置问题</p>
-<p><strong>修复工作量</strong>: 1-2 小时</p>
-<hr />
-<h2 id="_3">评分详情<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h2>
+<h2 id="_6">📈 预期改进效果<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h2>
+<h3 id="_7">用户信任度提升<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>维度</th>
-<th>评分</th>
-<th>备注</th>
+<th>指标</th>
+<th>改进前</th>
+<th>改进后</th>
+<th>提升</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>安全性</td>
-<td>9.6/10</td>
-<td>✅ 优秀</td>
+<td>CLI 可用性</td>
+<td>0%</td>
+<td>100%</td>
+<td>⬆️⬆️⬆️</td>
 </tr>
 <tr>
-<td>功能完整性</td>
-<td>8.5/10</td>
-<td>✅ 良好</td>
+<td>错误解决时间</td>
+<td>30 分钟</td>
+<td>5 分钟</td>
+<td>6x</td>
 </tr>
 <tr>
-<td>代码质量</td>
-<td>8.0/10</td>
-<td>⚠️ 需改进</td>
+<td>用户困惑度</td>
+<td>高</td>
+<td>低</td>
+<td>⬇️⬇️⬇️</td>
 </tr>
 <tr>
-<td>类型安全</td>
-<td>7.5/10</td>
-<td>⚠️ 需改进</td>
+<td>信任度评分</td>
+<td>5/10</td>
+<td>9/10</td>
+<td>+4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">代码质量提升<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>改进前</th>
+<th>改进后</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>错误处理覆盖率</td>
+<td>60%</td>
+<td>95%</td>
 </tr>
 <tr>
-<td>错误处理</td>
-<td>7.5/10</td>
-<td>⚠️ 需改进</td>
+<td>用户提示清晰度</td>
+<td>低</td>
+<td>高</td>
 </tr>
 <tr>
-<td>文档完整性</td>
-<td>7.0/10</td>
-<td>⚠️ 需改进</td>
-</tr>
-<tr>
-<td>测试覆盖</td>
-<td>8.5/10</td>
-<td>✅ 良好</td>
-</tr>
-<tr>
-<td>性能优化</td>
-<td>7.0/10</td>
-<td>⚠️ 需改进</td>
-</tr>
-<tr>
-<td><strong>总体</strong></td>
-<td><strong>8.1/10</strong></td>
-<td><strong>良好</strong></td>
+<td>可维护性</td>
+<td>中</td>
+<td>高</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2 id="_4">修复优先级<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h2>
-<h3 id="p0">P0 (立即修复)<a class="headerlink" href="#p0" title="Permanent link">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> 添加完整的类型注解 (2 小时)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> 细化异常处理 (1 小时)</li>
-</ul>
-<h3 id="p1">P1 (本周修复)<a class="headerlink" href="#p1" title="Permanent link">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> 改进日志记录 (1 小时)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> 添加错误恢复机制 (2 小时)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> 改进并发控制 (2 小时)</li>
-</ul>
-<h3 id="p2">P2 (本月改进)<a class="headerlink" href="#p2" title="Permanent link">&para;</a></h3>
-<ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> 添加集成测试 (3 小时)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> 添加性能优化 (2 小时)</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> 完善文档 (2 小时)</li>
-</ul>
+<h2 id="_9">✅ 总体建议<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h2>
+<h3 id="_10">现状评估<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<p><strong>代码功能</strong>: ✅ 完整<br />
+<strong>代码质量</strong>: 🟡 中等<br />
+<strong>用户体验</strong>: 🔴 需要改进<br />
+<strong>用户信任</strong>: 🔴 需要改进</p>
+<h3 id="_11">核心问题<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>CLI 工具是空壳</strong> - 严重影响可用性</li>
+<li><strong>错误处理不友好</strong> - 用户无法自助解决</li>
+<li><strong>提示信息不清晰</strong> - 用户困惑</li>
+</ol>
+<h3 id="_12">建议<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<p><strong>立即修复 P0 问题</strong> (本周完成)
+- 这些问题直接影响用户能否使用系统
+- 预计 7-11 小时</p>
+<p><strong>逐步改进 P1/P2 问题</strong> (本月完成)
+- 这些问题影响用户体验
+- 预计 10-14 小时</p>
+<p><strong>总投入</strong>: 17-25 小时 (2-3 个工作日)</p>
 <hr />
-<h2 id="_5">预期改进<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
-<p>修复后评分: <strong>9.2/10</strong> (优秀)</p>
+<h2 id="_13">📝 结论<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h2>
+<p>虽然代码功能完整，但<strong>用户体验和信任度需要显著改进</strong>。主要问题是：</p>
+<ol>
+<li>❌ CLI 工具不可用</li>
+<li>❌ 错误消息不清晰</li>
+<li>❌ 缺少用户指导</li>
+</ol>
+<p><strong>建议</strong>: 在发布前修复所有 P0 问题，确保用户能够实际使用系统。</p>
 <hr />
-<p><strong>审查完成</strong>: ✅</p>
+<p><strong>审查者</strong>: Cascade AI<br />
+<strong>审查日期</strong>: 2025-11-29<br />
+<strong>建议</strong>: 立即采取行动修复 P0 问题</p>
 
 
 
