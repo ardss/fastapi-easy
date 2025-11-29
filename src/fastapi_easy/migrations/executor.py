@@ -13,12 +13,11 @@ logger = logging.getLogger(__name__)
 class MigrationExecutor:
     """Executes migrations with transaction safety"""
     
-    def __init__(self, engine: Engine, auto_backup: bool = False):
+    def __init__(self, engine: Engine):
         """初始化迁移执行器
-        
+
         Args:
             engine: SQLAlchemy 引擎
-            auto_backup: 自动备份标志 (当前未实现，保留用于未来扩展)
         """
         self.engine = engine
         self.dialect = engine.dialect.name

@@ -18,49 +18,36 @@ class MigrationEngine:
     """The main entry point for the migration system"""
     
     def __init__(
-        self, 
-        engine: Engine, 
+        self,
+        engine: Engine,
         metadata,
-        mode: ExecutionMode = ExecutionMode.SAFE,
-        auto_backup: bool = False
+        mode: ExecutionMode = ExecutionMode.SAFE
     ):
-        # mode 参数已通过类型系统验证
+        """Initialize the migration engine
+
+        Args:
+            engine: SQLAlchemy engine
+            metadata: SQLAlchemy metadata
+            mode: Execution mode (SAFE, DRY_RUN, FORCE)
+        """
         if not isinstance(mode, ExecutionMode):
             raise TypeError(
-                f"mode must be ExecutionMode enum, got {type(mode).__name__}"
+                f"mode must be ExecutionMode enum, "
+                f"got {type(mode).__name__}"
             )
-        
-        # 验证 engine 连接
-        try:
-            from sqlalchemy import text
-            with engine.connect() as conn:
-                conn.execute(text("SELECT 1"))
-        except Exception as e:
-            raise RuntimeError(
-                f"Cannot connect to database: {e}"
-            )
-        
-        # 验证 metadata
-        if not metadata or not metadata.tables:
-            logger.warning(
-                "Metadata has no tables. "
-                "This might indicate a configuration issue."
-            )
-        
+
         self.engine = engine
         self.metadata = metadata
         self.mode = mode
-        
-        # Core components
         self.detector = SchemaDetector(engine, metadata)
         self.generator = MigrationGenerator(engine)
-        self.executor = MigrationExecutor(engine, auto_backup)
+        self.executor = MigrationExecutor(engine)
         self.storage = MigrationStorage(engine)
         self.lock = get_lock_provider(engine)
-        
+
         # Initialize storage
         self.storage.initialize()
-        
+
     async def auto_migrate(self) -> MigrationPlan:
         """Automatically detect and apply migrations"""
 
