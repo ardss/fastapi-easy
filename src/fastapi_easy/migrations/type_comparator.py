@@ -167,14 +167,31 @@ class TypeComparatorRegistry:
         logger.info(f"注册类型比较器: {comparator.__class__.__name__}")
     
     def compare(self, old_type: TypeEngine, new_type: TypeEngine) -> bool:
-        """比较两个类型"""
+        """比较两个类型
+        
+        Args:
+            old_type: 旧类型
+            new_type: 新类型
+            
+        Returns:
+            True 表示类型相同，False 表示不同
+        """
         for comparator in self.comparators:
             if comparator.compare(old_type, new_type):
                 return True
         return False
     
     def get_migration_sql(self, column_name: str, old_type: TypeEngine, new_type: TypeEngine) -> Optional[str]:
-        """获取类型变更的 SQL"""
+        """获取类型变更的 SQL
+        
+        Args:
+            column_name: 列名
+            old_type: 旧类型
+            new_type: 新类型
+            
+        Returns:
+            迁移 SQL，如果无法迁移则返回 None
+        """
         for comparator in self.comparators:
             sql = comparator.get_migration_sql(column_name, old_type, new_type)
             if sql:
