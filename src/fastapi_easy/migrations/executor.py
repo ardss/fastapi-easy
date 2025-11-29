@@ -101,19 +101,37 @@ class MigrationExecutor:
     async def _execute_migration(self, migration: Migration) -> bool:
         """
         Execute a single migration with transaction safety.
-        
+
         Returns:
             True if successful
-        
+
         Raises:
             Exception if migration fails
         """
-        logger.info(f"  ▶️ 执行: {migration.description}")
-        
+        logger.info(f"执行: {migration.description}")
+
         # Run in thread pool to avoid blocking
-        await asyncio.to_thread(self._execute_sql_sync, migration.upgrade_sql)
-        logger.info(f"  ✅ 成功: {migration.description}")
-        return True
+        try:
+            await asyncio.to_thread(
+                self._execute_sql_sync, migration.upgrade_sql
+            )
+            logger.info(f"成功: {migration.description}")
+            return True
+        except Exception:
+            logger.error(f"迁移失败: {migration.description}")
+            # 尝试执行回滚 SQL
+            if migration.downgrade_sql:
+                try:
+                    logger.info(f"尝试回滚: {migration.description}")
+                    await asyncio.to_thread(
+                        self._execute_sql_sync, migration.downgrade_sql
+                    )
+                    logger.info(f"回滚成功: {migration.description}")
+                except Exception as rollback_error:
+                    logger.error(
+                        f"回滚失败: {migration.description} - {rollback_error}"
+                    )
+            raise
 
     def _execute_sql_sync(self, sql: str) -> None:
         """Execute SQL synchronously within a transaction
