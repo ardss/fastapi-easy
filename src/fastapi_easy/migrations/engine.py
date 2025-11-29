@@ -249,9 +249,20 @@ class MigrationEngine:
             return result
         
         finally:
-            # 释放锁
-            logger.info("🔓 释放迁移锁...")
-            try:
-                await self.lock.release()
-            except Exception as e:
-                logger.error(f"❌ 锁释放失败: {e}")
+            # 释放锁 (带重试机制)
+            logger.info("释放迁移锁...")
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    await self.lock.release()
+                    logger.info("迁移锁已释放")
+                    break
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        logger.warning(
+                            f"锁释放失败 (尝试 {attempt + 1}/{max_retries}), "
+                            f"重试中..."
+                        )
+                        await asyncio.sleep(1)
+                    else:
+                        logger.error(f"锁释放失败: {e}")
