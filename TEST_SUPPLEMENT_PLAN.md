@@ -1,4 +1,4 @@
-# 测试补充计划 - 详细分析
+# 测试补充计划 - 详细分析 (分层设计版)
 
 **分析日期**: 2025-11-29  
 **分析对象**: exceptions.py, cli_helpers.py, cli.py, storage.py, engine.py  
@@ -6,16 +6,72 @@
 
 ---
 
+## 🏗️ 测试分层结构问题
+
+### ⚠️ 当前问题
+
+根目录下存在 5 个测试文件未分层：
+```
+tests/
+├── test_migration_engine.py      ❌ 应该在 unit/
+├── test_risk_engine.py           ❌ 应该在 unit/
+├── test_hooks.py                 ❌ 应该在 unit/
+├── test_e2e_migration.py         ❌ 应该在 e2e/
+├── test_ecommerce_example.py     ❌ 应该在 e2e/
+├── unit/
+├── integration/
+├── e2e/
+└── performance/
+```
+
+### ✅ 目标结构
+
+```
+tests/
+├── unit/
+│   ├── migrations/
+│   │   ├── test_exceptions.py (NEW)
+│   │   ├── test_cli_helpers.py (NEW)
+│   │   ├── test_storage_extended.py (NEW)
+│   │   ├── test_engine_error_handling.py (NEW)
+│   │   ├── test_migration_engine.py (MOVED)
+│   │   ├── test_risk_engine.py (MOVED)
+│   │   └── test_hooks.py (MOVED)
+│   └── ... (其他单元测试)
+│
+├── integration/
+│   ├── migrations/
+│   │   ├── test_cli_integration.py (NEW)
+│   │   └── test_storage_integration.py (NEW)
+│   └── ... (其他集成测试)
+│
+├── e2e/
+│   ├── migrations/
+│   │   ├── test_migration_e2e_extended.py (NEW)
+│   │   ├── test_e2e_migration.py (MOVED)
+│   │   └── test_ecommerce_example.py (MOVED)
+│   └── ... (其他端到端测试)
+│
+└── performance/
+    ├── migrations/
+    │   └── test_migration_performance.py (NEW)
+    └── ... (其他性能测试)
+```
+
+---
+
 ## 📊 当前测试覆盖分析
 
-### ✅ 已有测试 (39/39 通过)
+### ✅ 已有测试 (39/39 通过) - 需要重组
 
-| 模块 | 测试数 | 覆盖范围 | 缺陷 |
-|------|-------|--------|------|
-| test_migration_engine.py | 6 | 基础迁移流程 | ⚠️ 缺少错误处理 |
-| test_risk_engine.py | 15 | 风险评估 | ✅ 完整 |
-| test_hooks.py | 12 | Hook 系统 | ✅ 完整 |
-| test_cli.py | 6 | CLI 基础命令 | ⚠️ 缺少集成测试 |
+| 分层 | 模块 | 测试数 | 覆盖范围 | 位置问题 |
+|------|------|-------|--------|---------|
+| unit | test_migration_engine.py | 6 | 基础迁移流程 | ❌ 根目录 |
+| unit | test_risk_engine.py | 15 | 风险评估 | ❌ 根目录 |
+| unit | test_hooks.py | 12 | Hook 系统 | ❌ 根目录 |
+| unit | test_cli.py | 6 | CLI 基础命令 | ✅ unit/ |
+| e2e | test_e2e_migration.py | - | 端到端流程 | ❌ 根目录 |
+| e2e | test_ecommerce_example.py | - | 电商示例 | ❌ 根目录 |
 
 ---
 
@@ -485,29 +541,53 @@ class TestMigrationEngineErrorHandling:
 
 ---
 
-## 📋 测试补充计划
+## 📋 测试补充计划 (分层设计)
 
 ### 优先级 1️⃣ (关键 - 必须实施)
 
+#### 1.1 单元测试 (Unit Tests) - tests/unit/migrations/
+
 | 模块 | 测试数 | 工作量 | 优先级 | 风险 |
 |------|-------|-------|--------|------|
-| exceptions.py | 12 | 2-3 小时 | 🔴 高 | 异常处理不完整 |
-| cli_helpers.py | 16 | 2-3 小时 | 🔴 高 | CLI 输出不可靠 |
-| storage.py | 8 | 1-2 小时 | 🔴 高 | 数据持久化风险 |
+| test_exceptions.py (NEW) | 12 | 2-3 小时 | 🔴 高 | 异常处理不完整 |
+| test_cli_helpers.py (NEW) | 16 | 2-3 小时 | 🔴 高 | CLI 输出不可靠 |
+| test_storage_extended.py (NEW) | 8 | 1-2 小时 | 🔴 高 | 数据持久化风险 |
+| test_migration_engine.py (MOVED) | 6 | 0.5 小时 | - | 重组现有测试 |
+| test_risk_engine.py (MOVED) | 15 | 0.5 小时 | - | 重组现有测试 |
+| test_hooks.py (MOVED) | 12 | 0.5 小时 | - | 重组现有测试 |
+
+**小计**: 69 个测试, 6-8 小时
 
 ### 优先级 2️⃣ (重要 - 应该实施)
 
+#### 2.1 集成测试 (Integration Tests) - tests/integration/migrations/
+
 | 模块 | 测试数 | 工作量 | 优先级 | 风险 |
 |------|-------|-------|--------|------|
-| cli.py | 15 | 2-3 小时 | 🟡 中 | 集成测试缺失 |
-| engine.py | 10 | 2-3 小时 | 🟡 中 | 错误处理不完整 |
+| test_cli_integration.py (NEW) | 15 | 2-3 小时 | 🟡 中 | CLI 集成不完整 |
+| test_storage_integration.py (NEW) | 5 | 1-2 小时 | 🟡 中 | 存储集成不完整 |
+
+**小计**: 20 个测试, 3-5 小时
+
+#### 2.2 端到端测试 (E2E Tests) - tests/e2e/migrations/
+
+| 模块 | 测试数 | 工作量 | 优先级 | 风险 |
+|------|-------|-------|--------|------|
+| test_migration_e2e_extended.py (NEW) | 8 | 2-3 小时 | 🟡 中 | 端到端流程不完整 |
+| test_e2e_migration.py (MOVED) | - | 0.5 小时 | - | 重组现有测试 |
+| test_ecommerce_example.py (MOVED) | - | 0.5 小时 | - | 重组现有测试 |
+
+**小计**: 8 个新测试, 3-4 小时
 
 ### 优先级 3️⃣ (可选 - 后续实施)
 
+#### 3.1 性能测试 (Performance Tests) - tests/performance/migrations/
+
 | 模块 | 测试数 | 工作量 | 优先级 | 风险 |
 |------|-------|-------|--------|------|
-| 集成测试 | 8 | 2-3 小时 | 🟢 低 | 端到端流程 |
-| 性能测试 | 5 | 1-2 小时 | 🟢 低 | 性能回归 |
+| test_migration_performance.py (NEW) | 5 | 1-2 小时 | 🟢 低 | 性能回归 |
+
+**小计**: 5 个测试, 1-2 小时
 
 ---
 
@@ -553,82 +633,167 @@ class TestMigrationEngineErrorHandling:
 
 ---
 
-## 🚀 实施计划
+## 🚀 实施计划 (分层结构)
 
-### 第 1 周 (优先级 1️⃣)
+### 第 0 步: 目录结构重组 (0.5 小时)
 
-**任务 1: exceptions.py 测试** (2-3 小时)
 ```bash
-# 创建测试文件
-tests/unit/test_exceptions.py
+# 1. 创建 migrations 子目录
+mkdir -p tests/unit/migrations
+mkdir -p tests/integration/migrations
+mkdir -p tests/e2e/migrations
+mkdir -p tests/performance/migrations
 
-# 测试覆盖:
-- 基础异常类
-- 8 个具体异常类
-- 异常继承链
-- 消息安全性
+# 2. 移动现有测试文件
+mv tests/test_migration_engine.py tests/unit/migrations/
+mv tests/test_risk_engine.py tests/unit/migrations/
+mv tests/test_hooks.py tests/unit/migrations/
+mv tests/test_e2e_migration.py tests/e2e/migrations/
+mv tests/test_ecommerce_example.py tests/e2e/migrations/
+
+# 3. 更新 conftest.py 中的导入路径
+# 确保所有导入都指向正确的位置
 ```
 
-**任务 2: cli_helpers.py 测试** (2-3 小时)
-```bash
-# 创建测试文件
-tests/unit/test_cli_helpers.py
+### 第 1 周 (优先级 1️⃣ - 单元测试)
 
-# 测试覆盖:
-- CLIErrorHandler (6 个测试)
-- CLIFormatter (10 个测试)
-- CLIConfirm (8 个测试)
-- CLIProgress (4 个测试)
+**任务 1.1: 重组现有单元测试** (0.5 小时)
+```bash
+# 移动到 tests/unit/migrations/
+- test_migration_engine.py ✓
+- test_risk_engine.py ✓
+- test_hooks.py ✓
+
+# 验证测试仍然通过
+pytest tests/unit/migrations/ -v
 ```
 
-**任务 3: storage.py 测试** (1-2 小时)
+**任务 1.2: exceptions.py 单元测试** (2-3 小时)
 ```bash
 # 创建测试文件
-tests/unit/test_storage_extended.py
+tests/unit/migrations/test_exceptions.py
 
 # 测试覆盖:
-- 初始化 (4 个测试)
-- 记录迁移 (4 个测试)
-- 获取历史 (4 个测试)
-- 异常处理 (3 个测试)
+- 基础异常类 (3 个)
+- 具体异常类 (9 个)
+- 异常继承链 (1 个)
+- 消息安全性 (1 个)
+
+# 运行测试
+pytest tests/unit/migrations/test_exceptions.py -v
 ```
 
-### 第 2 周 (优先级 2️⃣)
-
-**任务 4: cli.py 集成测试** (2-3 小时)
+**任务 1.3: cli_helpers.py 单元测试** (2-3 小时)
 ```bash
 # 创建测试文件
-tests/integration/test_cli_integration.py
+tests/unit/migrations/test_cli_helpers.py
 
 # 测试覆盖:
-- plan 命令 (5 个测试)
-- apply 命令 (5 个测试)
-- history 命令 (3 个测试)
-- status 命令 (2 个测试)
+- CLIErrorHandler (3 个)
+- CLIFormatter (7 个)
+- CLIConfirm (4 个)
+- CLIProgress (2 个)
+
+# 运行测试
+pytest tests/unit/migrations/test_cli_helpers.py -v
 ```
 
-**任务 5: engine.py 错误处理测试** (2-3 小时)
+**任务 1.4: storage.py 单元测试** (1-2 小时)
 ```bash
 # 创建测试文件
-tests/unit/test_engine_error_handling.py
+tests/unit/migrations/test_storage_extended.py
 
 # 测试覆盖:
-- 错误处理 (5 个测试)
-- 异常恢复 (3 个测试)
-- 错误消息 (2 个测试)
+- 初始化 (2 个)
+- 记录迁移 (3 个)
+- 获取历史 (3 个)
+
+# 运行测试
+pytest tests/unit/migrations/test_storage_extended.py -v
 ```
 
-### 第 3 周 (优先级 3️⃣)
-
-**任务 6: 端到端测试** (2-3 小时)
+**任务 1.5: engine.py 单元测试** (2-3 小时)
 ```bash
 # 创建测试文件
-tests/e2e/test_migration_e2e_extended.py
+tests/unit/migrations/test_engine_error_handling.py
 
 # 测试覆盖:
-- 完整迁移流程
-- 错误恢复流程
-- 并发场景
+- 错误处理 (5 个)
+- 异常恢复 (3 个)
+- 错误消息 (2 个)
+
+# 运行测试
+pytest tests/unit/migrations/test_engine_error_handling.py -v
+```
+
+### 第 2 周 (优先级 2️⃣ - 集成测试)
+
+**任务 2.1: 重组现有端到端测试** (0.5 小时)
+```bash
+# 移动到 tests/e2e/migrations/
+- test_e2e_migration.py ✓
+- test_ecommerce_example.py ✓
+
+# 验证测试仍然通过
+pytest tests/e2e/migrations/ -v
+```
+
+**任务 2.2: CLI 集成测试** (2-3 小时)
+```bash
+# 创建测试文件
+tests/integration/migrations/test_cli_integration.py
+
+# 测试覆盖:
+- plan 命令 (5 个)
+- apply 命令 (5 个)
+- history 命令 (3 个)
+- status 命令 (2 个)
+
+# 运行测试
+pytest tests/integration/migrations/test_cli_integration.py -v
+```
+
+**任务 2.3: 存储集成测试** (1-2 小时)
+```bash
+# 创建测试文件
+tests/integration/migrations/test_storage_integration.py
+
+# 测试覆盖:
+- 数据库集成 (3 个)
+- 并发操作 (2 个)
+
+# 运行测试
+pytest tests/integration/migrations/test_storage_integration.py -v
+```
+
+**任务 2.4: 端到端扩展测试** (2-3 小时)
+```bash
+# 创建测试文件
+tests/e2e/migrations/test_migration_e2e_extended.py
+
+# 测试覆盖:
+- 完整迁移流程 (3 个)
+- 错误恢复流程 (3 个)
+- 并发场景 (2 个)
+
+# 运行测试
+pytest tests/e2e/migrations/test_migration_e2e_extended.py -v
+```
+
+### 第 3 周 (优先级 3️⃣ - 性能测试)
+
+**任务 3.1: 性能测试** (1-2 小时)
+```bash
+# 创建测试文件
+tests/performance/migrations/test_migration_performance.py
+
+# 测试覆盖:
+- 迁移性能基准 (2 个)
+- 并发性能 (2 个)
+- 内存使用 (1 个)
+
+# 运行测试
+pytest tests/performance/migrations/test_migration_performance.py -v
 ```
 
 ---
@@ -657,26 +822,79 @@ tests/e2e/test_migration_e2e_extended.py
 
 ---
 
-## 📝 总结
+## 📝 总结 (分层设计)
 
 ### 当前状态
-- ✅ 39 个测试通过
-- ⚠️ 61 个测试缺失
+- ✅ 39 个测试通过 (需要重组)
+- ⚠️ 61 个测试缺失 (按分层设计)
 - 🔴 覆盖率约 50%
+- 🔴 测试结构不规范 (5 个文件在根目录)
+
+### 分层结构问题
+```
+当前问题:
+├── tests/
+│   ├── test_migration_engine.py      ❌ 根目录
+│   ├── test_risk_engine.py           ❌ 根目录
+│   ├── test_hooks.py                 ❌ 根目录
+│   ├── test_e2e_migration.py         ❌ 根目录
+│   ├── test_ecommerce_example.py     ❌ 根目录
+│   ├── unit/
+│   ├── integration/
+│   ├── e2e/
+│   └── performance/
+
+目标结构:
+├── tests/
+│   ├── unit/
+│   │   └── migrations/
+│   │       ├── test_migration_engine.py (MOVED)
+│   │       ├── test_risk_engine.py (MOVED)
+│   │       ├── test_hooks.py (MOVED)
+│   │       ├── test_exceptions.py (NEW)
+│   │       ├── test_cli_helpers.py (NEW)
+│   │       ├── test_storage_extended.py (NEW)
+│   │       └── test_engine_error_handling.py (NEW)
+│   ├── integration/
+│   │   └── migrations/
+│   │       ├── test_cli_integration.py (NEW)
+│   │       └── test_storage_integration.py (NEW)
+│   ├── e2e/
+│   │   └── migrations/
+│   │       ├── test_e2e_migration.py (MOVED)
+│   │       ├── test_ecommerce_example.py (MOVED)
+│   │       └── test_migration_e2e_extended.py (NEW)
+│   └── performance/
+│       └── migrations/
+│           └── test_migration_performance.py (NEW)
+```
 
 ### 改进方向
-1. **立即实施** (优先级 1️⃣): 36 个测试 (1 周)
-2. **后续实施** (优先级 2️⃣): 25 个测试 (1 周)
-3. **可选实施** (优先级 3️⃣): 13 个测试 (1 周)
+1. **第 0 步**: 目录结构重组 (0.5 小时)
+2. **立即实施** (优先级 1️⃣): 69 个单元测试 (6-8 小时)
+3. **后续实施** (优先级 2️⃣): 28 个集成/端到端测试 (5-7 小时)
+4. **可选实施** (优先级 3️⃣): 5 个性能测试 (1-2 小时)
 
 ### 预期效果
-- 测试总数: 39 → 100+
+- 测试总数: 39 → 102+
 - 覆盖率: 50% → 90%+
 - 缺陷发现率: 提升 70%+
+- 测试结构: 规范化 ✅
 - 用户信任度: 显著提升
+
+### 分层测试统计
+
+| 分层 | 现有 | 新增 | 总计 | 覆盖率 |
+|------|------|------|------|--------|
+| Unit | 39 | 36 | 75 | 90%+ |
+| Integration | 0 | 20 | 20 | 85%+ |
+| E2E | 0 | 8 | 8 | 80%+ |
+| Performance | 0 | 5 | 5 | 75%+ |
+| **总计** | **39** | **69** | **108** | **88%+** |
 
 ---
 
 **计划状态**: 📋 待批准  
-**预计工作量**: 3 周  
-**推荐**: 立即开始实施优先级 1️⃣ 的测试
+**预计工作量**: 3 周 (12-18 小时)
+**第一步**: 目录结构重组 (0.5 小时)
+**推荐**: 立即开始实施分层结构重组和优先级 1️⃣ 的单元测试
