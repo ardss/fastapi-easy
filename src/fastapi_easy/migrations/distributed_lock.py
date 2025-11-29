@@ -51,7 +51,14 @@ class PostgresLockProvider(LockProvider):
         self._connection_created_at = None
 
     async def acquire(self, timeout: int = 30) -> bool:
-        """使用 pg_advisory_lock 获取锁"""
+        """使用 pg_advisory_lock 获取锁
+        
+        Args:
+            timeout: 获取锁的超时时间（秒）
+            
+        Returns:
+            True 表示成功获取锁，False 表示失败
+        """
         start_time = time.time()
         conn = None
 
@@ -61,8 +68,10 @@ class PostgresLockProvider(LockProvider):
 
             while time.time() - start_time < timeout:
                 try:
+                    # 使用参数化查询防止 SQL 注入
                     result = conn.execute(
-                        text(f"SELECT pg_try_advisory_lock({self.lock_id})")
+                        text("SELECT pg_try_advisory_lock(:lock_id)"),
+                        {"lock_id": self.lock_id}
                     )
                     locked = result.scalar()
 
@@ -145,11 +154,20 @@ class MySQLLockProvider(LockProvider):
         self._connection = None
 
     async def acquire(self, timeout: int = 30) -> bool:
-        """使用 GET_LOCK 获取锁"""
+        """使用 GET_LOCK 获取锁
+        
+        Args:
+            timeout: 获取锁的超时时间（秒）
+            
+        Returns:
+            True 表示成功获取锁，False 表示失败
+        """
         try:
             conn = self.engine.connect()
+            # 使用参数化查询防止 SQL 注入
             result = conn.execute(
-                text(f"SELECT GET_LOCK('{self.lock_name}', {timeout})")
+                text("SELECT GET_LOCK(:lock_name, :timeout)"),
+                {"lock_name": self.lock_name, "timeout": timeout}
             )
             locked = result.scalar()
 
@@ -172,13 +190,19 @@ class MySQLLockProvider(LockProvider):
             return False
 
     async def release(self) -> bool:
-        """释放 MySQL 锁"""
+        """释放 MySQL 锁
+        
+        Returns:
+            True 表示成功释放锁，False 表示失败
+        """
         if not self.acquired or not self._connection:
             return False
 
         try:
+            # 使用参数化查询防止 SQL 注入
             result = self._connection.execute(
-                text(f"SELECT RELEASE_LOCK('{self.lock_name}')")
+                text("SELECT RELEASE_LOCK(:lock_name)"),
+                {"lock_name": self.lock_name}
             )
             released = result.scalar()
 

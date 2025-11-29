@@ -2,8 +2,10 @@
 import json
 import logging
 import os
+import re
 from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -34,13 +36,59 @@ class CheckpointManager:
     
     def _ensure_dir(self) -> None:
         """确保检查点目录存在"""
-        if not os.path.exists(self.checkpoint_dir):
-            os.makedirs(self.checkpoint_dir)
-            logger.info(f"创建检查点目录: {self.checkpoint_dir}")
-    
+        try:
+            os.makedirs(self.checkpoint_dir, exist_ok=True)
+            logger.info(f"检查点目录已准备: {self.checkpoint_dir}")
+        except Exception as e:
+            logger.error(f"创建检查点目录失败: {e}")
+            raise
+
+    def _validate_migration_id(self, migration_id: str) -> bool:
+        """验证迁移 ID 的安全性
+        
+        Args:
+            migration_id: 迁移 ID
+            
+        Returns:
+            True 如果 ID 安全，False 否则
+        """
+        # 只允许字母、数字、下划线、连字符
+        return bool(re.match(r'^[a-zA-Z0-9_-]+$', migration_id))
+
     def _get_checkpoint_file(self, migration_id: str) -> str:
-        """获取检查点文件路径"""
-        return os.path.join(self.checkpoint_dir, f"{migration_id}.json")
+        """获取检查点文件路径，防止路径遍历
+        
+        Args:
+            migration_id: 迁移 ID
+            
+        Returns:
+            检查点文件的完整路径
+            
+        Raises:
+            ValueError: 如果 migration_id 包含不安全字符
+        """
+        # 验证 migration_id 的安全性
+        if not migration_id or not self._validate_migration_id(migration_id):
+            raise ValueError(
+                f"Invalid migration_id: {migration_id}. "
+                "Only alphanumeric, underscore, and hyphen allowed."
+            )
+
+        checkpoint_file = os.path.join(
+            self.checkpoint_dir,
+            f"{migration_id}.json"
+        )
+
+        # 确保文件在检查点目录内（防止路径遍历）
+        resolved_path = Path(checkpoint_file).resolve()
+        resolved_dir = Path(self.checkpoint_dir).resolve()
+
+        if not str(resolved_path).startswith(str(resolved_dir)):
+            raise ValueError(
+                f"Path traversal attempt detected: {migration_id}"
+            )
+
+        return checkpoint_file
     
     def save_checkpoint(self, record: CheckpointRecord) -> bool:
         """保存检查点"""

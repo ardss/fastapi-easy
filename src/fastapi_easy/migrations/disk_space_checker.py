@@ -2,8 +2,9 @@
 import logging
 import os
 import shutil
+from pathlib import Path
 
-from sqlalchemy import Engine, inspect, text
+from sqlalchemy.engine import Engine
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +27,16 @@ class DiskSpaceChecker:
             url = str(self.engine.url)
             if "sqlite:///" in url:
                 db_path = url.replace("sqlite:///", "")
-                if os.path.exists(db_path):
-                    return os.path.getsize(db_path)
+
+                # 验证路径安全性
+                resolved_path = Path(db_path).resolve()
+
+                # 确保路径指向有效的文件
+                if not resolved_path.is_file():
+                    logger.warning(f"Invalid database path: {db_path}")
+                    return 0
+
+                return resolved_path.stat().st_size
             return 0
         except (IOError, OSError) as e:
             logger.error(f"❌ 获取数据库大小失败: {e}")
