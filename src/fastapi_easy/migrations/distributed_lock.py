@@ -262,8 +262,10 @@ class PostgresLockProvider(LockProvider):
                         f"forcing close"
                     )
             
+            # 使用参数化查询防止 SQL 注入
             self._connection.execute(
-                text(f"SELECT pg_advisory_unlock({self.lock_id})")
+                text("SELECT pg_advisory_unlock(:lock_id)"),
+                {"lock_id": self.lock_id}
             )
             self.acquired = False
             logger.info(
