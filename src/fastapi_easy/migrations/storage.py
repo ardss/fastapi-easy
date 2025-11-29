@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import Column, DateTime, Integer, MetaData, String, Table, text
+from sqlalchemy import Column, DateTime, Integer, MetaData, String, Table
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import IntegrityError
 
@@ -70,22 +70,16 @@ class MigrationStorage:
         """
         try:
             with self.engine.begin() as conn:
+                # 使用表对象而不是字符串格式化
                 conn.execute(
-                    text(f"""
-                        INSERT INTO {self.TABLE_NAME}
-                        (version, description, applied_at,
-                         rollback_sql, risk_level, status)
-                        VALUES (:version, :description, :applied_at,
-                                :rollback_sql, :risk_level, :status)
-                    """),
-                    {
-                        "version": version,
-                        "description": description,
-                        "applied_at": datetime.now(),
-                        "rollback_sql": rollback_sql,
-                        "risk_level": risk_level,
-                        "status": RecordStatus.APPLIED.value,
-                    }
+                    self.table.insert().values(
+                        version=version,
+                        description=description,
+                        applied_at=datetime.now(),
+                        rollback_sql=rollback_sql,
+                        risk_level=risk_level,
+                        status=RecordStatus.APPLIED.value,
+                    )
                 )
             logger.info(f"📝 Recorded migration: {version}")
             return OperationResult(
@@ -126,11 +120,11 @@ class MigrationStorage:
         """
         try:
             with self.engine.connect() as conn:
+                # 使用表对象而不是字符串格式化
                 result = conn.execute(
-                    text(
-                        f"SELECT version FROM {self.TABLE_NAME} "
-                        f"WHERE status = 'applied' ORDER BY applied_at"
-                    )
+                    self.table.select().where(
+                        self.table.c.status == RecordStatus.APPLIED.value
+                    ).order_by(self.table.c.applied_at)
                 )
                 return [row[0] for row in result]
         except Exception as e:
@@ -141,22 +135,19 @@ class MigrationStorage:
         """Get recent migration history"""
         try:
             with self.engine.connect() as conn:
+                # 使用表对象而不是字符串格式化
                 result = conn.execute(
-                    text(f"""
-                        SELECT version, description, applied_at, risk_level, status 
-                        FROM {self.TABLE_NAME} 
-                        ORDER BY applied_at DESC 
-                        LIMIT :limit
-                    """),
-                    {"limit": limit}
+                    self.table.select().order_by(
+                        self.table.c.applied_at.desc()
+                    ).limit(limit)
                 )
                 return [
                     {
-                        "version": row[0],
-                        "description": row[1],
-                        "applied_at": row[2],
-                        "risk_level": row[3],
-                        "status": row[4],
+                        "version": row[1],
+                        "description": row[2],
+                        "applied_at": row[3],
+                        "risk_level": row[5],
+                        "status": row[6],
                     }
                     for row in result
                 ]

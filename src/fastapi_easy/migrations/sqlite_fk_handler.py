@@ -1,5 +1,6 @@
 """SQLite 外键处理模块"""
 import logging
+import re
 
 from sqlalchemy import Engine, text
 
@@ -37,8 +38,18 @@ class SQLiteForeignKeyHandler:
     def get_foreign_keys(self, table_name: str) -> list:
         """获取表的外键约束"""
         try:
+            # 验证表名安全性 - 只允许字母、数字、下划线
+            if not re.match(r'^[a-zA-Z_][a-zA-Z0-9_]*$', table_name):
+                raise ValueError(
+                    f"Invalid table name: {table_name}. "
+                    "Only alphanumeric and underscore allowed."
+                )
+
             with self.engine.connect() as conn:
-                result = conn.execute(text(f"PRAGMA foreign_key_list({table_name})"))
+                # PRAGMA 不支持参数化，但表名已验证
+                result = conn.execute(
+                    text(f"PRAGMA foreign_key_list({table_name})")
+                )
                 return result.fetchall()
         except Exception as e:
             logger.error(f"❌ 获取外键失败: {e}")
