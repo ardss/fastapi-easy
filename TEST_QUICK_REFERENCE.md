@@ -1,10 +1,70 @@
-# 测试补充计划 - 快速参考
+# 测试补充计划 - 快速参考 (分层设计版)
 
-**快速查看**: 缺失的测试一览表
+**快速查看**: 缺失的 61 个测试一览表 + 分层结构重组
 
 ---
 
-## 📊 缺失测试汇总
+## 🏗️ 分层结构重组 (第 0 步)
+
+### 当前问题 ❌
+```
+tests/
+├── test_migration_engine.py      ❌ 根目录
+├── test_risk_engine.py           ❌ 根目录
+├── test_hooks.py                 ❌ 根目录
+├── test_e2e_migration.py         ❌ 根目录
+├── test_ecommerce_example.py     ❌ 根目录
+├── unit/
+├── integration/
+├── e2e/
+└── performance/
+```
+
+### 目标结构 ✅
+```
+tests/
+├── unit/
+│   └── migrations/
+│       ├── test_migration_engine.py (MOVED)
+│       ├── test_risk_engine.py (MOVED)
+│       ├── test_hooks.py (MOVED)
+│       ├── test_exceptions.py (NEW)
+│       ├── test_cli_helpers.py (NEW)
+│       ├── test_storage_extended.py (NEW)
+│       └── test_engine_error_handling.py (NEW)
+├── integration/
+│   └── migrations/
+│       ├── test_cli_integration.py (NEW)
+│       └── test_storage_integration.py (NEW)
+├── e2e/
+│   └── migrations/
+│       ├── test_e2e_migration.py (MOVED)
+│       ├── test_ecommerce_example.py (MOVED)
+│       └── test_migration_e2e_extended.py (NEW)
+└── performance/
+    └── migrations/
+        └── test_migration_performance.py (NEW)
+```
+
+### 重组命令
+```bash
+# 创建目录
+mkdir -p tests/unit/migrations
+mkdir -p tests/integration/migrations
+mkdir -p tests/e2e/migrations
+mkdir -p tests/performance/migrations
+
+# 移动文件
+mv tests/test_migration_engine.py tests/unit/migrations/
+mv tests/test_risk_engine.py tests/unit/migrations/
+mv tests/test_hooks.py tests/unit/migrations/
+mv tests/test_e2e_migration.py tests/e2e/migrations/
+mv tests/test_ecommerce_example.py tests/e2e/migrations/
+```
+
+---
+
+## 📊 缺失测试汇总 (按分层)
 
 ### exceptions.py - 12 个缺失测试 🔴
 
@@ -182,81 +242,170 @@
 
 ---
 
-## 🚀 快速开始
+## 🚀 快速开始 (分层设计)
 
-### 第 1 天: exceptions.py 测试
+### 第 0 步: 目录结构重组 (0.5 小时)
 
 ```bash
-# 创建测试文件
-touch tests/unit/test_exceptions.py
+# 1. 创建 migrations 子目录
+mkdir -p tests/unit/migrations
+mkdir -p tests/integration/migrations
+mkdir -p tests/e2e/migrations
+mkdir -p tests/performance/migrations
 
-# 运行测试
-pytest tests/unit/test_exceptions.py -v
+# 2. 移动现有测试
+mv tests/test_migration_engine.py tests/unit/migrations/
+mv tests/test_risk_engine.py tests/unit/migrations/
+mv tests/test_hooks.py tests/unit/migrations/
+mv tests/test_e2e_migration.py tests/e2e/migrations/
+mv tests/test_ecommerce_example.py tests/e2e/migrations/
+
+# 3. 验证测试仍然通过
+pytest tests/unit/migrations/ -v
+pytest tests/e2e/migrations/ -v
 ```
 
+### 第 1 周: 单元测试 (6-8 小时)
+
+**第 1 天: exceptions.py 测试**
+```bash
+# 创建测试文件
+touch tests/unit/migrations/test_exceptions.py
+
+# 运行测试
+pytest tests/unit/migrations/test_exceptions.py -v
+```
 **预期**: 12 个新测试通过
 
-### 第 2 天: cli_helpers.py 测试
-
+**第 2 天: cli_helpers.py 测试**
 ```bash
 # 创建测试文件
-touch tests/unit/test_cli_helpers.py
+touch tests/unit/migrations/test_cli_helpers.py
 
 # 运行测试
-pytest tests/unit/test_cli_helpers.py -v
+pytest tests/unit/migrations/test_cli_helpers.py -v
 ```
-
 **预期**: 16 个新测试通过
 
-### 第 3 天: storage.py 测试
-
+**第 3 天: storage.py 测试**
 ```bash
 # 创建测试文件
-touch tests/unit/test_storage_extended.py
+touch tests/unit/migrations/test_storage_extended.py
 
 # 运行测试
-pytest tests/unit/test_storage_extended.py -v
+pytest tests/unit/migrations/test_storage_extended.py -v
 ```
-
 **预期**: 8 个新测试通过
 
-### 第 4-5 天: cli.py 和 engine.py 测试
-
+**第 4-5 天: engine.py 测试**
 ```bash
 # 创建测试文件
-touch tests/integration/test_cli_integration.py
-touch tests/unit/test_engine_error_handling.py
+touch tests/unit/migrations/test_engine_error_handling.py
+
+# 运行所有单元测试
+pytest tests/unit/migrations/ -v --cov=src/fastapi_easy/migrations
+```
+**预期**: 10 个新测试通过
+
+### 第 2 周: 集成和端到端测试 (5-7 小时)
+
+**第 6-7 天: CLI 集成测试**
+```bash
+# 创建测试文件
+touch tests/integration/migrations/test_cli_integration.py
+
+# 运行测试
+pytest tests/integration/migrations/test_cli_integration.py -v
+```
+**预期**: 15 个新测试通过
+
+**第 8 天: 存储集成测试**
+```bash
+# 创建测试文件
+touch tests/integration/migrations/test_storage_integration.py
+
+# 运行测试
+pytest tests/integration/migrations/test_storage_integration.py -v
+```
+**预期**: 5 个新测试通过
+
+**第 9-10 天: 端到端扩展测试**
+```bash
+# 创建测试文件
+touch tests/e2e/migrations/test_migration_e2e_extended.py
+
+# 运行所有集成和端到端测试
+pytest tests/integration/migrations/ tests/e2e/migrations/ -v
+```
+**预期**: 8 个新测试通过
+
+### 第 3 周: 性能测试 (1-2 小时)
+
+**第 11 天: 性能测试**
+```bash
+# 创建测试文件
+touch tests/performance/migrations/test_migration_performance.py
 
 # 运行所有测试
 pytest tests/ -v --cov=src/fastapi_easy/migrations
 ```
-
-**预期**: 25 个新测试通过
+**预期**: 5 个新测试通过
 
 ---
 
-## 📈 进度跟踪
+## 📈 进度跟踪 (分层设计)
 
 ### 当前状态 (基线)
 ```
-总测试数: 39
+总测试数: 39 (需要重组)
 缺失测试: 61
 覆盖率: ~50%
+结构问题: 5 个文件在根目录
 ```
 
-### 优先级 1️⃣ 完成后
+### 第 0 步完成后 (目录重组)
 ```
-总测试数: 75
+总测试数: 39 (已重组)
+缺失测试: 61
+覆盖率: ~50%
+结构问题: ✅ 已解决
+```
+
+### 优先级 1️⃣ 完成后 (单元测试)
+```
+总测试数: 75 (39 + 36)
 缺失测试: 25
 覆盖率: ~75%
+单元测试: ✅ 完整 (75 个)
 ```
 
-### 优先级 2️⃣ 完成后
+### 优先级 2️⃣ 完成后 (集成/E2E)
 ```
-总测试数: 100
+总测试数: 103 (75 + 28)
+缺失测试: 0
+覆盖率: ~88%+
+集成测试: ✅ 完整 (20 个)
+E2E 测试: ✅ 完整 (8 个)
+```
+
+### 优先级 3️⃣ 完成后 (性能)
+```
+总测试数: 108 (103 + 5)
 缺失测试: 0
 覆盖率: ~90%+
+性能测试: ✅ 完整 (5 个)
+结构: ✅ 完全规范化
 ```
+
+### 分层测试统计
+
+| 分层 | 现有 | 新增 | 总计 | 覆盖率 | 状态 |
+|------|------|------|------|--------|------|
+| Unit | 39 | 36 | 75 | 90%+ | P1 |
+| Integration | 0 | 20 | 20 | 85%+ | P2 |
+| E2E | 0 | 8 | 8 | 80%+ | P2 |
+| Performance | 0 | 5 | 5 | 75%+ | P3 |
+| **总计** | **39** | **69** | **108** | **88%+** | ✅ |
 
 ---
 
