@@ -5,6 +5,7 @@ import pytest
 from sqlalchemy import MetaData, create_engine
 
 from fastapi_easy.migrations.engine import MigrationEngine
+from fastapi_easy.migrations.types import OperationResult
 
 
 @pytest.fixture
@@ -40,8 +41,8 @@ class TestRollbackBasic:
         
         # 执行回滚
         result = await migration_engine.rollback(steps=1)
-        assert isinstance(result, dict)
-        assert result['success'] is True
+        assert isinstance(result, OperationResult)
+        assert result.success is True
     
     @pytest.mark.asyncio
     async def test_rollback_multiple_migrations(self, migration_engine):
@@ -61,27 +62,27 @@ class TestRollbackBasic:
         
         # 回滚 2 个迁移
         result = await migration_engine.rollback(steps=2)
-        assert isinstance(result, dict)
-        assert result['success'] is True
+        assert isinstance(result, OperationResult)
+        assert result.success is True
     
     @pytest.mark.asyncio
     async def test_rollback_no_migrations(self, migration_engine):
         """测试没有可回滚的迁移"""
         result = await migration_engine.rollback(steps=1)
-        assert isinstance(result, dict)
-        assert result['success'] is False
-        assert len(result['errors']) > 0
+        assert isinstance(result, OperationResult)
+        assert result.success is False
+        assert len(result.errors) > 0
     
     @pytest.mark.asyncio
     async def test_rollback_invalid_steps(self, migration_engine):
         """测试无效的回滚步数"""
         result = await migration_engine.rollback(steps=0)
-        assert isinstance(result, dict)
-        assert result['success'] is False
+        assert isinstance(result, OperationResult)
+        assert result.success is False
         
         result = await migration_engine.rollback(steps=-1)
-        assert isinstance(result, dict)
-        assert result['success'] is False
+        assert isinstance(result, OperationResult)
+        assert result.success is False
 
 
 class TestRollbackWithLock:
@@ -106,8 +107,8 @@ class TestRollbackWithLock:
         with patch.object(migration_engine.lock, 'acquire', new_callable=AsyncMock) as mock_acquire:
             mock_acquire.return_value = False
             result = await migration_engine.rollback(steps=1)
-            assert isinstance(result, dict)
-            assert result['success'] is False
+            assert isinstance(result, OperationResult)
+            assert result.success is False
     
     @pytest.mark.asyncio
     async def test_rollback_releases_lock(self, migration_engine):
@@ -140,8 +141,8 @@ class TestRollbackExecution:
                 with patch('sqlalchemy.create_engine') as mock_engine:
                     result = await migration_engine.rollback(steps=1)
                     # 应该尝试执行回滚
-                    assert isinstance(result, dict)
-                    assert result['success'] is True
+                    assert isinstance(result, OperationResult)
+                    assert result.success is True
     
     @pytest.mark.asyncio
     async def test_rollback_handles_missing_sql(self, migration_engine):
@@ -159,8 +160,8 @@ class TestRollbackExecution:
             with patch.object(migration_engine.lock, 'release', new_callable=AsyncMock):
                 result = await migration_engine.rollback(steps=1)
                 # 应该处理缺少 SQL 的情况
-                assert isinstance(result, dict)
-                assert result['success'] is True
+                assert isinstance(result, OperationResult)
+                assert result.success is True
 
 
 class TestRollbackErrorHandling:
@@ -182,7 +183,7 @@ class TestRollbackErrorHandling:
                 # 执行回滚 - 由于表不存在，会导致 SQL 错误
                 result = await migration_engine.rollback(steps=1)
                 # 应该捕获错误
-                assert isinstance(result, dict)
+                assert isinstance(result, OperationResult)
     
     @pytest.mark.asyncio
     async def test_rollback_lock_release_error(self, migration_engine):
@@ -196,8 +197,8 @@ class TestRollbackErrorHandling:
                 # 应该处理锁释放错误
                 result = await migration_engine.rollback(steps=1)
                 # 即使锁释放失败，回滚也应该成功
-                assert isinstance(result, dict)
-                assert result['success'] is True
+                assert isinstance(result, OperationResult)
+                assert result.success is True
 
 
 class TestRollbackOrder:
@@ -220,5 +221,5 @@ class TestRollbackOrder:
             with patch.object(migration_engine.lock, 'release', new_callable=AsyncMock):
                 result = await migration_engine.rollback(steps=3)
                 # 应该按相反顺序处理迁移
-                assert isinstance(result, dict)
-                assert result['success'] is True
+                assert isinstance(result, OperationResult)
+                assert result.success is True

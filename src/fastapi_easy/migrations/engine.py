@@ -8,7 +8,7 @@ from .distributed_lock import get_lock_provider
 from .executor import MigrationExecutor
 from .generator import MigrationGenerator
 from .storage import MigrationStorage
-from .types import MigrationPlan
+from .types import MigrationPlan, OperationResult
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +137,7 @@ class MigrationEngine:
         """Get migration history"""
         return self.storage.get_migration_history(limit)
     
-    async def rollback(self, steps: int = 1, continue_on_error: bool = False) -> dict:
+    async def rollback(self, steps: int = 1, continue_on_error: bool = False) -> OperationResult:
         """
         回滚指定数量的迁移
         
@@ -146,40 +146,36 @@ class MigrationEngine:
             continue_on_error: 是否在错误时继续回滚
         
         Returns:
-            {
-                'success': bool,
-                'rolled_back': int,  # 成功回滚的数量
-                'failed': int,       # 失败的数量
-                'errors': [...]      # 错误列表
-            }
+            OperationResult with:
+                success: bool
+                data: {
+                    'rolled_back': int,  # 成功回滚的数量
+                    'failed': int,       # 失败的数量
+                }
+                errors: [...]  # 错误列表
         """
-        results = {
-            'success': False,
-            'rolled_back': 0,
-            'failed': 0,
-            'errors': []
-        }
+        result = OperationResult(success=False)
         
         # 验证参数
         if steps <= 0:
             logger.error("❌ 回滚步数必须大于 0")
-            results['errors'].append("回滚步数必须大于 0")
-            return results
+            result.add_error("回滚步数必须大于 0")
+            return result
         
         # 获取迁移历史
         history = self.storage.get_migration_history(limit=steps)
         
         if not history:
             logger.warning("⚠️ 没有可回滚的迁移")
-            results['errors'].append("没有可回滚的迁移")
-            return results
+            result.add_error("没有可回滚的迁移")
+            return result
         
         # 获取锁
         logger.info(f"🔒 获取迁移锁...")
         if not await self.lock.acquire():
             logger.warning("⏳ 无法获取锁，假设另一个实例正在迁移")
-            results['errors'].append("无法获取迁移锁")
-            return results
+            result.add_error("无法获取迁移锁")
+            return result
         
         try:
             logger.info(f"⏮️ 准备回滚 {len(history)} 个迁移...")
@@ -206,34 +202,36 @@ class MigrationEngine:
                                 conn.execute(text(statement))
                     
                     logger.info(f"  ✅ 成功回滚 {version}")
-                    results['rolled_back'] += 1
+                    if result.data is None:
+                        result.data = {'rolled_back': 0, 'failed': 0}
+                    result.data['rolled_back'] += 1
                 
                 except Exception as e:
                     logger.error(f"  ❌ 回滚 {version} 失败: {e}")
-                    results['failed'] += 1
-                    results['errors'].append({
-                        'version': version,
-                        'description': description,
-                        'error': str(e)
-                    })
+                    if result.data is None:
+                        result.data = {'rolled_back': 0, 'failed': 0}
+                    result.data['failed'] += 1
+                    result.add_error(f"{version}: {str(e)}")
                     
                     if not continue_on_error:
                         raise
                     else:
                         logger.warning(f"继续回滚下一个迁移...")
             
-            results['success'] = results['failed'] == 0
-            if results['success']:
-                logger.info(f"✅ 成功回滚 {results['rolled_back']} 个迁移")
+            if result.data is None:
+                result.data = {'rolled_back': 0, 'failed': 0}
+            result.success = result.data['failed'] == 0
+            if result.success:
+                logger.info(f"✅ 成功回滚 {result.data['rolled_back']} 个迁移")
             else:
-                logger.warning(f"⚠️ 回滚完成: {results['rolled_back']} 成功, {results['failed']} 失败")
+                logger.warning(f"⚠️ 回滚完成: {result.data['rolled_back']} 成功, {result.data['failed']} 失败")
             
-            return results
+            return result
         
         except Exception as e:
             logger.error(f"❌ 回滚失败: {e}", exc_info=True)
-            results['errors'].append(str(e))
-            return results
+            result.add_error(str(e))
+            return result
         
         finally:
             # 释放锁
