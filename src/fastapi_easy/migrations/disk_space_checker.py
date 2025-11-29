@@ -16,7 +16,11 @@ class DiskSpaceChecker:
         self.min_free_space_mb = min_free_space_mb
     
     def get_database_size(self) -> int:
-        """获取数据库大小（字节）"""
+        """获取数据库大小（字节）
+        
+        Returns:
+            数据库文件大小（字节），如果获取失败返回 0
+        """
         try:
             # 获取数据库文件路径
             url = str(self.engine.url)
@@ -25,12 +29,16 @@ class DiskSpaceChecker:
                 if os.path.exists(db_path):
                     return os.path.getsize(db_path)
             return 0
-        except Exception as e:
+        except (IOError, OSError) as e:
             logger.error(f"❌ 获取数据库大小失败: {e}")
             return 0
     
     def estimate_copy_swap_space(self) -> int:
-        """估算 Copy-Swap-Drop 所需的空间（字节）"""
+        """估算 Copy-Swap-Drop 所需的空间（字节）
+        
+        Returns:
+            估算所需的空间大小（字节），如果估算失败返回 0
+        """
         try:
             # 估算为数据库大小的 2 倍（复制 + 临时表）
             db_size = self.get_database_size()
@@ -40,7 +48,11 @@ class DiskSpaceChecker:
             return 0
     
     def get_available_space(self) -> int:
-        """获取可用磁盘空间（字节）"""
+        """获取可用磁盘空间（字节）
+        
+        Returns:
+            可用磁盘空间大小（字节），如果获取失败返回 0
+        """
         try:
             # 获取数据库所在目录
             url = str(self.engine.url)
@@ -50,7 +62,7 @@ class DiskSpaceChecker:
                 stat = shutil.disk_usage(db_dir)
                 return stat.free
             return 0
-        except Exception as e:
+        except (IOError, OSError) as e:
             logger.error(f"❌ 获取可用空间失败: {e}")
             return 0
     

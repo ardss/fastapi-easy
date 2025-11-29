@@ -40,9 +40,22 @@ class MigrationGenerator:
         return MigrationPlan(migrations=migrations, status="pending")
 
     def _generate_version(self) -> str:
+        """生成迁移版本号
+        
+        Returns:
+            版本号字符串 (格式: YYYYMMDDHHmmss_xxxx)
+        """
         return datetime.now().strftime("%Y%m%d%H%M%S") + "_" + self._random_string(4)
 
     def _random_string(self, length: int) -> str:
+        """生成随机字符串
+        
+        Args:
+            length: 字符串长度
+            
+        Returns:
+            随机字符串
+        """
         import random
         import string
         return ''.join(random.choices(string.ascii_lowercase, k=length))

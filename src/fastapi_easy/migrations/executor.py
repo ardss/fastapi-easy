@@ -109,8 +109,15 @@ class MigrationExecutor:
         logger.info(f"  ✅ 成功: {migration.description}")
         return True
 
-    def _execute_sql_sync(self, sql: str):
-        """Execute SQL synchronously within a transaction"""
+    def _execute_sql_sync(self, sql: str) -> None:
+        """Execute SQL synchronously within a transaction
+        
+        Args:
+            sql: SQL string to execute
+            
+        Raises:
+            Exception: If SQL execution fails
+        """
         try:
             # 使用 engine.begin() 自动处理事务
             with self.engine.begin() as conn:
