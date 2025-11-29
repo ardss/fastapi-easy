@@ -23,7 +23,11 @@ class CheckpointRecord:
     progress: int = 0  # 进度百分比 (0-100)
     
     def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
+        """转换为字典
+        
+        Returns:
+            包含检查点记录的字典
+        """
         return asdict(self)
 
 
@@ -114,10 +118,10 @@ class CheckpointManager:
             checkpoint_file = self._get_checkpoint_file(migration_id)
             if not os.path.exists(checkpoint_file):
                 return None
-            
+
             with open(checkpoint_file, 'r') as f:
                 data = json.load(f)
-            
+
             return CheckpointRecord(**data)
         except (IOError, OSError) as e:
             logger.error(f"文件读取失败: {e}")
@@ -127,9 +131,6 @@ class CheckpointManager:
             return None
         except (TypeError, ValueError) as e:
             logger.error(f"数据验证失败: {e}")
-            return None
-        except Exception as e:
-            logger.error(f"加载检查点失败: {e}")
             return None
     
     def delete_checkpoint(self, migration_id: str) -> bool:

@@ -1,11 +1,11 @@
 import logging
 import time
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from sqlalchemy import Column, DateTime, Integer, MetaData, String, Table
 from sqlalchemy.engine import Engine
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import DatabaseError, IntegrityError, OperationalError
 
 from .types import OperationResult, RecordStatus
 
@@ -127,10 +127,13 @@ class MigrationStorage:
                     ).order_by(self.table.c.applied_at)
                 )
                 return [row[0] for row in result]
-        except Exception as e:
-            logger.warning(f"Could not fetch migration history: {e}")
+        except (OperationalError, DatabaseError) as e:
+            logger.warning(f"数据库查询失败: {e}")
             return []
-    
+        except (TypeError, ValueError) as e:
+            logger.warning(f"数据处理失败: {e}")
+            return []
+
     def get_migration_history(self, limit: int = 10) -> List[dict]:
         """Get recent migration history"""
         try:
@@ -151,6 +154,9 @@ class MigrationStorage:
                     }
                     for row in result
                 ]
-        except Exception as e:
-            logger.warning(f"Could not fetch migration history: {e}")
+        except (OperationalError, DatabaseError) as e:
+            logger.warning(f"数据库查询失败: {e}")
+            return []
+        except (TypeError, ValueError) as e:
+            logger.warning(f"数据处理失败: {e}")
             return []
