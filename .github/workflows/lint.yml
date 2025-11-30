@@ -1,0 +1,68 @@
+name: Lint and Code Quality
+
+on:
+  push:
+    branches: [ master, main, develop, feature/* ]
+  pull_request:
+    branches: [ master, main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install black isort flake8 mypy pylint
+
+    - name: Run Black formatter check
+      run: |
+        black --check src/fastapi_easy tests/ --line-length=100 || echo "Black formatting issues found"
+
+    - name: Run isort import checker
+      run: |
+        isort --check-only src/fastapi_easy tests/ --profile=black || echo "Import sorting issues found"
+
+    - name: Run Flake8 linter
+      run: |
+        flake8 src/fastapi_easy tests/ --max-line-length=100 --extend-ignore=E203,W503 --count --statistics || true
+
+    - name: Run MyPy type checker
+      run: |
+        mypy src/fastapi_easy --ignore-missing-imports --no-error-summary || true
+
+    - name: Run Pylint
+      run: |
+        pylint src/fastapi_easy --disable=all --enable=E,F --fail-under=9.0 || true
+
+  security:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+
+    - name: Run Bandit security check
+      run: |
+        bandit -r src/fastapi_easy -ll || true
+
+    - name: Check dependencies with Safety
+      run: |
+        safety check --json || true
