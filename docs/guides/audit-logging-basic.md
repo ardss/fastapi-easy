@@ -313,4 +313,4 @@ A: 定期归档和清理，使用分区表。
 
 ---
 
-**下一步**: [配置参考](18-configuration.md) →
+**下一步**: [配置参考](../reference/configuration.md) →

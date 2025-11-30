@@ -302,20 +302,20 @@ A: 使用 PostgreSQL 或 MySQL，配置环境变量管理数据库 URL。
 
 现在你已经掌握了数据库集成，可以继续学习:
 
-1. **[启用查询功能](04-filters.md)** - 添加过滤、排序、分页
+1. **[启用查询功能](../guides/querying.md)** - 添加过滤、排序、分页
    - 查看示例: `examples/03_with_queries.py`
 
-2. **[高级功能](10-soft-delete.md)** - 软删除、审计日志
+2. **[高级功能](../guides/soft-delete.md)** - 软删除、审计日志
    - 查看示例: `examples/04_advanced_features.py`
 
-3. **[完整项目](06-complete-example.md)** - 多资源电商 API
+3. **[完整项目](03-complete-example.md)** - 多资源电商 API
    - 查看示例: `examples/05_complete_ecommerce.py`
 
 ---
 
 ## 10. 相关资源
 
-- 📚 [完整数据库文档](02-databases.md)
+- 📚 [完整数据库文档](../adapters/index.md)
 - 💻 [示例代码](../../examples/02_with_database.py)
-- 🐛 [故障排除](17-troubleshooting.md)
-- 🎓 [最佳实践](16-best-practices.md)
+- 🐛 [故障排除](../guides/troubleshooting.md)
+- 🎓 [最佳实践](../guides/best-practices.md)
