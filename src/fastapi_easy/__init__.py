@@ -18,6 +18,23 @@ from .core.config import CRUDConfig
 from .core.crud_router import CRUDRouter
 from .core.errors import AppError, ErrorCode
 from .core.hooks import HookRegistry
+from .backends import SQLAlchemyAdapter
+
+# Optional adapters
+try:
+    from .backends import TortoiseAdapter
+except ImportError:
+    TortoiseAdapter = None
+
+try:
+    from .backends import SQLModelAdapter
+except ImportError:
+    SQLModelAdapter = None
+
+try:
+    from .backends import MongoAdapter
+except ImportError:
+    MongoAdapter = None
 
 __all__ = [
     "CRUDRouter",
@@ -27,4 +44,8 @@ __all__ = [
     "ErrorCode",
     "CRUDConfig",
     "FastAPIEasy",
+    "SQLAlchemyAdapter",
+    "TortoiseAdapter",
+    "SQLModelAdapter",
+    "MongoAdapter",
 ]

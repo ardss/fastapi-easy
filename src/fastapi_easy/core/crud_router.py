@@ -88,6 +88,14 @@ class CRUDRouter(APIRouter):
         self._add_delete_one_route()
         self._add_delete_all_route()
     
+    def _handle_error(self, e: Exception, default_detail: str) -> None:
+        """Handle errors with optional details"""
+        detail = default_detail
+        if self.config.include_error_details:
+            detail = f"{default_detail}: {str(e)}"
+        logger.error(f"{default_detail}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=detail)
+    
     def _add_get_all_route(self) -> None:
         """Add GET all items route"""
         async def get_all(
@@ -132,8 +140,7 @@ class CRUDRouter(APIRouter):
                         logger.error(f"Expected list from get_all, got {type(result)}")
                         result = []
                 except Exception as e:
-                    logger.error(f"Error in get_all: {str(e)}", exc_info=True)
-                    raise HTTPException(status_code=500, detail="Failed to retrieve items")
+                    self._handle_error(e, "Failed to retrieve items")
             
             # Trigger hooks with error handling
             context.result = result
@@ -183,8 +190,7 @@ class CRUDRouter(APIRouter):
                 try:
                     result = await self.adapter.get_one(id)
                 except Exception as e:
-                    logger.error(f"Error in get_one: {str(e)}", exc_info=True)
-                    raise HTTPException(status_code=500, detail="Failed to retrieve item")
+                    self._handle_error(e, "Failed to retrieve item")
             
             # Return 404 if not found
             if result is None:
@@ -239,8 +245,7 @@ class CRUDRouter(APIRouter):
                 try:
                     result = await self.adapter.create(context.data)
                 except Exception as e:
-                    logger.error(f"Error in create: {str(e)}", exc_info=True)
-                    raise HTTPException(status_code=500, detail="Failed to create item")
+                    self._handle_error(e, "Failed to create item")
             
             # Trigger hooks with error handling
             context.result = result
@@ -291,8 +296,7 @@ class CRUDRouter(APIRouter):
                 try:
                     result = await self.adapter.update(id, context.data)
                 except Exception as e:
-                    logger.error(f"Error in update: {str(e)}", exc_info=True)
-                    raise HTTPException(status_code=500, detail="Failed to update item")
+                    self._handle_error(e, "Failed to update item")
             
             # Trigger hooks with error handling
             context.result = result
@@ -340,8 +344,7 @@ class CRUDRouter(APIRouter):
                 try:
                     result = await self.adapter.delete_one(id)
                 except Exception as e:
-                    logger.error(f"Error in delete_one: {str(e)}", exc_info=True)
-                    raise HTTPException(status_code=500, detail="Failed to delete item")
+                    self._handle_error(e, "Failed to delete item")
             
             # Trigger hooks with error handling
             context.result = result
@@ -401,8 +404,7 @@ class CRUDRouter(APIRouter):
                         logger.error(f"Expected list from delete_all, got {type(result)}")
                         result = []
                 except Exception as e:
-                    logger.error(f"Error in delete_all: {str(e)}", exc_info=True)
-                    raise HTTPException(status_code=500, detail="Failed to delete items")
+                    self._handle_error(e, "Failed to delete items")
             
             # Trigger hooks with error handling
             context.result = result
