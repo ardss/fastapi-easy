@@ -114,11 +114,16 @@ warn_no_return = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=src/fastapi_easy --cov-report=html --cov-report=term --cov-report=xml -v"
+addopts = "--cov=src/fastapi_easy --cov-report=html --cov-report=term --cov-report=xml -v -W ignore::DeprecationWarning -W ignore::PendingDeprecationWarning -W ignore::FutureWarning"
 asyncio_mode = "auto"
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::FutureWarning",
+]
 
 [tool.coverage.run]
 source = ["src/fastapi_easy"]
