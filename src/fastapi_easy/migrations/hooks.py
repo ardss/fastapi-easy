@@ -130,9 +130,15 @@ class HookRegistry:
                 results[hook.name] = result
                 logger.debug(f"Hook {hook.name} completed successfully")
 
-            except asyncio.TimeoutError:
-                logger.error(f"Hook {hook.name} timed out")
+            except asyncio.TimeoutError as e:
+                logger.error(f"Hook {hook.name} timed out: {e}")
                 results[hook.name] = {"error": "Timeout"}
+            except (ValueError, TypeError) as e:
+                logger.error(
+                    f"Hook {hook.name} validation error: {e}",
+                    exc_info=True,
+                )
+                results[hook.name] = {"error": str(e)}
             except Exception as e:
                 logger.error(
                     f"Error executing hook {hook.name}: {e}",

@@ -20,6 +20,9 @@ class SQLiteForeignKeyHandler:
                 conn.execute(text("PRAGMA foreign_keys = OFF"))
             logger.info("✅ 禁用 SQLite 外键约束")
             return True
+        except (ConnectionError, OSError) as e:
+            logger.error(f"❌ 禁用外键失败 (连接错误): {e}")
+            return False
         except Exception as e:
             logger.error(f"❌ 禁用外键失败: {e}")
             return False
@@ -31,6 +34,9 @@ class SQLiteForeignKeyHandler:
                 conn.execute(text("PRAGMA foreign_keys = ON"))
             logger.info("✅ 启用 SQLite 外键约束")
             return True
+        except (ConnectionError, OSError) as e:
+            logger.error(f"❌ 启用外键失败 (连接错误): {e}")
+            return False
         except Exception as e:
             logger.error(f"❌ 启用外键失败: {e}")
             return False

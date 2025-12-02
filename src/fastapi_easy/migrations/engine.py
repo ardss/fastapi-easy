@@ -237,6 +237,17 @@ class MigrationEngine:
                         result.data = {'rolled_back': 0, 'failed': 0}
                     result.data['rolled_back'] += 1
                 
+                except (OSError, IOError) as e:
+                    logger.error(f"  ❌ 回滚 {version} 失败 (I/O error): {e}")
+                    if result.data is None:
+                        result.data = {'rolled_back': 0, 'failed': 0}
+                    result.data['failed'] += 1
+                    result.add_error(f"{version}: {str(e)}")
+                    
+                    if not continue_on_error:
+                        raise
+                    else:
+                        logger.warning(f"继续回滚下一个迁移...")
                 except Exception as e:
                     logger.error(f"  ❌ 回滚 {version} 失败: {e}")
                     if result.data is None:

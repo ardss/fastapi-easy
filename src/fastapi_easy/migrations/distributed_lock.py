@@ -49,6 +49,9 @@ class ConnectionManager:
             self._connection = conn
             self._created_at = time.time()
             yield conn
+        except (ConnectionError, OSError) as e:
+            logger.error(f"连接获取失败 (连接错误): {e}")
+            raise
         except Exception as e:
             logger.error(f"连接获取失败: {e}")
             raise
@@ -56,6 +59,8 @@ class ConnectionManager:
             if conn:
                 try:
                     conn.close()
+                except (ConnectionError, OSError) as e:
+                    logger.warning(f"连接关闭失败 (连接错误): {e}")
                 except Exception as e:
                     logger.warning(f"连接关闭失败: {e}")
             self._connection = None

@@ -182,6 +182,12 @@ class RedisSchemaCacheProvider(SchemaCacheProvider):
             else:
                 logger.debug(f"Cache miss: {key}")
                 return None
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decode error reading from Redis: {e}")
+            return None
+        except (ConnectionError, OSError) as e:
+            logger.error(f"Connection error reading from Redis: {e}")
+            return None
         except Exception as e:
             logger.error(f"Error reading from Redis: {e}")
             return None
@@ -199,6 +205,12 @@ class RedisSchemaCacheProvider(SchemaCacheProvider):
             )
             logger.debug(f"Cache set: {key} (TTL: {ttl}s)")
             return True
+        except (TypeError, ValueError) as e:
+            logger.error(f"Serialization error writing to Redis: {e}")
+            return False
+        except (ConnectionError, OSError) as e:
+            logger.error(f"Connection error writing to Redis: {e}")
+            return False
         except Exception as e:
             logger.error(f"Error writing to Redis: {e}")
             return False
@@ -212,6 +224,9 @@ class RedisSchemaCacheProvider(SchemaCacheProvider):
             self.redis_client.delete(key)
             logger.debug(f"Cache deleted: {key}")
             return True
+        except (ConnectionError, OSError) as e:
+            logger.error(f"Connection error deleting from Redis: {e}")
+            return False
         except Exception as e:
             logger.error(f"Error deleting from Redis: {e}")
             return False
@@ -225,6 +240,9 @@ class RedisSchemaCacheProvider(SchemaCacheProvider):
             self.redis_client.flushdb()
             logger.info("All Redis caches cleared")
             return True
+        except (ConnectionError, OSError) as e:
+            logger.error(f"Connection error clearing Redis: {e}")
+            return False
         except Exception as e:
             logger.error(f"Error clearing Redis: {e}")
             return False
