@@ -154,14 +154,23 @@ class JWTAuth:
             logger.debug(f"Token verified for user: {payload.get('sub')}")
             return TokenPayload(**payload)
 
-        except jwt.ExpiredSignatureError:
-            logger.warning("Expired token attempted")
+        except jwt.ExpiredSignatureError as e:
+            logger.warning(f"Expired token attempted: {e}")
             raise TokenExpiredError("Token has expired")
+        except jwt.InvalidSignatureError as e:
+            logger.warning(f"Invalid token signature: {e}")
+            raise InvalidTokenError(f"Invalid token signature: {str(e)}")
+        except jwt.DecodeError as e:
+            logger.warning(f"Token decode error: {e}")
+            raise InvalidTokenError(f"Token decode error: {str(e)}")
         except jwt.InvalidTokenError as e:
-            logger.warning(f"Invalid token: {str(e)}")
+            logger.warning(f"Invalid token: {e}")
             raise InvalidTokenError(f"Invalid token: {str(e)}")
+        except (ValueError, TypeError) as e:
+            logger.error(f"Token payload validation failed: {e}")
+            raise InvalidTokenError(f"Token payload validation failed: {str(e)}")
         except Exception as e:
-            logger.error(f"Token verification failed: {str(e)}")
+            logger.error(f"Token verification failed: {e}")
             raise InvalidTokenError(f"Token verification failed: {str(e)}")
 
     def decode_token(self, token: str) -> Dict:

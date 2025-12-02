@@ -1,8 +1,8 @@
 """Security decorators for FastAPI-Easy"""
 
+import logging
 from contextvars import ContextVar
-from functools import wraps
-from typing import Callable, List, Optional
+from typing import Optional
 
 from fastapi import Depends, Header, HTTPException
 
@@ -13,6 +13,8 @@ from .exceptions import (
     TokenExpiredError,
 )
 from .jwt_auth import JWTAuth
+
+logger = logging.getLogger(__name__)
 
 # Use ContextVar for thread-safe JWT auth instance
 _jwt_auth: ContextVar[Optional[JWTAuth]] = ContextVar('jwt_auth', default=None)
@@ -94,10 +96,16 @@ async def get_current_user(
             "token_type": payload.type,
         }
     except TokenExpiredError as e:
+        logger.warning(f"Token expired: {e}")
         raise HTTPException(status_code=401, detail=str(e))
     except InvalidTokenError as e:
+        logger.warning(f"Invalid token: {e}")
         raise HTTPException(status_code=401, detail=str(e))
+    except (ValueError, TypeError, AttributeError) as e:
+        logger.error(f"Token payload error: {e}")
+        raise HTTPException(status_code=401, detail="Invalid token")
     except Exception as e:
+        logger.error(f"Unexpected token verification error: {e}")
         raise HTTPException(status_code=401, detail="Invalid token")
 
 

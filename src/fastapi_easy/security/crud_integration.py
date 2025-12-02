@@ -80,14 +80,26 @@ class ProtectedCRUDRouter:
                     current_user = await get_current_user(
                         kwargs.get("authorization")
                     )
-                except (InvalidTokenError, TokenExpiredError) as e:
+                except TokenExpiredError as e:
+                    logger.warning(f"Token expired: {e}")
                     if self.security_config.enable_auth:
                         raise HTTPException(status_code=401, detail=str(e))
+                except InvalidTokenError as e:
+                    logger.warning(f"Invalid token: {e}")
+                    if self.security_config.enable_auth:
+                        raise HTTPException(status_code=401, detail=str(e))
+                except (ValueError, TypeError, AttributeError) as e:
+                    logger.error(f"Token payload error: {e}")
+                    if self.security_config.enable_auth:
+                        raise HTTPException(
+                            status_code=401, detail="Unauthorized"
+                        )
                 except Exception as e:
-                    # Log unexpected errors for debugging
                     logger.error(f"Unexpected error in get_current_user: {e}")
                     if self.security_config.enable_auth:
-                        raise HTTPException(status_code=401, detail="Unauthorized")
+                        raise HTTPException(
+                            status_code=401, detail="Unauthorized"
+                        )
 
             # Check roles
             if self.security_config.require_roles and current_user:

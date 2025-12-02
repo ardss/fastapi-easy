@@ -43,6 +43,9 @@ class PasswordManager:
             hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
             logger.debug("Password hashed successfully")
             return hashed.decode("utf-8")
+        except (ValueError, TypeError) as e:
+            logger.error(f"Password encoding error: {e}")
+            raise
         except Exception as e:
             logger.error(f"Password hashing failed: {e}")
             raise
