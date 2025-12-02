@@ -6,7 +6,6 @@ Ensures all configuration values are valid before use.
 import logging
 from typing import Any, Dict
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -53,6 +52,9 @@ class ConfigValidator:
                 logger.warning(f"L2 size ({l2_size}) should be >= L1 size ({l1_size})")
             
             return True
+        except (ValueError, TypeError, KeyError) as e:
+            logger.error(f"Cache config validation error: {str(e)}")
+            return False
         except Exception as e:
             logger.error(f"Cache config validation failed: {str(e)}")
             return False

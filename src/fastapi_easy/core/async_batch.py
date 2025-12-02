@@ -1,7 +1,10 @@
 """Async batch processing optimization for concurrent operations"""
 
 import asyncio
-from typing import Any, List, Callable, Awaitable, Optional
+import logging
+from typing import Any, Awaitable, Callable, List, Optional
+
+logger = logging.getLogger(__name__)
 
 
 class AsyncBatchProcessor:
@@ -42,8 +45,15 @@ class AsyncBatchProcessor:
                     if timeout:
                         return await asyncio.wait_for(processor(item), timeout=timeout)
                     return await processor(item)
+                except asyncio.TimeoutError as e:
+                    logger.error(f"Processor timeout for item: {e}")
+                    return e
+                except (ValueError, TypeError) as e:
+                    logger.error(f"Processor validation error for item: {e}")
+                    return e
                 except Exception as e:
-                    return e  # 返回异常而不是抛出
+                    logger.error(f"Processor error for item: {e}")
+                    return e
         
         tasks = [bounded_processor(item) for item in items]
         return await asyncio.gather(*tasks, return_exceptions=True)
@@ -82,10 +92,19 @@ class AsyncBatchProcessor:
             async with semaphore:
                 try:
                     if timeout:
-                        return await asyncio.wait_for(processor(batch), timeout=timeout)
+                        return await asyncio.wait_for(
+                            processor(batch), timeout=timeout
+                        )
                     return await processor(batch)
+                except asyncio.TimeoutError as e:
+                    logger.error(f"Batch processor timeout: {e}")
+                    return e
+                except (ValueError, TypeError) as e:
+                    logger.error(f"Batch processor validation error: {e}")
+                    return e
                 except Exception as e:
-                    return e  # 返回异常而不是抛出
+                    logger.error(f"Batch processor error: {e}")
+                    return e
         
         tasks = [bounded_processor(batch) for batch in batches]
         batch_results = await asyncio.gather(*tasks, return_exceptions=True)
