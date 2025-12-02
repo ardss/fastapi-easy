@@ -7,11 +7,10 @@ FastAPIEasy 应用类 - 集成迁移引擎的 FastAPI 应用
 import asyncio
 import logging
 from contextlib import asynccontextmanager
-from typing import List, Optional, Tuple, Type
+from typing import List, Optional, Type
 
 from fastapi import FastAPI
-from sqlalchemy import MetaData, create_engine
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import MetaData, create_engine, text
 
 from .migrations.engine import MigrationEngine
 from .migrations.exceptions import MigrationError
@@ -134,14 +133,24 @@ class FastAPIEasy(FastAPI):
             # 创建数据库引擎
             engine = create_engine(self.database_url)
             
+            # 验证数据库连接
+            try:
+                with engine.connect() as conn:
+                    conn.execute(text("SELECT 1"))
+                logger.info("✅ Database connection verified")
+            except Exception as e:
+                raise ValueError(f"Database connection failed: {e}")
+            
             # 创建 metadata
             metadata = MetaData()
             
             # 如果提供了模型，从模型中收集 metadata
             if self.models:
                 for model in self.models:
-                    if hasattr(model, "__table__"):
-                        metadata.tables[model.__table__.name] = model.__table__
+                    if not hasattr(model, "__table__"):
+                        raise ValueError(f"Invalid model: {model} - missing __table__ attribute")
+                    metadata.tables[model.__table__.name] = model.__table__
+                logger.info(f"✅ Loaded {len(self.models)} models")
             
             self._metadata = metadata
             
@@ -153,14 +162,19 @@ class FastAPIEasy(FastAPI):
             )
             
             # 初始化存储
-            self._migration_engine.storage.initialize()
+            try:
+                self._migration_engine.storage.initialize()
+                logger.info("✅ Migration storage initialized")
+            except Exception as e:
+                logger.error(f"Storage initialization failed: {e}")
+                raise
             
             # 自动执行迁移
             if self.auto_migrate:
                 await self._run_auto_migration()
             
         except Exception as e:
-            logger.error(f"启动迁移引擎失败: {e}", exc_info=True)
+            logger.error(f"Application startup failed: {e}", exc_info=True)
             raise
     
     async def _shutdown(self):
