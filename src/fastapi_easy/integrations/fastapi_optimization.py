@@ -1,7 +1,9 @@
 """FastAPI integration for performance optimization"""
 
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 from fastapi import FastAPI
+
 from ..core.optimized_adapter import OptimizedSQLAlchemyAdapter
 
 
@@ -55,23 +57,26 @@ class FastAPIOptimization:
     
     def _setup_hooks(self) -> None:
         """Setup application lifecycle hooks"""
-        
-        @self.app.on_event("startup")
-        async def startup():
-            """Startup event handler"""
-            # Warmup caches for all adapters
+        from contextlib import asynccontextmanager
+
+        @asynccontextmanager
+        async def lifespan(app):
+            """Application lifespan context manager"""
+            # Startup
             for adapter_name, adapter in self.adapters.items():
                 if self.config.enable_cache:
                     warmed = await adapter.warmup_cache(limit=1000)
-                    print(f"[Optimization] Warmed up {warmed} items for {adapter_name}")
-        
-        @self.app.on_event("shutdown")
-        async def shutdown():
-            """Shutdown event handler"""
-            # Cleanup resources
+                    print(
+                        f"[Optimization] Warmed up {warmed} items "
+                        f"for {adapter_name}"
+                    )
+            yield
+            # Shutdown
             for adapter_name, adapter in self.adapters.items():
                 await adapter.clear_cache()
                 print(f"[Optimization] Cleared cache for {adapter_name}")
+
+        self.app.router.lifespan_context = lifespan
     
     def _setup_health_check(self) -> None:
         """Setup health check endpoint"""

@@ -1,10 +1,10 @@
 """WebSocket support for FastAPI-Easy"""
 
-from typing import Any, Callable, Dict, List, Optional, Set
-from abc import ABC, abstractmethod
-import json
 import asyncio
-from datetime import datetime
+import json
+from abc import ABC, abstractmethod
+from datetime import datetime, timezone
+from typing import Any, Callable, Dict, List, Optional, Set
 
 
 class WebSocketMessage:
@@ -28,7 +28,9 @@ class WebSocketMessage:
         self.type = type
         self.data = data
         self.client_id = client_id
-        self.timestamp = timestamp or datetime.utcnow().isoformat()
+        self.timestamp = (
+            timestamp or datetime.now(timezone.utc).isoformat()
+        )
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary

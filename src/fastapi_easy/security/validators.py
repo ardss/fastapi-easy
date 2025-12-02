@@ -3,7 +3,7 @@
 import re
 from typing import Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 
 class PermissionCheckRequest(BaseModel):
@@ -13,7 +13,8 @@ class PermissionCheckRequest(BaseModel):
     permission: str
     resource_id: Optional[str] = None
 
-    @validator("user_id")
+    @field_validator("user_id")
+    @classmethod
     def validate_user_id(cls, v):
         """Validate user_id
 
@@ -32,11 +33,13 @@ class PermissionCheckRequest(BaseModel):
             raise ValueError("user_id too long (max 255 characters)")
         if not re.match(r"^[a-zA-Z0-9_\-\.@]+$", v):
             raise ValueError(
-                "user_id contains invalid characters (allowed: alphanumeric, _, -, ., @)"
+                "user_id contains invalid characters "
+                "(allowed: alphanumeric, _, -, ., @)"
             )
         return v
 
-    @validator("permission")
+    @field_validator("permission")
+    @classmethod
     def validate_permission(cls, v):
         """Validate permission
 
@@ -54,10 +57,14 @@ class PermissionCheckRequest(BaseModel):
         if len(v) > 100:
             raise ValueError("permission too long (max 100 characters)")
         if not re.match(r"^[a-z_]+$", v):
-            raise ValueError("permission contains invalid characters (allowed: lowercase, _)")
+            raise ValueError(
+                "permission contains invalid characters "
+                "(allowed: lowercase, _)"
+            )
         return v
 
-    @validator("resource_id")
+    @field_validator("resource_id")
+    @classmethod
     def validate_resource_id(cls, v):
         """Validate resource_id
 
@@ -79,7 +86,8 @@ class PermissionCheckRequest(BaseModel):
             raise ValueError("resource_id too long (max 255 characters)")
         if not re.match(r"^[a-zA-Z0-9_\-\.:/]+$", v):
             raise ValueError(
-                "resource_id contains invalid characters (allowed: alphanumeric, _, -, ., :, /)"
+                "resource_id contains invalid characters "
+                "(allowed: alphanumeric, _, -, ., :, /)"
             )
         return v
 
@@ -90,7 +98,8 @@ class ResourceOwnershipCheckRequest(BaseModel):
     user_id: str
     resource_id: str
 
-    @validator("user_id")
+    @field_validator("user_id")
+    @classmethod
     def validate_user_id(cls, v):
         """Validate user_id"""
         if not v or not v.strip():
@@ -99,11 +108,13 @@ class ResourceOwnershipCheckRequest(BaseModel):
             raise ValueError("user_id too long (max 255 characters)")
         if not re.match(r"^[a-zA-Z0-9_\-\.@]+$", v):
             raise ValueError(
-                "user_id contains invalid characters (allowed: alphanumeric, _, -, ., @)"
+                "user_id contains invalid characters "
+                "(allowed: alphanumeric, _, -, ., @)"
             )
         return v
 
-    @validator("resource_id")
+    @field_validator("resource_id")
+    @classmethod
     def validate_resource_id(cls, v):
         """Validate resource_id"""
         if not v or not v.strip():
@@ -112,7 +123,8 @@ class ResourceOwnershipCheckRequest(BaseModel):
             raise ValueError("resource_id too long (max 255 characters)")
         if not re.match(r"^[a-zA-Z0-9_\-\.:/]+$", v):
             raise ValueError(
-                "resource_id contains invalid characters (allowed: alphanumeric, _, -, ., :, /)"
+                "resource_id contains invalid characters "
+                "(allowed: alphanumeric, _, -, ., :, /)"
             )
         return v
 
@@ -123,7 +135,8 @@ class BatchPermissionCheckRequest(BaseModel):
     user_id: str
     permissions: list
 
-    @validator("user_id")
+    @field_validator("user_id")
+    @classmethod
     def validate_user_id(cls, v):
         """Validate user_id"""
         if not v or not v.strip():
@@ -132,11 +145,13 @@ class BatchPermissionCheckRequest(BaseModel):
             raise ValueError("user_id too long (max 255 characters)")
         if not re.match(r"^[a-zA-Z0-9_\-\.@]+$", v):
             raise ValueError(
-                "user_id contains invalid characters (allowed: alphanumeric, _, -, ., @)"
+                "user_id contains invalid characters "
+                "(allowed: alphanumeric, _, -, ., @)"
             )
         return v
 
-    @validator("permissions")
+    @field_validator("permissions")
+    @classmethod
     def validate_permissions(cls, v):
         """Validate permissions list"""
         if not v or len(v) == 0:
@@ -153,7 +168,8 @@ class BatchPermissionCheckRequest(BaseModel):
                 raise ValueError("permission too long (max 100 characters)")
             if not re.match(r"^[a-z_]+$", perm):
                 raise ValueError(
-                    "permission contains invalid characters (allowed: lowercase, _)"
+                    "permission contains invalid characters "
+                    "(allowed: lowercase, _)"
                 )
 
         return v
