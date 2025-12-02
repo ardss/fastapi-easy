@@ -138,8 +138,10 @@ class FastAPIEasy(FastAPI):
                 with engine.connect() as conn:
                     conn.execute(text("SELECT 1"))
                 logger.info("✅ Database connection verified")
-            except Exception as e:
+            except (ConnectionError, OSError) as e:
                 raise ValueError(f"Database connection failed: {e}")
+            except Exception as e:
+                raise ValueError(f"Database connection verification failed: {e}")
             
             # 创建 metadata
             metadata = MetaData()
@@ -148,7 +150,9 @@ class FastAPIEasy(FastAPI):
             if self.models:
                 for model in self.models:
                     if not hasattr(model, "__table__"):
-                        raise ValueError(f"Invalid model: {model} - missing __table__ attribute")
+                        raise TypeError(
+                            f"Invalid model: {model} - missing __table__ attribute"
+                        )
                     metadata.tables[model.__table__.name] = model.__table__
                 logger.info(f"✅ Loaded {len(self.models)} models")
             
@@ -165,6 +169,9 @@ class FastAPIEasy(FastAPI):
             try:
                 self._migration_engine.storage.initialize()
                 logger.info("✅ Migration storage initialized")
+            except (OSError, IOError) as e:
+                logger.error(f"Storage initialization failed (I/O error): {e}")
+                raise
             except Exception as e:
                 logger.error(f"Storage initialization failed: {e}")
                 raise
@@ -173,6 +180,9 @@ class FastAPIEasy(FastAPI):
             if self.auto_migrate:
                 await self._run_auto_migration()
             
+        except (ValueError, TypeError) as e:
+            logger.error(f"Application startup configuration error: {e}")
+            raise
         except Exception as e:
             logger.error(f"Application startup failed: {e}", exc_info=True)
             raise

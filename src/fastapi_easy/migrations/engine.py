@@ -115,6 +115,12 @@ class MigrationEngine:
             logger.info(f"迁移完成: {plan.status}")
             return plan
 
+        except (OSError, IOError) as e:
+            logger.error(
+                f"迁移失败 (I/O error): {e}",
+                exc_info=True
+            )
+            raise
         except Exception as e:
             error_msg = str(e)
             logger.error(

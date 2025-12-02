@@ -116,21 +116,35 @@ class MigrationExecutor:
             )
             logger.info(f"成功: {migration.description}")
             return True
-        except Exception:
-            logger.error(f"迁移失败: {migration.description}")
+        except (OSError, IOError) as e:
+            logger.error(f"迁移失败 (I/O error): {migration.description} - {e}")
             # 尝试执行回滚 SQL
             if migration.downgrade_sql:
-                try:
-                    logger.info(f"尝试回滚: {migration.description}")
-                    await asyncio.to_thread(
-                        self._execute_sql_sync, migration.downgrade_sql
-                    )
-                    logger.info(f"回滚成功: {migration.description}")
-                except Exception as rollback_error:
-                    logger.error(
-                        f"回滚失败: {migration.description} - {rollback_error}"
-                    )
+                await self._attempt_rollback(migration)
             raise
+        except Exception as e:
+            logger.error(f"迁移失败: {migration.description} - {e}")
+            # 尝试执行回滚 SQL
+            if migration.downgrade_sql:
+                await self._attempt_rollback(migration)
+            raise
+
+    async def _attempt_rollback(self, migration: Migration) -> None:
+        """尝试执行回滚 SQL
+        
+        Args:
+            migration: 迁移对象
+        """
+        try:
+            logger.info(f"尝试回滚: {migration.description}")
+            await asyncio.to_thread(
+                self._execute_sql_sync, migration.downgrade_sql
+            )
+            logger.info(f"回滚成功: {migration.description}")
+        except (OSError, IOError) as e:
+            logger.error(f"回滚失败 (I/O error): {migration.description} - {e}")
+        except Exception as e:
+            logger.error(f"回滚失败: {migration.description} - {e}")
 
     def _execute_sql_sync(self, sql: str) -> None:
         """Execute SQL synchronously within a transaction
