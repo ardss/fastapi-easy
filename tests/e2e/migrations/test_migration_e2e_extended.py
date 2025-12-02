@@ -144,7 +144,11 @@ class TestE2EErrorHandling:
         """无效迁移数据处理"""
         # 空版本
         result = migration_engine.storage.record_migration("", "Test", "ROLLBACK", "SAFE")
-        assert result is True or result is False  # 应该有结果
+        # 应该返回 OperationResult 对象
+        assert hasattr(result, 'success')
+        assert hasattr(result, 'data')
+        # 空版本应该被记录（允许）
+        assert result.success is True
     
     def test_long_description_handling(self, migration_engine):
         """长描述处理"""
