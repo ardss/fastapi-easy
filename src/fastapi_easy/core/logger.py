@@ -1,10 +1,10 @@
 """Logging system for FastAPI-Easy"""
 
-import logging
 import json
-from typing import Any, Dict, Optional
+import logging
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, Optional
 
 
 class LogLevel(str, Enum):
@@ -29,8 +29,9 @@ class LogFormatter(logging.Formatter):
         Returns:
             Formatted log message
         """
+        from datetime import timezone
         log_data = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),
