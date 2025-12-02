@@ -1,13 +1,14 @@
 """SQLAlchemy async ORM adapter"""
 
 from typing import Any, Dict, List, Optional, Type
-from sqlalchemy import select, delete, func
+
+from sqlalchemy import delete, func, select
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
+from ..core.errors import AppError, ConflictError, ErrorCode
 from .base import BaseORMAdapter
-from ..core.errors import ConflictError, AppError, ErrorCode
 
 
 class SQLAlchemyAdapter(BaseORMAdapter):
@@ -133,7 +134,7 @@ class SQLAlchemyAdapter(BaseORMAdapter):
             raise AppError(
                 code=ErrorCode.INTERNAL_ERROR,
                 status_code=500,
-                message=f"Database error: {str(e)}"
+                message=f"Database error (validation): {str(e)}"
             )
         except SQLAlchemyError as e:
             raise AppError(

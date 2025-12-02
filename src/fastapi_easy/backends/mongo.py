@@ -1,11 +1,12 @@
 """MongoDB (Motor) adapter"""
 
 from typing import Any, Dict, List, Optional, Tuple, Union
+
+from ..core.errors import AppError, ConflictError, ErrorCode
 from .base import BaseORMAdapter
-from ..core.errors import ConflictError, AppError, ErrorCode
 
 try:
-    from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorCollection
+    from motor.motor_asyncio import AsyncIOMotorCollection, AsyncIOMotorDatabase
 except ImportError:
     AsyncIOMotorDatabase = Any  # type: ignore
     AsyncIOMotorCollection = Any  # type: ignore
@@ -126,6 +127,12 @@ class MongoAdapter(BaseORMAdapter):
             # Usually Pydantic models handle _id -> id mapping if configured.
             return items
             
+        except (ValueError, TypeError) as e:
+            raise AppError(
+                code=ErrorCode.INTERNAL_ERROR,
+                status_code=500,
+                message=f"Database error (validation): {str(e)}"
+            )
         except Exception as e:
             raise AppError(
                 code=ErrorCode.INTERNAL_ERROR,

@@ -1,11 +1,12 @@
 """Tortoise ORM adapter"""
 
-from typing import Any, Dict, List, Optional, Type, Tuple
-from tortoise import Model
-from tortoise.exceptions import IntegrityError, DoesNotExist
+from typing import Any, Dict, List, Optional, Tuple, Type
 
+from tortoise import Model
+from tortoise.exceptions import DoesNotExist, IntegrityError
+
+from ..core.errors import AppError, ConflictError, ErrorCode
 from .base import BaseORMAdapter
-from ..core.errors import ConflictError, AppError, ErrorCode
 
 
 class TortoiseAdapter(BaseORMAdapter):
@@ -129,6 +130,12 @@ class TortoiseAdapter(BaseORMAdapter):
             query = query.offset(skip).limit(limit)
             
             return await query
+        except ValueError as e:
+            raise AppError(
+                code=ErrorCode.INTERNAL_ERROR,
+                status_code=500,
+                message=f"Database error (validation): {str(e)}"
+            )
         except Exception as e:
             raise AppError(
                 code=ErrorCode.INTERNAL_ERROR,
