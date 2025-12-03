@@ -13,7 +13,15 @@
 
 ## 📚 文档
 
-👉 **[阅读完整文档](docs/index.md)**
+👉 **[阅读完整文档](docs/README.md)** | [快速开始](docs/tutorial/01-quick-start.md) | [API 参考](docs/reference/api.md)
+
+### 文档导航
+
+- **[快速开始](docs/tutorial/01-quick-start.md)** (5 分钟) - 运行你的第一个 CRUD API
+- **[功能指南](docs/guides/)** - Hook 系统、缓存、GraphQL、WebSocket 等
+- **[API 参考](docs/reference/api.md)** - 完整的 API 文档
+- **[安全指南](docs/security/)** - 认证、权限、速率限制
+- **[ORM 适配器](docs/adapters/)** - SQLAlchemy、Tortoise、MongoDB、SQLModel
 
 ---
 
