@@ -5,9 +5,8 @@ to acquire the same lock multiple times without deadlock.
 """
 
 import asyncio
-from typing import Optional, Dict, Any
 import logging
-
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -95,12 +94,14 @@ class ReentrantAsyncLock:
             logger.error(f"Error releasing lock: {str(e)}")
             return False
 
-    async def __aenter__(self):
+    async def __aenter__(
+        self,
+    ) -> "ReentrantAsyncLock":
         """Async context manager entry"""
         await self.acquire()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Async context manager exit"""
         self.release()
 
@@ -193,9 +194,6 @@ class ReentrantLockManager:
             Number of locks cleaned up
         """
         async with self._cleanup_lock:
-            import time
-
-            current_time = time.time()
             keys_to_remove = []
 
             # Safely iterate over locks

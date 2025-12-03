@@ -5,9 +5,8 @@ to ensure data consistency while minimizing cache clearing.
 """
 
 import logging
-from typing import Optional, Set, Any, Dict
 from enum import Enum
-
+from typing import Any, Dict, Optional, Set
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +28,7 @@ class CacheInvalidationManager:
         self.invalidation_log: list = []
         self.max_log_size = 1000
 
-    async def invalidate_list_cache(self, cache, operation: str = "get_all") -> int:
+    async def invalidate_list_cache(self, cache: Any, operation: str = "get_all") -> int:
         """Invalidate list operation caches
 
         Clears all caches related to list operations (get_all, etc.)
@@ -230,7 +229,12 @@ class CacheInvalidationManager:
         """
         import time
 
-        log_entry = {"timestamp": time.time(), "type": inv_type, "target": target, "count": count}
+        log_entry: Dict[str, Any] = {
+            "timestamp": time.time(),
+            "type": inv_type,
+            "target": target,
+            "count": count,
+        }
 
         self.invalidation_log.append(log_entry)
 
@@ -258,7 +262,11 @@ class CacheInvalidationManager:
                 by_type[inv_type] = 0
             by_type[inv_type] += entry["count"]
 
-        return {"total": total, "by_type": by_type, "recent": self.invalidation_log[-10:]}
+        return {
+            "total": total,
+            "by_type": by_type,
+            "recent": self.invalidation_log[-10:],
+        }
 
 
 # Singleton instance
