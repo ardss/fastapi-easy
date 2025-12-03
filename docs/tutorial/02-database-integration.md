@@ -316,6 +316,6 @@ A: 使用 PostgreSQL 或 MySQL，配置环境变量管理数据库 URL。
 ## 10. 相关资源
 
 - 📚 [完整数据库文档](../adapters/index.md)
-- 💻 [示例代码](../../examples/02_with_database.py)
+- 💻 [示例代码](https://github.com/ardss/fastapi-easy/blob/main/examples/02_with_database.py)
 - 🐛 [故障排除](../guides/troubleshooting.md)
 - 🎓 [最佳实践](../guides/best-practices.md)

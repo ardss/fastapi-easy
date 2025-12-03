@@ -348,9 +348,9 @@ async def after_migrate(context):
 
 ## 相关文档
 
-- [迁移引擎设计](../SCHEMA_MIGRATION_ULTIMATE_DESIGN.md)
-- [CLI 工具指南](../cli-guide.md)
-- [错误处理](../error-handling.md)
+- [迁移引擎设计](../archive/SCHEMA_MIGRATION_ULTIMATE_DESIGN.md)
+- [错误处理](./error-handling.md)
+- [最佳实践](./best-practices.md)
 
 ## 获取帮助
 
