@@ -143,61 +143,31 @@ extra:
 
 nav:
   - 首页: index.md
+  - 快速开始: getting-started.md
   
-  - 📚 教程 (新手必读):
-    - 快速上手 (5分钟): tutorial/01-quick-start.md
-    - 数据库集成 (10分钟): tutorial/02-database-integration.md
-    - 完整示例 (15分钟): tutorial/03-complete-example.md
-  
-  - 🎯 基础功能 (初级):
-    - 查询指南: guides/querying.md
+  - 用户指南:
+    - 概览: user-guide/index.md
+    - 基础概念: tutorial/01-quick-start.md
+    - 数据库集成: tutorial/02-database-integration.md
+    - 查询和过滤: guides/querying.md
     - 权限控制: guides/permissions-basic.md
     - 错误处理: guides/error-handling.md
-  
-  - ⚡ 高级功能 (中级):
     - Hook系统: guides/hooks-advanced.md
     - 缓存系统: guides/caching.md
-    - 软删除: guides/soft-delete.md
-    - 批量操作: guides/bulk-operations.md
-    - 审计日志: guides/audit-logging-basic.md
-  
-  - 🚀 专家功能 (高级):
+    - 数据库迁移: guides/migrations.md
     - GraphQL支持: guides/graphql-integration.md
     - WebSocket支持: guides/websocket-integration.md
-    - 数据库迁移: guides/migrations.md
   
-  - 🗄️ 数据库:
-    - 适配器概览: adapters/index.md
-    - SQLAlchemy: adapters/sqlalchemy.md
-    - Tortoise ORM: adapters/tortoise.md
-    - MongoDB: adapters/mongodb.md
-    - SQLModel: adapters/sqlmodel.md
-  
-  - 🔒 安全:
-    - 安全概览: security/index.md
-    - 认证: security/authentication.md
-    - 权限系统: security/permissions.md
-    - 多租户支持: security/multi-tenancy.md
-    - 审计日志: security/audit-logging.md
-    - 密码与限流: security/password-rate-limit.md
-    - 权限加载器: security/permission-loader.md
-    - 资源检查器: security/resource-checker.md
-    - 权限引擎: security/permission-engine.md
-    - 安全配置: security/security-config.md
-    - 最佳实践: security/security-best-practices.md
-  
-  - 📖 参考手册:
+  - 参考:
     - API参考: reference/api.md
     - 架构设计: reference/architecture.md
-    - 数据流: reference/data-flow.md
     - 配置参数: reference/configuration.md
-    - 钩子系统: reference/hooks.md
-    - CLI工具: reference/cli.md
+    - 数据库适配器: adapters/index.md
   
-  - 💡 最佳实践:
-    - 最佳实践: guides/best-practices.md
-    - 故障排除: guides/troubleshooting.md
+  - 安全:
+    - 概览: security/index.md
+    - 认证: security/authentication.md
+    - 权限: security/permissions.md
   
-  - 🤝 贡献:
-    - 贡献指南: development/contributing.md
-    - 测试指南: development/testing.md
+  - 常见问题: faq.md
+  - 贡献: development/contributing.md
