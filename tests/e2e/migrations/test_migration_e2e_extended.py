@@ -1,7 +1,7 @@
 """端到端迁移测试 - 完整流程"""
 
 import pytest
-from sqlalchemy import Column, Integer, MetaData, String, Table, create_engine
+from sqlalchemy import MetaData, create_engine
 
 from fastapi_easy.migrations.engine import MigrationEngine
 from fastapi_easy.migrations.storage import MigrationStorage

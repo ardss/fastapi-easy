@@ -9,10 +9,9 @@ import pytest_asyncio
 from sqlalchemy import Column, Integer, String, Float, select
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.exc import IntegrityError
 
 from fastapi_easy.backends.sqlalchemy import SQLAlchemyAdapter
-from fastapi_easy.core.errors import ConflictError, AppError
+from fastapi_easy.core.errors import ConflictError
 
 
 # ============================================================================
@@ -23,7 +22,6 @@ from fastapi_easy.core.errors import ConflictError, AppError
 class Base(DeclarativeBase):
     """SQLAlchemy base class"""
 
-    pass
 
 
 class TransactionItem(Base):
@@ -286,7 +284,7 @@ class TestDeadlockHandling:
             )
             # Both should complete successfully
             assert len(results) == 2
-        except Exception as e:
+        except Exception as _:
             # If deadlock occurs, it should be handled gracefully
             pytest.skip(f"Deadlock occurred (expected in some databases): {e}")
 

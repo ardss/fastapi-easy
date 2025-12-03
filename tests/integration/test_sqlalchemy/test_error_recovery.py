@@ -6,9 +6,7 @@ Tests for error handling, recovery mechanisms, and resilience.
 import asyncio
 import pytest
 from sqlalchemy import select
-from unittest.mock import AsyncMock, patch, MagicMock
 
-from fastapi_easy.core.errors import AppError, ErrorCode
 from .conftest import Item
 
 
@@ -26,7 +24,7 @@ class TestConnectionFailure:
                 result = await session.execute(select(Item))
                 items = result.scalars().all()
                 assert items is not None
-        except Exception as e:
+        except Exception as _:
             # Should handle connection errors gracefully
             pytest.skip(f"Connection error (expected in some environments): {e}")
 
@@ -123,7 +121,7 @@ class TestRetryMechanism:
                 result = await operation_with_retry()
                 assert result is not None
                 break
-            except Exception as e:
+            except Exception as _:
                 if attempt == max_retries - 1:
                     raise
                 await asyncio.sleep(0.01)
@@ -149,7 +147,7 @@ class TestRetryMechanism:
                 result = await operation_with_backoff()
                 assert result is not None
                 break
-            except Exception as e:
+            except Exception as _:
                 if attempt == max_retries - 1:
                     raise
                 delay = base_delay * (2**attempt)
@@ -174,7 +172,7 @@ class TestRetryMechanism:
             for attempt in range(max_retries):
                 try:
                     await always_fails()
-                except Exception as e:
+                except Exception as _:
                     if attempt == max_retries - 1:
                         raise
                     await asyncio.sleep(0.01)
@@ -265,7 +263,7 @@ class TestErrorRecovery:
             results = await asyncio.gather(transaction_1(), transaction_2())
             # Both should complete (SQLite doesn't have true deadlocks)
             assert len(results) == 2
-        except Exception as e:
+        except Exception as _:
             # If deadlock occurs, it should be handled gracefully
             pytest.skip(f"Deadlock occurred (expected in some databases): {e}")
 

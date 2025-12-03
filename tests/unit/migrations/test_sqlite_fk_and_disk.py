@@ -1,7 +1,7 @@
 """SQLite 外键和磁盘空间测试"""
 
 import pytest
-from sqlalchemy import MetaData, create_engine
+from sqlalchemy import create_engine
 
 from fastapi_easy.migrations.disk_space_checker import DiskSpaceChecker
 from fastapi_easy.migrations.sqlite_fk_handler import SQLiteForeignKeyHandler

@@ -1,6 +1,5 @@
 """Unit tests for CLI tools"""
 
-import pytest
 from click.testing import CliRunner
 from fastapi_easy.cli import cli
 

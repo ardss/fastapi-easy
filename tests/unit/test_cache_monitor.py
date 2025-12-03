@@ -1,6 +1,5 @@
 """Tests for cache monitor"""
 
-import pytest
 from fastapi_easy.core.cache_monitor import CacheMetrics, CacheMonitor, create_cache_monitor
 
 

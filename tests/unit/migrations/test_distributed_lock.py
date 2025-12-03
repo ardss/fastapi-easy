@@ -1,7 +1,5 @@
 """分布式锁单元测试"""
 
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy import create_engine

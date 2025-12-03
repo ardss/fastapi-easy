@@ -1,6 +1,5 @@
 """Tests for database connection pool configuration"""
 
-import pytest
 from fastapi_easy.core.pool import (
     PoolConfig,
     PoolConfigBuilder,

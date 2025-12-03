@@ -2,7 +2,6 @@ import os
 import tempfile
 
 import pytest
-import sqlalchemy
 from sqlalchemy import Column, Integer, String, create_engine, text
 from sqlalchemy.orm import declarative_base
 

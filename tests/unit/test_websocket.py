@@ -1,8 +1,7 @@
 """Unit tests for WebSocket support"""
 
 import pytest
-import asyncio
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 from fastapi_easy.websocket import (
     WebSocketMessage,
     WebSocketConnectionManager,

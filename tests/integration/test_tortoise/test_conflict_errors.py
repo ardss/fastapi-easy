@@ -3,7 +3,6 @@
 import pytest
 from tortoise.exceptions import IntegrityError
 from unittest.mock import patch
-from fastapi_easy.backends.tortoise import TortoiseAdapter
 from fastapi_easy.core.errors import ConflictError
 
 

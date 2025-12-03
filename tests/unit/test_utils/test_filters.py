@@ -1,6 +1,5 @@
 """Tests for filter utilities"""
 
-import pytest
 from fastapi_easy.utils.filters import FilterParser
 
 

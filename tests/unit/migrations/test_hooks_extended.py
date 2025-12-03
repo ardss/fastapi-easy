@@ -1,10 +1,9 @@
 """Hook 系统扩展单元测试"""
 
-import asyncio
 
 import pytest
 
-from fastapi_easy.migrations.hooks import HookRegistry, HookTrigger, MigrationHook
+from fastapi_easy.migrations.hooks import HookRegistry, HookTrigger
 
 
 @pytest.fixture

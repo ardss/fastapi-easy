@@ -2,7 +2,6 @@
 
 import pytest
 import asyncio
-from typing import List
 
 
 @pytest.mark.asyncio

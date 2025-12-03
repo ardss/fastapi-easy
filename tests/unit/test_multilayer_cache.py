@@ -1,7 +1,6 @@
 """Tests for multi-layer cache module"""
 
 import pytest
-import asyncio
 from fastapi_easy.core.multilayer_cache import MultiLayerCache, create_multilayer_cache
 
 

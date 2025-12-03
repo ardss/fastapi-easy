@@ -4,11 +4,8 @@ CLI 辅助模块单元测试
 测试 CLIErrorHandler, CLIFormatter, CLIConfirm, CLIProgress 等辅助类
 """
 
-import sys
-from io import StringIO
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
 
 from fastapi_easy.migrations.cli_helpers import (
     CLIConfirm,

@@ -1,6 +1,5 @@
 """Unit tests for rate limiting"""
 
-import time
 
 import pytest
 

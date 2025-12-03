@@ -1,7 +1,7 @@
 """Unit tests for ORM backends"""
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 from fastapi_easy.backends.base import BaseORMAdapter
 
 

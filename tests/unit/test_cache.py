@@ -1,7 +1,6 @@
 """Tests for query cache module"""
 
 import pytest
-import asyncio
 from fastapi_easy.core.cache import QueryCache, CacheEntry, get_query_cache, create_query_cache
 
 

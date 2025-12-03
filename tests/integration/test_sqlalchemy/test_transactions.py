@@ -194,7 +194,7 @@ class TestDeadlockHandling:
             )
             # Both should complete successfully
             assert len(results) == 2
-        except Exception as e:
+        except Exception as _:
             # If deadlock occurs, it should be handled gracefully
             pytest.skip(f"Deadlock occurred (expected in some databases): {e}")
 

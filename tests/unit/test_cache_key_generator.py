@@ -1,6 +1,5 @@
 """Tests for cache key generator"""
 
-import pytest
 from fastapi_easy.core.cache_key_generator import (
     CacheKeyGenerator,
     generate_cache_key,

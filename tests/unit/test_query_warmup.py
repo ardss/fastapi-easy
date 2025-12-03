@@ -3,7 +3,6 @@
 import pytest
 import asyncio
 from fastapi_easy.core.query_warmup import (
-    QueryWarmupStrategy,
     SimpleWarmupStrategy,
     QueryWarmupExecutor,
     ColdStartOptimizer,

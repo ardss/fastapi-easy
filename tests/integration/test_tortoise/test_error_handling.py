@@ -1,9 +1,8 @@
 """Tortoise ORM error handling tests"""
 
 import pytest
-from unittest.mock import AsyncMock, patch
-from fastapi_easy.backends.tortoise import TortoiseAdapter
-from fastapi_easy.core.errors import AppError, ConflictError, ErrorCode
+from unittest.mock import patch
+from fastapi_easy.core.errors import AppError, ErrorCode
 
 
 @pytest.mark.asyncio

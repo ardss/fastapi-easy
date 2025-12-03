@@ -1,6 +1,6 @@
 """回滚功能单元测试"""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from sqlalchemy import MetaData, create_engine

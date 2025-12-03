@@ -1,6 +1,5 @@
 """Tests for query projection module"""
 
-import pytest
 from fastapi_easy.core.query_projection import (
     QueryProjection,
     ProjectionBuilder,

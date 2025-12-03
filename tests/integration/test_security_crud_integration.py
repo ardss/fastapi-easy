@@ -1,7 +1,7 @@
 """Integration tests for security with CRUDRouter"""
 
 import pytest
-from fastapi import Body, Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
 
@@ -13,7 +13,6 @@ from fastapi_easy.security import (
 )
 from fastapi_easy.security.crud_integration import (
     CRUDSecurityConfig,
-    ProtectedCRUDRouter,
     create_protected_crud_router,
 )
 

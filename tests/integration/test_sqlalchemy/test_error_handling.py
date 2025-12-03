@@ -1,7 +1,7 @@
 """SQLAlchemy adapter error handling tests"""
 
 import pytest
-from fastapi_easy.core.errors import AppError, ErrorCode
+from fastapi_easy.core.errors import AppError
 
 
 @pytest.mark.asyncio

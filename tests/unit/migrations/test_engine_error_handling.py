@@ -4,18 +4,12 @@
 测试 MigrationEngine 的错误处理、异常恢复和错误消息
 """
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from sqlalchemy import MetaData, create_engine
 
 from fastapi_easy.migrations.engine import MigrationEngine
-from fastapi_easy.migrations.exceptions import (
-    DatabaseConnectionError,
-    LockAcquisitionError,
-    MigrationExecutionError,
-    SchemaDetectionError,
-)
 
 
 @pytest.fixture
@@ -43,7 +37,7 @@ class TestMigrationEngineErrorHandling:
             # 应该捕获异常
             try:
                 await migration_engine.auto_migrate()
-            except Exception as e:
+            except Exception as _:
                 assert str(e) != ""
 
     @pytest.mark.asyncio
@@ -65,7 +59,7 @@ class TestMigrationEngineErrorHandling:
 
             try:
                 await migration_engine.auto_migrate()
-            except Exception as e:
+            except Exception as _:
                 # 应该有错误信息
                 assert str(e) != ""
 
@@ -73,7 +67,6 @@ class TestMigrationEngineErrorHandling:
     async def test_lock_acquisition_error(self, migration_engine):
         """测试锁获取错误"""
         # 跳过此测试，因为 lock_provider 不是公共属性
-        pass
 
     @pytest.mark.asyncio
     async def test_storage_error_handling(self, migration_engine):
@@ -84,7 +77,7 @@ class TestMigrationEngineErrorHandling:
             # 应该记录错误但不中断
             try:
                 await migration_engine.auto_migrate()
-            except Exception as e:
+            except Exception as _:
                 # 存储错误不应该导致迁移失败
                 pass
 
@@ -96,7 +89,6 @@ class TestMigrationEngineExceptionRecovery:
     async def test_lock_release_failure_recovery(self, migration_engine):
         """测试锁释放失败恢复"""
         # 跳过此测试，因为 lock_provider 不是公共属性
-        pass
 
     @pytest.mark.asyncio
     async def test_partial_migration_failure(self, migration_engine):
@@ -134,7 +126,7 @@ class TestMigrationEngineErrorMessages:
 
             try:
                 await migration_engine.auto_migrate()
-            except Exception as e:
+            except Exception as _:
                 error_msg = str(e)
                 # 错误消息应该包含有用的信息
                 assert len(error_msg) > 0
@@ -147,7 +139,7 @@ class TestMigrationEngineErrorMessages:
 
             try:
                 await migration_engine.auto_migrate()
-            except Exception as e:
+            except Exception as _:
                 error_msg = str(e)
                 # 应该有调试信息
                 assert len(error_msg) > 0
@@ -265,14 +257,14 @@ class TestMigrationEngineErrorPropagation:
             def raise_chained_error():
                 try:
                     raise Exception("Original error")
-                except Exception as e:
+                except Exception as _:
                     raise Exception("Wrapped error") from e
 
             mock_executor.execute.side_effect = raise_chained_error
 
             try:
                 await migration_engine.auto_migrate()
-            except Exception as e:
+            except Exception as _:
                 # 应该保留错误链信息
                 assert str(e) != ""
 

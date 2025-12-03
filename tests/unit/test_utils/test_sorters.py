@@ -1,6 +1,5 @@
 """Tests for sort utilities"""
 
-import pytest
 from fastapi_easy.utils.sorters import SortParser
 
 

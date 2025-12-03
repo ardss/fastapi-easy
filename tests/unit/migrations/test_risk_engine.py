@@ -2,8 +2,6 @@
 高级风险评估引擎测试
 """
 
-import pytest
-from sqlalchemy import Column, Integer, String, create_engine
 from sqlalchemy.orm import declarative_base
 
 from fastapi_easy.migrations.risk_engine import (

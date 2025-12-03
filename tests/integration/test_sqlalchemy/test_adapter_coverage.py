@@ -1,9 +1,8 @@
 """Additional coverage tests for SQLAlchemy adapter"""
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-from fastapi_easy.backends.sqlalchemy import SQLAlchemyAdapter
 from fastapi_easy.core.errors import AppError
 
 

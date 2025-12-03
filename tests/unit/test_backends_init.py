@@ -1,8 +1,5 @@
 """Tests for backends/__init__.py module"""
 
-import pytest
-from unittest.mock import patch, MagicMock
-import sys
 
 
 class TestBackendsInit:

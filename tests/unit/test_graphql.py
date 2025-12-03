@@ -1,6 +1,5 @@
 """Unit tests for GraphQL support"""
 
-import pytest
 from fastapi_easy.graphql import (
     GraphQLField,
     GraphQLType,

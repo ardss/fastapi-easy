@@ -12,7 +12,6 @@ from fastapi_easy.backends.sqlalchemy import SQLAlchemyAdapter
 class Base(DeclarativeBase):
     """SQLAlchemy base class"""
 
-    pass
 
 
 class PerformanceItem(Base):

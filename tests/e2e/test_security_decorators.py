@@ -1,7 +1,7 @@
 """Unit tests for security decorators"""
 
 import pytest
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI
 from fastapi.testclient import TestClient
 
 from fastapi_easy.security import (

@@ -143,7 +143,7 @@ class TestMigrationEdgeCases:
             engine = create_engine(invalid_url)
             # 这里可能会抛出异常
             assert engine is not None
-        except Exception as e:
+        except Exception as _:
             # 验证异常被正确处理
             assert e is not None
 
