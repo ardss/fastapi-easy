@@ -149,14 +149,16 @@ nav:
     - 完整示例: tutorial/03-complete-example.md
   - 指南:
     - 查询指南: guides/querying.md
+    - Hook系统: guides/hooks-advanced.md
+    - 缓存系统: guides/caching.md
     - 权限控制: guides/permissions-basic.md
     - 审计日志: guides/audit-logging-basic.md
     - 错误处理: guides/error-handling.md
     - 软删除: guides/soft-delete.md
     - 批量操作: guides/bulk-operations.md
     - 数据库迁移: guides/migrations.md
-    - GraphQL支持: guides/graphql.md
-    - WebSocket支持: guides/websocket.md
+    - GraphQL支持: guides/graphql-integration.md
+    - WebSocket支持: guides/websocket-integration.md
     - 最佳实践: guides/best-practices.md
     - 故障排除: guides/troubleshooting.md
   - 数据库适配器:
