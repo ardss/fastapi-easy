@@ -21,6 +21,7 @@ Base = declarative_base()
 
 class User(Base):
     """用户模型"""
+
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)

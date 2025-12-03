@@ -219,9 +219,7 @@ class TestPermissionCheckRequest:
 
     def test_valid_resource_id(self):
         """Test valid resource_id"""
-        req = PermissionCheckRequest(
-            user_id="user1", permission="read", resource_id="post:123"
-        )
+        req = PermissionCheckRequest(user_id="user1", permission="read", resource_id="post:123")
         assert req.resource_id == "post:123"
 
 
@@ -250,9 +248,7 @@ class TestBatchPermissionCheckRequest:
 
     def test_valid_request(self):
         """Test valid batch permission check request"""
-        req = BatchPermissionCheckRequest(
-            user_id="user1", permissions=["read", "write"]
-        )
+        req = BatchPermissionCheckRequest(user_id="user1", permissions=["read", "write"])
         assert req.user_id == "user1"
         assert req.permissions == ["read", "write"]
 
@@ -264,16 +260,12 @@ class TestBatchPermissionCheckRequest:
     def test_permissions_too_long(self):
         """Test permissions list too long"""
         with pytest.raises(ValidationError):
-            BatchPermissionCheckRequest(
-                user_id="user1", permissions=["perm"] * 101
-            )
+            BatchPermissionCheckRequest(user_id="user1", permissions=["perm"] * 101)
 
     def test_invalid_permission_in_list(self):
         """Test invalid permission in list"""
         with pytest.raises(ValidationError):
-            BatchPermissionCheckRequest(
-                user_id="user1", permissions=["read", "WRITE"]
-            )
+            BatchPermissionCheckRequest(user_id="user1", permissions=["read", "WRITE"])
 
 
 # ============================================================================

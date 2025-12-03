@@ -138,9 +138,7 @@ class TestMultiTenantResourceChecker:
     @pytest.mark.asyncio
     async def test_check_owner_with_tenant(self):
         """Test checking owner with tenant set"""
-        resources = {
-            "resource1": {"owner_id": "user1", "permissions": {}}
-        }
+        resources = {"resource1": {"owner_id": "user1", "permissions": {}}}
         base_checker = StaticResourceChecker(resources)
         checker = MultiTenantResourceChecker(base_checker)
 

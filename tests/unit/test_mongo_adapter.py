@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import MagicMock, AsyncMock
 from fastapi_easy.backends.mongo import MongoAdapter
 
+
 @pytest.fixture
 def mock_collection():
     collection = MagicMock()
@@ -15,11 +16,13 @@ def mock_collection():
     collection.count_documents = AsyncMock()
     return collection
 
+
 @pytest.fixture
 def mock_db(mock_collection):
     db = MagicMock()
     db.__getitem__ = MagicMock(return_value=mock_collection)
     return db
+
 
 def test_init_with_string(mock_db):
     adapter = MongoAdapter(collection="users", database=mock_db)
@@ -27,9 +30,11 @@ def test_init_with_string(mock_db):
     # But we set return_value, so it should be same
     assert adapter.collection == mock_db["users"]
 
+
 def test_init_with_collection(mock_collection):
     adapter = MongoAdapter(collection=mock_collection)
     assert adapter.collection == mock_collection
+
 
 def test_apply_filters(mock_collection):
     adapter = MongoAdapter(collection=mock_collection)
@@ -45,6 +50,7 @@ def test_apply_filters(mock_collection):
     assert query["tags"] == {"$in": ["a", "b"]}
     assert query["desc"] == {"$regex": "test"}
 
+
 @pytest.mark.asyncio
 async def test_get_all(mock_collection):
     adapter = MongoAdapter(collection=mock_collection)
@@ -58,13 +64,16 @@ async def test_get_all(mock_collection):
 
     mock_collection.find.return_value = cursor
 
-    result = await adapter.get_all(filters={}, sorts={"name": "asc"}, pagination={"skip": 0, "limit": 10})
+    result = await adapter.get_all(
+        filters={}, sorts={"name": "asc"}, pagination={"skip": 0, "limit": 10}
+    )
 
     assert result == [{"name": "John"}]
     mock_collection.find.assert_called_once()
     cursor.sort.assert_called_with([("name", 1)])
     cursor.skip.assert_called_with(0)
     cursor.limit.assert_called_with(10)
+
 
 @pytest.mark.asyncio
 async def test_get_one(mock_collection):
@@ -74,6 +83,7 @@ async def test_get_one(mock_collection):
     result = await adapter.get_one("123")
     assert result == {"_id": "123", "name": "John"}
     mock_collection.find_one.assert_called_with({"_id": "123"})
+
 
 @pytest.mark.asyncio
 async def test_create(mock_collection):
@@ -87,6 +97,7 @@ async def test_create(mock_collection):
     assert result == {"_id": "123", "name": "John"}
     mock_collection.insert_one.assert_called_with({"name": "John"})
 
+
 @pytest.mark.asyncio
 async def test_update(mock_collection):
     adapter = MongoAdapter(collection=mock_collection)
@@ -98,7 +109,9 @@ async def test_update(mock_collection):
 
     assert result == {"_id": "123", "name": "John Updated"}
     mock_collection.update_one.assert_called_with(
-        {"_id": "123"}, {"$set": {"name": "John Updated"}})
+        {"_id": "123"}, {"$set": {"name": "John Updated"}}
+    )
+
 
 @pytest.mark.asyncio
 async def test_delete_one(mock_collection):
@@ -111,6 +124,7 @@ async def test_delete_one(mock_collection):
     assert result == {"_id": "123", "name": "John"}
     mock_collection.delete_one.assert_called_with({"_id": "123"})
 
+
 @pytest.mark.asyncio
 async def test_count(mock_collection):
     adapter = MongoAdapter(collection=mock_collection)
@@ -120,11 +134,13 @@ async def test_count(mock_collection):
     assert count == 5
     mock_collection.count_documents.assert_called_with({})
 
+
 @pytest.mark.asyncio
 async def test_init_with_string_no_database():
     """Test initialization with string collection name but no database"""
     with pytest.raises(ValueError, match="Database must be provided"):
         MongoAdapter(collection="users")
+
 
 @pytest.mark.asyncio
 async def test_apply_filters_all_operators(mock_collection):
@@ -154,16 +170,16 @@ async def test_apply_filters_all_operators(mock_collection):
     assert query["description"] == {"$regex": "test"}
     assert query["title"] == {"$regex": "CASE", "$options": "i"}
 
+
 @pytest.mark.asyncio
 async def test_apply_filters_string_in_value(mock_collection):
     """Test 'in' operator with comma-separated string"""
     adapter = MongoAdapter(collection=mock_collection)
-    filters = {
-        "tags": {"field": "tags", "operator": "in", "value": "a,b,c"}
-    }
+    filters = {"tags": {"field": "tags", "operator": "in", "value": "a,b,c"}}
 
     query = adapter._apply_filters(filters)
     assert query["tags"] == {"$in": ["a", "b", "c"]}
+
 
 @pytest.mark.asyncio
 async def test_apply_filters_skip_non_dict(mock_collection):
@@ -171,23 +187,23 @@ async def test_apply_filters_skip_non_dict(mock_collection):
     adapter = MongoAdapter(collection=mock_collection)
     filters = {
         "invalid": "not a dict",
-        "valid": {"field": "name", "operator": "exact", "value": "John"}
+        "valid": {"field": "name", "operator": "exact", "value": "John"},
     }
 
     query = adapter._apply_filters(filters)
     assert "invalid" not in query
     assert query["name"] == "John"
 
+
 @pytest.mark.asyncio
 async def test_apply_filters_skip_no_field(mock_collection):
     """Test that filters without field are skipped"""
     adapter = MongoAdapter(collection=mock_collection)
-    filters = {
-        "no_field": {"operator": "exact", "value": "test"}
-    }
+    filters = {"no_field": {"operator": "exact", "value": "test"}}
 
     query = adapter._apply_filters(filters)
     assert len(query) == 0
+
 
 @pytest.mark.asyncio
 async def test_get_all_with_sorting_desc(mock_collection):
@@ -203,12 +219,11 @@ async def test_get_all_with_sorting_desc(mock_collection):
     mock_collection.find.return_value = cursor
 
     result = await adapter.get_all(
-        filters={},
-        sorts={"created_at": "desc"},
-        pagination={"skip": 0, "limit": 10}
+        filters={}, sorts={"created_at": "desc"}, pagination={"skip": 0, "limit": 10}
     )
 
     cursor.sort.assert_called_with([("created_at", -1)])
+
 
 @pytest.mark.asyncio
 async def test_get_all_error_handling(mock_collection):
@@ -221,6 +236,7 @@ async def test_get_all_error_handling(mock_collection):
     with pytest.raises(AppError, match="Database error"):
         await adapter.get_all(filters={}, sorts={}, pagination={})
 
+
 @pytest.mark.asyncio
 async def test_get_one_error_handling(mock_collection):
     """Test error handling in get_one"""
@@ -231,6 +247,7 @@ async def test_get_one_error_handling(mock_collection):
 
     with pytest.raises(AppError, match="Database error"):
         await adapter.get_one("123")
+
 
 @pytest.mark.asyncio
 async def test_create_duplicate_key_error(mock_collection):
@@ -244,6 +261,7 @@ async def test_create_duplicate_key_error(mock_collection):
     with pytest.raises(ConflictError, match="Item already exists"):
         await adapter.create({"name": "John"})
 
+
 @pytest.mark.asyncio
 async def test_create_general_error(mock_collection):
     """Test create with general error"""
@@ -254,6 +272,7 @@ async def test_create_general_error(mock_collection):
 
     with pytest.raises(AppError, match="Database error"):
         await adapter.create({"name": "John"})
+
 
 @pytest.mark.asyncio
 async def test_update_removes_pk_field(mock_collection):
@@ -267,10 +286,8 @@ async def test_update_removes_pk_field(mock_collection):
     result = await adapter.update("123", data)
 
     # Verify _id was removed from the update data
-    mock_collection.update_one.assert_called_with(
-        {"_id": "123"},
-        {"$set": {"name": "Updated"}}
-    )
+    mock_collection.update_one.assert_called_with({"_id": "123"}, {"$set": {"name": "Updated"}})
+
 
 @pytest.mark.asyncio
 async def test_update_not_found(mock_collection):
@@ -280,6 +297,7 @@ async def test_update_not_found(mock_collection):
 
     result = await adapter.update("999", {"name": "Updated"})
     assert result is None
+
 
 @pytest.mark.asyncio
 async def test_update_duplicate_key_error(mock_collection):
@@ -293,6 +311,7 @@ async def test_update_duplicate_key_error(mock_collection):
     with pytest.raises(ConflictError, match="Update conflict"):
         await adapter.update("123", {"name": "John"})
 
+
 @pytest.mark.asyncio
 async def test_update_general_error(mock_collection):
     """Test update with general error"""
@@ -304,6 +323,7 @@ async def test_update_general_error(mock_collection):
     with pytest.raises(AppError, match="Database error"):
         await adapter.update("123", {"name": "John"})
 
+
 @pytest.mark.asyncio
 async def test_delete_one_not_found(mock_collection):
     """Test delete_one when item not found"""
@@ -313,6 +333,7 @@ async def test_delete_one_not_found(mock_collection):
     result = await adapter.delete_one("999")
     assert result is None
     mock_collection.delete_one.assert_not_called()
+
 
 @pytest.mark.asyncio
 async def test_delete_one_error_handling(mock_collection):
@@ -324,6 +345,7 @@ async def test_delete_one_error_handling(mock_collection):
 
     with pytest.raises(AppError, match="Database error"):
         await adapter.delete_one("123")
+
 
 @pytest.mark.asyncio
 async def test_delete_all(mock_collection):
@@ -339,6 +361,7 @@ async def test_delete_all(mock_collection):
     assert len(result) == 2
     mock_collection.delete_many.assert_called_with({})
 
+
 @pytest.mark.asyncio
 async def test_delete_all_error_handling(mock_collection):
     """Test error handling in delete_all"""
@@ -349,6 +372,7 @@ async def test_delete_all_error_handling(mock_collection):
 
     with pytest.raises(AppError, match="Database error"):
         await adapter.delete_all()
+
 
 @pytest.mark.asyncio
 async def test_count_with_filters(mock_collection):
@@ -361,6 +385,7 @@ async def test_count_with_filters(mock_collection):
 
     assert count == 3
     mock_collection.count_documents.assert_called_with({"age": {"$gt": 18}})
+
 
 @pytest.mark.asyncio
 async def test_count_error_handling(mock_collection):

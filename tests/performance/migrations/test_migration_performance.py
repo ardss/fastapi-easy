@@ -1,4 +1,5 @@
 """性能测试 - 迁移系统性能基准"""
+
 import time
 
 import pytest
@@ -38,10 +39,7 @@ class TestMigrationPerformance:
         start = time.time()
         for i in range(1, 101):
             migration_engine.storage.record_migration(
-                f"{i:03d}",
-                f"Migration {i}",
-                "ROLLBACK",
-                "SAFE"
+                f"{i:03d}", f"Migration {i}", "ROLLBACK", "SAFE"
             )
         elapsed = time.time() - start
 
@@ -53,10 +51,7 @@ class TestMigrationPerformance:
         # 先记录一些迁移
         for i in range(1, 51):
             migration_engine.storage.record_migration(
-                f"{i:03d}",
-                f"Migration {i}",
-                "ROLLBACK",
-                "SAFE"
+                f"{i:03d}", f"Migration {i}", "ROLLBACK", "SAFE"
             )
 
         # 测试检索性能
@@ -73,10 +68,7 @@ class TestMigrationPerformance:
         start = time.time()
         for i in range(1, 501):
             migration_engine.storage.record_migration(
-                f"{i:04d}",
-                f"Migration {i}",
-                "ROLLBACK",
-                "SAFE"
+                f"{i:04d}", f"Migration {i}", "ROLLBACK", "SAFE"
             )
         elapsed = time.time() - start
 
@@ -108,10 +100,7 @@ class TestMigrationMemoryUsage:
         # 记录大量迁移而不应该导致内存溢出
         for i in range(1, 1001):
             migration_engine.storage.record_migration(
-                f"{i:04d}",
-                f"Migration {i}",
-                "ROLLBACK",
-                "SAFE"
+                f"{i:04d}", f"Migration {i}", "ROLLBACK", "SAFE"
             )
 
         # 应该能够检索所有记录
@@ -123,10 +112,7 @@ class TestMigrationMemoryUsage:
         # 记录 100 个迁移
         for i in range(1, 101):
             migration_engine.storage.record_migration(
-                f"{i:03d}",
-                f"Migration {i}",
-                "ROLLBACK",
-                "SAFE"
+                f"{i:03d}", f"Migration {i}", "ROLLBACK", "SAFE"
             )
 
         # 测试不同限制的性能
@@ -148,10 +134,7 @@ class TestMigrationThroughput:
 
         while time.time() - start < 1.0:
             migration_engine.storage.record_migration(
-                f"{count:05d}",
-                f"Migration {count}",
-                "ROLLBACK",
-                "SAFE"
+                f"{count:05d}", f"Migration {count}", "ROLLBACK", "SAFE"
             )
             count += 1
 
@@ -163,10 +146,7 @@ class TestMigrationThroughput:
         # 先记录一些迁移
         for i in range(1, 51):
             migration_engine.storage.record_migration(
-                f"{i:03d}",
-                f"Migration {i}",
-                "ROLLBACK",
-                "SAFE"
+                f"{i:03d}", f"Migration {i}", "ROLLBACK", "SAFE"
             )
 
         start = time.time()

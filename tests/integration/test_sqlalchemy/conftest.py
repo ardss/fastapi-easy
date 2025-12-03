@@ -11,11 +11,13 @@ from fastapi_easy.backends.sqlalchemy import SQLAlchemyAdapter
 
 class Base(DeclarativeBase):
     """SQLAlchemy base class"""
+
     pass
 
 
 class Item(Base):
     """Test item model"""
+
     __tablename__ = "items"
 
     id = Column(Integer, primary_key=True)
@@ -28,6 +30,7 @@ class Item(Base):
 
 class TransactionItem(Base):
     """Test item model for transaction tests"""
+
     __tablename__ = "transaction_items"
 
     id = Column(Integer, primary_key=True)

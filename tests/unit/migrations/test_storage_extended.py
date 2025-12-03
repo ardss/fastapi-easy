@@ -28,9 +28,11 @@ class TestMigrationStorageInitialize:
 
         # 验证表存在
         with in_memory_db.connect() as conn:
-            result = conn.execute(text(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='_fastapi_easy_migrations'"
-            ))
+            result = conn.execute(
+                text(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='_fastapi_easy_migrations'"
+                )
+            )
             assert result.fetchone() is not None
 
     def test_initialize_table_exists(self, in_memory_db):
@@ -41,9 +43,11 @@ class TestMigrationStorageInitialize:
         storage.initialize()
 
         with in_memory_db.connect() as conn:
-            result = conn.execute(text(
-                "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='_fastapi_easy_migrations'"
-            ))
+            result = conn.execute(
+                text(
+                    "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='_fastapi_easy_migrations'"
+                )
+            )
             assert result.scalar() == 1
 
     def test_table_has_correct_columns(self, in_memory_db):
@@ -52,9 +56,7 @@ class TestMigrationStorageInitialize:
         storage.initialize()
 
         with in_memory_db.connect() as conn:
-            result = conn.execute(text(
-                "PRAGMA table_info(_fastapi_easy_migrations)"
-            ))
+            result = conn.execute(text("PRAGMA table_info(_fastapi_easy_migrations)"))
             columns = {row[1] for row in result.fetchall()}
             assert "version" in columns
             assert "description" in columns
@@ -69,10 +71,7 @@ class TestMigrationStorageRecord:
         storage.initialize()
 
         result = storage.record_migration(
-            version="001",
-            description="Test migration",
-            rollback_sql="ROLLBACK",
-            risk_level="SAFE"
+            version="001", description="Test migration", rollback_sql="ROLLBACK", risk_level="SAFE"
         )
         assert result.success is True
         assert result.data["version"] == "001"
@@ -111,8 +110,8 @@ class TestMigrationStorageRecord:
         result = storage.record_migration(
             version="001_test",
             description="Test with 'quotes' and \"double quotes\"",
-            rollback_sql="DROP TABLE \"test\"",
-            risk_level="HIGH"
+            rollback_sql='DROP TABLE "test"',
+            risk_level="HIGH",
         )
         assert isinstance(result, OperationResult)
         assert result.success is True

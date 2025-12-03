@@ -10,6 +10,7 @@ from fastapi_easy.backends.tortoise import TortoiseAdapter
 
 class Item(Model):
     """Test item model"""
+
     id = fields.IntField(pk=True)
     name = fields.CharField(max_length=100)
     price = fields.FloatField()
@@ -23,6 +24,7 @@ class Item(Model):
 
 class UniqueItem(Model):
     """Test item model with unique constraint"""
+
     id = fields.IntField(pk=True)
     name = fields.CharField(max_length=100, unique=True)
     price = fields.FloatField()
@@ -38,8 +40,7 @@ class UniqueItem(Model):
 async def tortoise_db():
     """Initialize Tortoise ORM with in-memory SQLite"""
     await Tortoise.init(
-        db_url="sqlite://:memory:",
-        modules={"models": ["tests.integration.test_tortoise.conftest"]}
+        db_url="sqlite://:memory:", modules={"models": ["tests.integration.test_tortoise.conftest"]}
     )
     await Tortoise.generate_schemas()
 

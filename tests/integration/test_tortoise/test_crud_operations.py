@@ -126,9 +126,7 @@ class TestTortoiseCRUD:
 
     async def test_count_with_filters(self, tortoise_adapter, sample_items):
         """Test counting with filters"""
-        filters = {
-            "price__gt": {"field": "price", "operator": "gt", "value": 10}
-        }
+        filters = {"price__gt": {"field": "price", "operator": "gt", "value": 10}}
 
         count = await tortoise_adapter.count(filters)
 
@@ -141,9 +139,7 @@ class TestTortoiseFiltering:
 
     async def test_filter_exact(self, tortoise_adapter, sample_items):
         """Test exact filter"""
-        filters = {
-            "name": {"field": "name", "operator": "exact", "value": "apple"}
-        }
+        filters = {"name": {"field": "name", "operator": "exact", "value": "apple"}}
 
         items = await tortoise_adapter.get_all(
             filters=filters,
@@ -156,9 +152,7 @@ class TestTortoiseFiltering:
 
     async def test_filter_gt(self, tortoise_adapter, sample_items):
         """Test greater than filter"""
-        filters = {
-            "price__gt": {"field": "price", "operator": "gt", "value": 10}
-        }
+        filters = {"price__gt": {"field": "price", "operator": "gt", "value": 10}}
 
         items = await tortoise_adapter.get_all(
             filters=filters,
@@ -171,9 +165,7 @@ class TestTortoiseFiltering:
 
     async def test_filter_gte(self, tortoise_adapter, sample_items):
         """Test greater than or equal filter"""
-        filters = {
-            "price__gte": {"field": "price", "operator": "gte", "value": 10}
-        }
+        filters = {"price__gte": {"field": "price", "operator": "gte", "value": 10}}
 
         items = await tortoise_adapter.get_all(
             filters=filters,
@@ -186,9 +178,7 @@ class TestTortoiseFiltering:
 
     async def test_filter_lt(self, tortoise_adapter, sample_items):
         """Test less than filter"""
-        filters = {
-            "price__lt": {"field": "price", "operator": "lt", "value": 10}
-        }
+        filters = {"price__lt": {"field": "price", "operator": "lt", "value": 10}}
 
         items = await tortoise_adapter.get_all(
             filters=filters,
@@ -201,9 +191,7 @@ class TestTortoiseFiltering:
 
     async def test_filter_lte(self, tortoise_adapter, sample_items):
         """Test less than or equal filter"""
-        filters = {
-            "price__lte": {"field": "price", "operator": "lte", "value": 10}
-        }
+        filters = {"price__lte": {"field": "price", "operator": "lte", "value": 10}}
 
         items = await tortoise_adapter.get_all(
             filters=filters,
@@ -216,9 +204,7 @@ class TestTortoiseFiltering:
 
     async def test_filter_in(self, tortoise_adapter, sample_items):
         """Test in filter"""
-        filters = {
-            "name__in": {"field": "name", "operator": "in", "value": ["apple", "banana"]}
-        }
+        filters = {"name__in": {"field": "name", "operator": "in", "value": ["apple", "banana"]}}
 
         items = await tortoise_adapter.get_all(
             filters=filters,
@@ -231,9 +217,7 @@ class TestTortoiseFiltering:
 
     async def test_filter_like(self, tortoise_adapter, sample_items):
         """Test like filter"""
-        filters = {
-            "name__like": {"field": "name", "operator": "like", "value": "app"}
-        }
+        filters = {"name__like": {"field": "name", "operator": "like", "value": "app"}}
 
         items = await tortoise_adapter.get_all(
             filters=filters,

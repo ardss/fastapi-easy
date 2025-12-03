@@ -13,8 +13,10 @@ from fastapi_easy.core.crud_router import CRUDRouter
 # Test Models
 # ============================================================================
 
+
 class ItemSchema(BaseModel):
     """Test item schema"""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -24,6 +26,7 @@ class ItemSchema(BaseModel):
 
 class UserSchema(BaseModel):
     """Test user schema"""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -34,6 +37,7 @@ class UserSchema(BaseModel):
 # ============================================================================
 # Mock Fixtures
 # ============================================================================
+
 
 @pytest.fixture
 def mock_adapter():
@@ -76,6 +80,7 @@ def mock_adapter_with_data():
 # Configuration Fixtures
 # ============================================================================
 
+
 @pytest.fixture
 def default_config():
     """Default CRUD configuration"""
@@ -102,6 +107,7 @@ def minimal_config():
 # Router Fixtures
 # ============================================================================
 
+
 @pytest.fixture
 def crud_router(mock_adapter, default_config):
     """CRUD router with mock adapter"""
@@ -126,14 +132,9 @@ def crud_router_with_data(mock_adapter_with_data, default_config):
 # Pytest Configuration
 # ============================================================================
 
+
 def pytest_configure(config):
     """Configure pytest"""
-    config.addinivalue_line(
-        "markers", "asyncio: mark test as async"
-    )
-    config.addinivalue_line(
-        "markers", "integration: mark test as integration test"
-    )
-    config.addinivalue_line(
-        "markers", "unit: mark test as unit test"
-    )
+    config.addinivalue_line("markers", "asyncio: mark test as async")
+    config.addinivalue_line("markers", "integration: mark test as integration test")
+    config.addinivalue_line("markers", "unit: mark test as unit test")

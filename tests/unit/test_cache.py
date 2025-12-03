@@ -88,6 +88,7 @@ class TestQueryCache:
     async def test_cache_cleanup_expired(self):
         """Test cleaning up expired entries"""
         import asyncio
+
         cache = QueryCache()
         await cache.set("key1", "value1", ttl=1)
         await cache.set("key2", "value2", ttl=300)

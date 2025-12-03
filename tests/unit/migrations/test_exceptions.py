@@ -99,37 +99,25 @@ class TestMigrationExecutionError:
 
     def test_permission_error(self):
         """测试权限错误"""
-        error = MigrationExecutionError(
-            "001",
-            "Permission denied"
-        )
+        error = MigrationExecutionError("001", "Permission denied")
         assert "迁移执行失败" in error.message
         assert "权限错误" in error.suggestion
 
     def test_table_not_exist_error(self):
         """测试表不存在错误"""
-        error = MigrationExecutionError(
-            "002",
-            "Table users not exist"
-        )
+        error = MigrationExecutionError("002", "Table users not exist")
         assert "迁移执行失败" in error.message
         assert "表不存在" in error.suggestion
 
     def test_syntax_error(self):
         """测试 SQL 语法错误"""
-        error = MigrationExecutionError(
-            "003",
-            "Syntax error near 'CREATE'"
-        )
+        error = MigrationExecutionError("003", "Syntax error near 'CREATE'")
         assert "迁移执行失败" in error.message
         assert "SQL 语法错误" in error.suggestion
 
     def test_unknown_error(self):
         """测试未知错误"""
-        error = MigrationExecutionError(
-            "004",
-            "Unknown error"
-        )
+        error = MigrationExecutionError("004", "Unknown error")
         assert "迁移执行失败" in error.message
         assert "调试步骤" in error.suggestion
 
@@ -139,28 +127,19 @@ class TestLockAcquisitionError:
 
     def test_postgres_lock_error(self):
         """测试 PostgreSQL 锁错误"""
-        error = LockAcquisitionError(
-            "postgresql",
-            {"id": 1}
-        )
+        error = LockAcquisitionError("postgresql", {"id": 1})
         assert "无法获取迁移锁" in error.message
         assert "postgresql" in error.message
 
     def test_mysql_lock_error(self):
         """测试 MySQL 锁错误"""
-        error = LockAcquisitionError(
-            "mysql",
-            {"name": "fastapi_easy_migration"}
-        )
+        error = LockAcquisitionError("mysql", {"name": "fastapi_easy_migration"})
         assert "无法获取迁移锁" in error.message
         assert "mysql" in error.message
 
     def test_file_lock_error(self):
         """测试文件锁错误"""
-        error = LockAcquisitionError(
-            "file",
-            {"file": ".fastapi_easy_migration.lock"}
-        )
+        error = LockAcquisitionError("file", {"file": ".fastapi_easy_migration.lock"})
         assert "无法获取迁移锁" in error.message
         assert "file" in error.message
 
@@ -177,28 +156,19 @@ class TestStorageError:
 
     def test_insert_error(self):
         """测试插入错误"""
-        error = StorageError(
-            "insert",
-            "Duplicate entry"
-        )
+        error = StorageError("insert", "Duplicate entry")
         assert "迁移历史记录失败" in error.message
         assert "insert" in error.message
 
     def test_query_error(self):
         """测试查询错误"""
-        error = StorageError(
-            "query",
-            "Table not found"
-        )
+        error = StorageError("query", "Table not found")
         assert "迁移历史记录失败" in error.message
         assert "query" in error.message
 
     def test_update_error(self):
         """测试更新错误"""
-        error = StorageError(
-            "update",
-            "Update failed"
-        )
+        error = StorageError("update", "Update failed")
         assert "迁移历史记录失败" in error.message
         assert "update" in error.message
 
@@ -215,19 +185,13 @@ class TestCacheError:
 
     def test_permission_error(self):
         """测试权限错误"""
-        error = CacheError(
-            "read",
-            "Permission denied"
-        )
+        error = CacheError("read", "Permission denied")
         assert "缓存操作失败" in error.message
         assert "权限错误" in error.suggestion
 
     def test_corruption_error(self):
         """测试缓存损坏"""
-        error = CacheError(
-            "write",
-            "Invalid JSON corrupted"
-        )
+        error = CacheError("write", "Invalid JSON corrupted")
         assert "缓存操作失败" in error.message
         assert "缓存文件损坏" in error.suggestion
 
@@ -243,19 +207,13 @@ class TestRiskAssessmentError:
 
     def test_rule_error(self):
         """测试规则错误"""
-        error = RiskAssessmentError(
-            "custom_rule",
-            "Rule evaluation failed"
-        )
+        error = RiskAssessmentError("custom_rule", "Rule evaluation failed")
         assert "custom_rule" in error.message
         assert "风险规则执行失败" in error.message
 
     def test_risk_suggestion(self):
         """测试风险建议"""
-        error = RiskAssessmentError(
-            "test_rule",
-            "Rule failed"
-        )
+        error = RiskAssessmentError("test_rule", "Rule failed")
         full = error.get_full_message()
         assert "检查规则实现是否正确" in full
 
@@ -292,7 +250,7 @@ class TestExceptionInheritance:
         ]
 
         for exc in exceptions:
-            assert hasattr(exc, 'message')
+            assert hasattr(exc, "message")
             assert exc.message is not None
 
     def test_all_exceptions_have_suggestion(self):
@@ -308,7 +266,7 @@ class TestExceptionInheritance:
         ]
 
         for exc in exceptions:
-            assert hasattr(exc, 'suggestion')
+            assert hasattr(exc, "suggestion")
 
 
 class TestExceptionMessageSecurity:
@@ -316,10 +274,7 @@ class TestExceptionMessageSecurity:
 
     def test_no_password_in_connection_error(self):
         """测试连接错误不泄露密码"""
-        error = DatabaseConnectionError(
-            "postgresql://user:password@localhost/db",
-            Exception()
-        )
+        error = DatabaseConnectionError("postgresql://user:password@localhost/db", Exception())
         full = error.get_full_message()
         # 密码应该被隐藏或不显示
         assert "password" not in full.lower() or "password" in error.message

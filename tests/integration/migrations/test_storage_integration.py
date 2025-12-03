@@ -41,10 +41,7 @@ class TestStorageWithEngine:
         """测试引擎记录迁移"""
         # 记录迁移
         migration_engine.storage.record_migration(
-            version="001",
-            description="Test migration",
-            rollback_sql="ROLLBACK",
-            risk_level="SAFE"
+            version="001", description="Test migration", rollback_sql="ROLLBACK", risk_level="SAFE"
         )
 
         # 验证记录
@@ -59,7 +56,7 @@ class TestStorageWithEngine:
                 version=f"00{i}",
                 description=f"Migration {i}",
                 rollback_sql="ROLLBACK",
-                risk_level="SAFE"
+                risk_level="SAFE",
             )
 
         history = migration_engine.storage.get_migration_history(limit=10)
@@ -129,12 +126,7 @@ class TestStorageErrorRecovery:
 
     def test_storage_with_special_characters(self, storage):
         """测试存储处理特殊字符"""
-        storage.record_migration(
-            "001",
-            "Add 'users' table with @index",
-            "DROP TABLE users",
-            "SAFE"
-        )
+        storage.record_migration("001", "Add 'users' table with @index", "DROP TABLE users", "SAFE")
 
         history = storage.get_migration_history(limit=10)
         assert len(history) == 1
@@ -142,8 +134,9 @@ class TestStorageErrorRecovery:
 
     def test_storage_with_long_sql(self, storage):
         """测试存储处理长 SQL"""
-        long_sql = "SELECT * FROM users WHERE " + \
-            " AND ".join([f"col{i} = {i}" for i in range(100)])
+        long_sql = "SELECT * FROM users WHERE " + " AND ".join(
+            [f"col{i} = {i}" for i in range(100)]
+        )
         storage.record_migration("001", "Complex query", long_sql, "SAFE")
 
         history = storage.get_migration_history(limit=10)
@@ -159,12 +152,7 @@ class TestStorageAndEngineIntegration:
         migration_engine.storage.initialize()
 
         # 记录迁移
-        migration_engine.storage.record_migration(
-            "001",
-            "Test migration",
-            "ROLLBACK",
-            "SAFE"
-        )
+        migration_engine.storage.record_migration("001", "Test migration", "ROLLBACK", "SAFE")
 
         # 检索迁移
         history = migration_engine.storage.get_migration_history(limit=10)
@@ -191,10 +179,7 @@ class TestStorageAndEngineIntegration:
         # 记录多个迁移
         for i in range(1, 4):
             migration_engine.storage.record_migration(
-                f"00{i}",
-                f"Migration {i}",
-                "ROLLBACK",
-                "SAFE"
+                f"00{i}", f"Migration {i}", "ROLLBACK", "SAFE"
             )
 
         # 多次检索应该返回相同结果

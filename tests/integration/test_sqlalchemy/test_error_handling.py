@@ -10,9 +10,7 @@ class TestSQLAlchemyFilterValidation:
 
     async def test_filter_invalid_field_name(self, sqlalchemy_adapter):
         """Test filter with invalid field name"""
-        filters = {
-            "invalid": {"field": None, "operator": "exact", "value": "test"}
-        }
+        filters = {"invalid": {"field": None, "operator": "exact", "value": "test"}}
 
         with pytest.raises(AppError) as exc_info:
             await sqlalchemy_adapter.get_all(filters, {}, {"skip": 0, "limit": 10})
@@ -21,9 +19,7 @@ class TestSQLAlchemyFilterValidation:
 
     async def test_filter_invalid_operator(self, sqlalchemy_adapter):
         """Test filter with invalid operator"""
-        filters = {
-            "test": {"field": "name", "operator": "invalid_op", "value": "test"}
-        }
+        filters = {"test": {"field": "name", "operator": "invalid_op", "value": "test"}}
 
         with pytest.raises(AppError) as exc_info:
             await sqlalchemy_adapter.get_all(filters, {}, {"skip": 0, "limit": 10})
@@ -32,9 +28,7 @@ class TestSQLAlchemyFilterValidation:
 
     async def test_filter_none_value(self, sqlalchemy_adapter):
         """Test filter with None value"""
-        filters = {
-            "test": {"field": "name", "operator": "exact", "value": None}
-        }
+        filters = {"test": {"field": "name", "operator": "exact", "value": None}}
 
         with pytest.raises(AppError) as exc_info:
             await sqlalchemy_adapter.get_all(filters, {}, {"skip": 0, "limit": 10})
@@ -43,9 +37,7 @@ class TestSQLAlchemyFilterValidation:
 
     async def test_filter_field_not_found(self, sqlalchemy_adapter):
         """Test filter with non-existent field"""
-        filters = {
-            "test": {"field": "nonexistent_field", "operator": "exact", "value": "test"}
-        }
+        filters = {"test": {"field": "nonexistent_field", "operator": "exact", "value": "test"}}
 
         with pytest.raises(AppError) as exc_info:
             await sqlalchemy_adapter.get_all(filters, {}, {"skip": 0, "limit": 10})
@@ -54,9 +46,7 @@ class TestSQLAlchemyFilterValidation:
 
     async def test_filter_non_dict_value(self, sqlalchemy_adapter):
         """Test filter with non-dict value (should be skipped)"""
-        filters = {
-            "test": "not a dict"
-        }
+        filters = {"test": "not a dict"}
 
         # Should not raise, just skip the invalid filter
         items = await sqlalchemy_adapter.get_all(filters, {}, {"skip": 0, "limit": 10})
@@ -64,9 +54,7 @@ class TestSQLAlchemyFilterValidation:
 
     async def test_count_with_invalid_filter(self, sqlalchemy_adapter):
         """Test count with invalid filter"""
-        filters = {
-            "test": {"field": "nonexistent_field", "operator": "exact", "value": "test"}
-        }
+        filters = {"test": {"field": "nonexistent_field", "operator": "exact", "value": "test"}}
 
         with pytest.raises(AppError) as exc_info:
             await sqlalchemy_adapter.count(filters)

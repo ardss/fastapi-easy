@@ -38,7 +38,7 @@ class TestMigrationEngineErrorHandling:
     async def test_database_connection_error_handling(self, migration_engine):
         """测试数据库连接错误处理"""
         # 尝试初始化应该处理错误
-        with patch.object(migration_engine, 'detector') as mock_detector:
+        with patch.object(migration_engine, "detector") as mock_detector:
             mock_detector.detect_changes.side_effect = Exception("Connection failed")
             # 应该捕获异常
             try:
@@ -49,7 +49,7 @@ class TestMigrationEngineErrorHandling:
     @pytest.mark.asyncio
     async def test_schema_detection_timeout(self, migration_engine):
         """测试 Schema 检测超时"""
-        with patch.object(migration_engine, 'detector') as mock_detector:
+        with patch.object(migration_engine, "detector") as mock_detector:
             mock_detector.detect_changes.side_effect = TimeoutError("Detection timeout")
 
             try:
@@ -60,7 +60,7 @@ class TestMigrationEngineErrorHandling:
     @pytest.mark.asyncio
     async def test_migration_execution_error(self, migration_engine):
         """测试迁移执行错误"""
-        with patch.object(migration_engine, 'executor') as mock_executor:
+        with patch.object(migration_engine, "executor") as mock_executor:
             mock_executor.execute.side_effect = Exception("SQL execution failed")
 
             try:
@@ -78,7 +78,7 @@ class TestMigrationEngineErrorHandling:
     @pytest.mark.asyncio
     async def test_storage_error_handling(self, migration_engine):
         """测试存储错误处理"""
-        with patch.object(migration_engine, 'storage') as mock_storage:
+        with patch.object(migration_engine, "storage") as mock_storage:
             mock_storage.record_migration.side_effect = Exception("Storage failed")
 
             # 应该记录错误但不中断
@@ -101,7 +101,7 @@ class TestMigrationEngineExceptionRecovery:
     @pytest.mark.asyncio
     async def test_partial_migration_failure(self, migration_engine):
         """测试部分迁移失败"""
-        with patch.object(migration_engine, 'executor') as mock_executor:
+        with patch.object(migration_engine, "executor") as mock_executor:
             # 第一个迁移成功，第二个失败
             mock_executor.execute.side_effect = [None, Exception("Second migration failed")]
 
@@ -113,7 +113,7 @@ class TestMigrationEngineExceptionRecovery:
     @pytest.mark.asyncio
     async def test_transaction_rollback(self, migration_engine):
         """测试事务回滚"""
-        with patch.object(migration_engine, 'executor') as mock_executor:
+        with patch.object(migration_engine, "executor") as mock_executor:
             mock_executor.execute.side_effect = Exception("Execution failed")
 
             try:
@@ -129,7 +129,7 @@ class TestMigrationEngineErrorMessages:
     @pytest.mark.asyncio
     async def test_error_message_includes_diagnostics(self, migration_engine):
         """测试错误消息包含诊断信息"""
-        with patch.object(migration_engine, 'detector') as mock_detector:
+        with patch.object(migration_engine, "detector") as mock_detector:
             mock_detector.detect_changes.side_effect = Exception("Detection failed")
 
             try:
@@ -142,7 +142,7 @@ class TestMigrationEngineErrorMessages:
     @pytest.mark.asyncio
     async def test_error_message_includes_debug_steps(self, migration_engine):
         """测试错误消息包含调试步骤"""
-        with patch.object(migration_engine, 'executor') as mock_executor:
+        with patch.object(migration_engine, "executor") as mock_executor:
             mock_executor.execute.side_effect = Exception("SQL syntax error")
 
             try:
@@ -159,7 +159,7 @@ class TestMigrationEngineErrorContext:
     @pytest.mark.asyncio
     async def test_error_with_migration_version(self, migration_engine):
         """测试错误包含迁移版本"""
-        with patch.object(migration_engine, 'executor') as mock_executor:
+        with patch.object(migration_engine, "executor") as mock_executor:
             mock_executor.execute.side_effect = Exception("Execution failed")
 
             try:
@@ -170,7 +170,7 @@ class TestMigrationEngineErrorContext:
     @pytest.mark.asyncio
     async def test_error_with_database_info(self, migration_engine):
         """测试错误包含数据库信息"""
-        with patch.object(migration_engine, 'detector') as mock_detector:
+        with patch.object(migration_engine, "detector") as mock_detector:
             mock_detector.detect_changes.side_effect = Exception("Detection failed")
 
             try:
@@ -181,7 +181,7 @@ class TestMigrationEngineErrorContext:
     @pytest.mark.asyncio
     async def test_error_with_timestamp(self, migration_engine):
         """测试错误包含时间戳"""
-        with patch.object(migration_engine, 'executor') as mock_executor:
+        with patch.object(migration_engine, "executor") as mock_executor:
             mock_executor.execute.side_effect = Exception("Execution failed")
 
             try:
@@ -196,12 +196,9 @@ class TestMigrationEngineErrorRecoveryStrategies:
     @pytest.mark.asyncio
     async def test_retry_on_transient_error(self, migration_engine):
         """测试临时错误重试"""
-        with patch.object(migration_engine, 'detector') as mock_detector:
+        with patch.object(migration_engine, "detector") as mock_detector:
             # 第一次失败，第二次成功
-            mock_detector.detect_changes.side_effect = [
-                Exception("Transient error"),
-                []
-            ]
+            mock_detector.detect_changes.side_effect = [Exception("Transient error"), []]
 
             try:
                 await migration_engine.auto_migrate()
@@ -211,7 +208,7 @@ class TestMigrationEngineErrorRecoveryStrategies:
     @pytest.mark.asyncio
     async def test_graceful_degradation(self, migration_engine):
         """测试优雅降级"""
-        with patch.object(migration_engine, 'storage') as mock_storage:
+        with patch.object(migration_engine, "storage") as mock_storage:
             mock_storage.initialize.side_effect = Exception("Storage unavailable")
 
             # 应该继续而不是完全失败
@@ -223,8 +220,8 @@ class TestMigrationEngineErrorRecoveryStrategies:
     @pytest.mark.asyncio
     async def test_error_logging(self, migration_engine):
         """测试错误日志记录"""
-        with patch('fastapi_easy.migrations.engine.logger') as mock_logger:
-            with patch.object(migration_engine, 'detector') as mock_detector:
+        with patch("fastapi_easy.migrations.engine.logger") as mock_logger:
+            with patch.object(migration_engine, "detector") as mock_detector:
                 mock_detector.detect_changes.side_effect = Exception("Detection failed")
 
                 try:
@@ -242,7 +239,7 @@ class TestMigrationEngineErrorPropagation:
     @pytest.mark.asyncio
     async def test_critical_error_propagation(self, migration_engine):
         """测试关键错误传播"""
-        with patch.object(migration_engine, 'detector') as mock_detector:
+        with patch.object(migration_engine, "detector") as mock_detector:
             mock_detector.detect_changes.side_effect = Exception("Critical error")
 
             with pytest.raises(Exception):
@@ -251,7 +248,7 @@ class TestMigrationEngineErrorPropagation:
     @pytest.mark.asyncio
     async def test_non_critical_error_handling(self, migration_engine):
         """测试非关键错误处理"""
-        with patch.object(migration_engine, 'storage') as mock_storage:
+        with patch.object(migration_engine, "storage") as mock_storage:
             mock_storage.record_migration.side_effect = Exception("Non-critical error")
 
             # 非关键错误不应该中断迁移
@@ -263,7 +260,7 @@ class TestMigrationEngineErrorPropagation:
     @pytest.mark.asyncio
     async def test_error_chain_handling(self, migration_engine):
         """测试错误链处理"""
-        with patch.object(migration_engine, 'executor') as mock_executor:
+        with patch.object(migration_engine, "executor") as mock_executor:
             # 模拟错误链
             def raise_chained_error():
                 try:
@@ -286,7 +283,7 @@ class TestMigrationEngineErrorRecoveryCleanup:
     @pytest.mark.asyncio
     async def test_cleanup_on_error(self, migration_engine):
         """测试错误时的清理"""
-        with patch.object(migration_engine, 'detector') as mock_detector:
+        with patch.object(migration_engine, "detector") as mock_detector:
             mock_detector.detect_changes.side_effect = Exception("Detection failed")
 
             try:
@@ -297,7 +294,7 @@ class TestMigrationEngineErrorRecoveryCleanup:
     @pytest.mark.asyncio
     async def test_resource_cleanup_on_error(self, migration_engine):
         """测试错误时的资源清理"""
-        with patch.object(migration_engine, 'executor') as mock_executor:
+        with patch.object(migration_engine, "executor") as mock_executor:
             mock_executor.execute.side_effect = Exception("Execution failed")
 
             try:

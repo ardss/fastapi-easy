@@ -71,11 +71,13 @@ class TestFilterParser:
 
     def test_multiple_filters(self):
         """Test multiple filters"""
-        filters = FilterParser.parse({
-            "name": "apple",
-            "price__gt": "10",
-            "status__in": "active,pending",
-        })
+        filters = FilterParser.parse(
+            {
+                "name": "apple",
+                "price__gt": "10",
+                "status__in": "active,pending",
+            }
+        )
 
         assert len(filters) == 3
         assert filters["name"]["operator"] == "exact"
@@ -101,10 +103,12 @@ class TestFilterParser:
 
     def test_underscore_prefix_ignored(self):
         """Test that underscore-prefixed parameters are ignored"""
-        filters = FilterParser.parse({
-            "name": "apple",
-            "_internal": "value",
-        })
+        filters = FilterParser.parse(
+            {
+                "name": "apple",
+                "_internal": "value",
+            }
+        )
 
         assert "name" in filters
         assert "_internal" not in filters

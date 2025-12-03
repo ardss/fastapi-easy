@@ -11,11 +11,13 @@ from fastapi_easy.migrations.types import ExecutionMode, RiskLevel
 
 Base = declarative_base()
 
+
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     name = Column(String)
     age = Column(Integer)
+
 
 @pytest.fixture
 def temp_db():
@@ -27,6 +29,7 @@ def temp_db():
     finally:
         # Wait a bit for connections to close
         import time
+
         time.sleep(0.1)
         # Try to remove the file, ignore errors on Windows
         try:
@@ -34,6 +37,7 @@ def temp_db():
                 os.unlink(path)
         except (OSError, PermissionError):
             pass
+
 
 @pytest.mark.asyncio
 async def test_migration_engine_detects_changes(temp_db):
@@ -47,6 +51,7 @@ async def test_migration_engine_detects_changes(temp_db):
     assert plan.migrations[0].risk_level == RiskLevel.SAFE
     assert "Create table 'users'" in plan.migrations[0].description
     assert "CREATE TABLE users" in plan.migrations[0].upgrade_sql
+
 
 @pytest.mark.asyncio
 async def test_migration_engine_detects_new_column(temp_db):
@@ -65,6 +70,7 @@ async def test_migration_engine_detects_new_column(temp_db):
     assert migration.risk_level == RiskLevel.SAFE
     assert "Add nullable column 'users.age'" in migration.description
     assert "ALTER TABLE users ADD COLUMN age INTEGER" in migration.upgrade_sql
+
 
 @pytest.mark.asyncio
 async def test_migration_engine_detects_type_change_sqlite(temp_db):
@@ -92,6 +98,7 @@ async def test_migration_engine_detects_type_change_sqlite(temp_db):
     assert "ALTER TABLE users_new_" in sql
     assert "COMMIT" in sql
 
+
 @pytest.mark.asyncio
 async def test_migration_engine_executes_safe_migrations(temp_db):
     """Test: Execute safe migrations in safe mode"""
@@ -107,13 +114,15 @@ async def test_migration_engine_executes_safe_migrations(temp_db):
     # Verify table exists
     with engine.connect() as conn:
         result = conn.execute(
-            text("SELECT name FROM sqlite_master WHERE type='table' AND name='users'"))
+            text("SELECT name FROM sqlite_master WHERE type='table' AND name='users'")
+        )
         assert result.fetchone() is not None
 
     # Verify migration history was recorded
     history = migration_engine.get_history()
     assert len(history) == 1
     assert "Create table 'users'" in history[0]["description"]
+
 
 @pytest.mark.asyncio
 async def test_migration_engine_skips_risky_migrations_in_safe_mode(temp_db):
@@ -138,6 +147,7 @@ async def test_migration_engine_skips_risky_migrations_in_safe_mode(temp_db):
         result = conn.execute(text("PRAGMA table_info(users)"))
         columns = {row[1]: row[2] for row in result}
         assert "VARCHAR" in columns["age"].upper()
+
 
 @pytest.mark.asyncio
 async def test_migration_engine_executes_risky_migrations_in_aggressive_mode(temp_db):

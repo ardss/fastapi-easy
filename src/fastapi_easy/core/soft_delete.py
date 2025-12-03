@@ -55,7 +55,7 @@ class SoftDeleteAdapter:
 
         # Check if model has soft delete columns
         if hasattr(self.model, "is_deleted"):
-            return self.model.is_deleted  is False
+            return self.model.is_deleted is False
 
         return None
 

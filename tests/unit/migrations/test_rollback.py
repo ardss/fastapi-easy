@@ -1,4 +1,5 @@
 """回滚功能单元测试"""
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -29,10 +30,7 @@ class TestRollbackBasic:
         """测试回滚单个迁移"""
         # 先记录一个迁移
         migration_engine.storage.record_migration(
-            "001",
-            "Create users table",
-            "DROP TABLE users",
-            "SAFE"
+            "001", "Create users table", "DROP TABLE users", "SAFE"
         )
 
         # 验证迁移已记录
@@ -50,10 +48,7 @@ class TestRollbackBasic:
         # 记录多个迁移
         for i in range(1, 4):
             migration_engine.storage.record_migration(
-                f"00{i}",
-                f"Migration {i}",
-                "ROLLBACK",
-                "SAFE"
+                f"00{i}", f"Migration {i}", "ROLLBACK", "SAFE"
             )
 
         # 验证迁移已记录
@@ -93,9 +88,9 @@ class TestRollbackWithLock:
         """测试回滚获取锁"""
         migration_engine.storage.record_migration("001", "Test", "ROLLBACK", "SAFE")
 
-        with patch.object(migration_engine.lock, 'acquire', new_callable=AsyncMock) as mock_acquire:
+        with patch.object(migration_engine.lock, "acquire", new_callable=AsyncMock) as mock_acquire:
             mock_acquire.return_value = True
-            with patch.object(migration_engine.lock, 'release', new_callable=AsyncMock):
+            with patch.object(migration_engine.lock, "release", new_callable=AsyncMock):
                 result = await migration_engine.rollback(steps=1)
                 mock_acquire.assert_called_once()
 
@@ -104,7 +99,7 @@ class TestRollbackWithLock:
         """测试回滚锁获取失败"""
         migration_engine.storage.record_migration("001", "Test", "ROLLBACK", "SAFE")
 
-        with patch.object(migration_engine.lock, 'acquire', new_callable=AsyncMock) as mock_acquire:
+        with patch.object(migration_engine.lock, "acquire", new_callable=AsyncMock) as mock_acquire:
             mock_acquire.return_value = False
             result = await migration_engine.rollback(steps=1)
             assert isinstance(result, OperationResult)
@@ -115,9 +110,11 @@ class TestRollbackWithLock:
         """测试回滚释放锁"""
         migration_engine.storage.record_migration("001", "Test", "ROLLBACK", "SAFE")
 
-        with patch.object(migration_engine.lock, 'acquire', new_callable=AsyncMock) as mock_acquire:
+        with patch.object(migration_engine.lock, "acquire", new_callable=AsyncMock) as mock_acquire:
             mock_acquire.return_value = True
-            with patch.object(migration_engine.lock, 'release', new_callable=AsyncMock) as mock_release:
+            with patch.object(
+                migration_engine.lock, "release", new_callable=AsyncMock
+            ) as mock_release:
                 await migration_engine.rollback(steps=1)
                 mock_release.assert_called_once()
 
@@ -129,16 +126,13 @@ class TestRollbackExecution:
     async def test_rollback_executes_sql(self, migration_engine):
         """测试回滚执行 SQL"""
         migration_engine.storage.record_migration(
-            "001",
-            "Create table",
-            "DROP TABLE test_table",
-            "SAFE"
+            "001", "Create table", "DROP TABLE test_table", "SAFE"
         )
 
-        with patch.object(migration_engine.lock, 'acquire', new_callable=AsyncMock) as mock_acquire:
+        with patch.object(migration_engine.lock, "acquire", new_callable=AsyncMock) as mock_acquire:
             mock_acquire.return_value = True
-            with patch.object(migration_engine.lock, 'release', new_callable=AsyncMock):
-                with patch('sqlalchemy.create_engine') as mock_engine:
+            with patch.object(migration_engine.lock, "release", new_callable=AsyncMock):
+                with patch("sqlalchemy.create_engine") as mock_engine:
                     result = await migration_engine.rollback(steps=1)
                     # 应该尝试执行回滚
                     assert isinstance(result, OperationResult)
@@ -148,16 +142,11 @@ class TestRollbackExecution:
     async def test_rollback_handles_missing_sql(self, migration_engine):
         """测试处理缺少回滚 SQL"""
         # 记录没有回滚 SQL 的迁移
-        migration_engine.storage.record_migration(
-            "001",
-            "Test",
-            "",  # 空回滚 SQL
-            "SAFE"
-        )
+        migration_engine.storage.record_migration("001", "Test", "", "SAFE")  # 空回滚 SQL
 
-        with patch.object(migration_engine.lock, 'acquire', new_callable=AsyncMock) as mock_acquire:
+        with patch.object(migration_engine.lock, "acquire", new_callable=AsyncMock) as mock_acquire:
             mock_acquire.return_value = True
-            with patch.object(migration_engine.lock, 'release', new_callable=AsyncMock):
+            with patch.object(migration_engine.lock, "release", new_callable=AsyncMock):
                 result = await migration_engine.rollback(steps=1)
                 # 应该处理缺少 SQL 的情况
                 assert isinstance(result, OperationResult)
@@ -171,15 +160,12 @@ class TestRollbackErrorHandling:
     async def test_rollback_sql_error(self, migration_engine):
         """测试回滚 SQL 错误"""
         migration_engine.storage.record_migration(
-            "001",
-            "Test",
-            "DROP TABLE nonexistent_table",
-            "SAFE"
+            "001", "Test", "DROP TABLE nonexistent_table", "SAFE"
         )
 
-        with patch.object(migration_engine.lock, 'acquire', new_callable=AsyncMock) as mock_acquire:
+        with patch.object(migration_engine.lock, "acquire", new_callable=AsyncMock) as mock_acquire:
             mock_acquire.return_value = True
-            with patch.object(migration_engine.lock, 'release', new_callable=AsyncMock):
+            with patch.object(migration_engine.lock, "release", new_callable=AsyncMock):
                 # 执行回滚 - 由于表不存在，会导致 SQL 错误
                 result = await migration_engine.rollback(steps=1)
                 # 应该捕获错误
@@ -190,9 +176,11 @@ class TestRollbackErrorHandling:
         """测试回滚锁释放错误"""
         migration_engine.storage.record_migration("001", "Test", "ROLLBACK", "SAFE")
 
-        with patch.object(migration_engine.lock, 'acquire', new_callable=AsyncMock) as mock_acquire:
+        with patch.object(migration_engine.lock, "acquire", new_callable=AsyncMock) as mock_acquire:
             mock_acquire.return_value = True
-            with patch.object(migration_engine.lock, 'release', new_callable=AsyncMock) as mock_release:
+            with patch.object(
+                migration_engine.lock, "release", new_callable=AsyncMock
+            ) as mock_release:
                 mock_release.side_effect = Exception("Lock release failed")
                 # 应该处理锁释放错误
                 result = await migration_engine.rollback(steps=1)
@@ -210,15 +198,12 @@ class TestRollbackOrder:
         # 记录多个迁移
         for i in range(1, 4):
             migration_engine.storage.record_migration(
-                f"00{i}",
-                f"Migration {i}",
-                f"ROLLBACK {i}",
-                "SAFE"
+                f"00{i}", f"Migration {i}", f"ROLLBACK {i}", "SAFE"
             )
 
-        with patch.object(migration_engine.lock, 'acquire', new_callable=AsyncMock) as mock_acquire:
+        with patch.object(migration_engine.lock, "acquire", new_callable=AsyncMock) as mock_acquire:
             mock_acquire.return_value = True
-            with patch.object(migration_engine.lock, 'release', new_callable=AsyncMock):
+            with patch.object(migration_engine.lock, "release", new_callable=AsyncMock):
                 result = await migration_engine.rollback(steps=3)
                 # 应该按相反顺序处理迁移
                 assert isinstance(result, OperationResult)

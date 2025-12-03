@@ -71,6 +71,7 @@ class TestSecurityConfig:
     def test_from_env(self):
         """Test creating config from environment"""
         import os
+
         os.environ["JWT_SECRET_KEY"] = "test-secret-key"
 
         try:

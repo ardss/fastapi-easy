@@ -1,4 +1,5 @@
 """SQLite 外键和磁盘空间测试"""
+
 import pytest
 from sqlalchemy import MetaData, create_engine
 
@@ -30,6 +31,7 @@ class TestSQLiteForeignKeyHandler:
     def test_get_foreign_keys(self, sqlite_engine):
         """测试获取外键"""
         from sqlalchemy import text
+
         handler = SQLiteForeignKeyHandler(sqlite_engine)
         # 创建一个表
         with sqlite_engine.begin() as conn:

@@ -14,14 +14,11 @@ import pytest
 from fastapi.testclient import TestClient
 
 # 跳过此模块中的所有测试
-skip_reason = (
-    "ecommerce_api module not found - "
-    "use examples/05_complete_ecommerce.py"
-)
+skip_reason = "ecommerce_api module not found - " "use examples/05_complete_ecommerce.py"
 pytestmark = pytest.mark.skip(reason=skip_reason)
 
 # 添加 examples 目录到 Python 路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../examples'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../examples"))
 
 # 此导入会失败，但由于 pytestmark 会跳过所有测试，所以不会执行
 try:
@@ -29,6 +26,7 @@ try:
 except ImportError:
     # 创建一个虚拟应用以避免导入错误
     from fastapi import FastAPI
+
     app = FastAPI()
 
 
@@ -62,25 +60,75 @@ def client():
 
     # 创建示例商品
     products = [
-        Product(id=1, name="苹果", description="新鲜苹果", price=15.5, stock=100,
-                category_id=1, created_at=datetime.now(), updated_at=datetime.now()),
-        Product(id=2, name="香蕉", description="黄色香蕉", price=8.0, stock=150,
-                category_id=1, created_at=datetime.now(), updated_at=datetime.now()),
-        Product(id=3, name="番茄", description="红色番茄", price=5.5, stock=200,
-                category_id=2, created_at=datetime.now(), updated_at=datetime.now()),
-        Product(id=4, name="牛肉", description="优质牛肉", price=85.0, stock=50,
-                category_id=3, created_at=datetime.now(), updated_at=datetime.now()),
+        Product(
+            id=1,
+            name="苹果",
+            description="新鲜苹果",
+            price=15.5,
+            stock=100,
+            category_id=1,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        ),
+        Product(
+            id=2,
+            name="香蕉",
+            description="黄色香蕉",
+            price=8.0,
+            stock=150,
+            category_id=1,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        ),
+        Product(
+            id=3,
+            name="番茄",
+            description="红色番茄",
+            price=5.5,
+            stock=200,
+            category_id=2,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        ),
+        Product(
+            id=4,
+            name="牛肉",
+            description="优质牛肉",
+            price=85.0,
+            stock=50,
+            category_id=3,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        ),
     ]
     products_db.extend(products)
 
     # 创建示例订单
     orders = [
-        Order(id=1, order_number="ORD-001", total_price=150.0, status="completed",
-              created_at=datetime.now(), updated_at=datetime.now()),
-        Order(id=2, order_number="ORD-002", total_price=200.0, status="pending",
-              created_at=datetime.now(), updated_at=datetime.now()),
-        Order(id=3, order_number="ORD-003", total_price=85.0, status="shipped",
-              created_at=datetime.now(), updated_at=datetime.now()),
+        Order(
+            id=1,
+            order_number="ORD-001",
+            total_price=150.0,
+            status="completed",
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        ),
+        Order(
+            id=2,
+            order_number="ORD-002",
+            total_price=200.0,
+            status="pending",
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        ),
+        Order(
+            id=3,
+            order_number="ORD-003",
+            total_price=85.0,
+            status="shipped",
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        ),
     ]
     orders_db.extend(orders)
 
@@ -120,10 +168,7 @@ class TestCategoryEndpoints:
 
     def test_create_category(self, client):
         """测试创建分类"""
-        response = client.post("/categories", json={
-            "name": "新分类",
-            "description": "测试分类"
-        })
+        response = client.post("/categories", json={"name": "新分类", "description": "测试分类"})
         assert response.status_code == 201
         data = response.json()
         assert data["name"] == "新分类"
@@ -131,10 +176,9 @@ class TestCategoryEndpoints:
 
     def test_update_category(self, client):
         """测试更新分类"""
-        response = client.put("/categories/1", json={
-            "name": "更新的分类",
-            "description": "更新的描述"
-        })
+        response = client.put(
+            "/categories/1", json={"name": "更新的分类", "description": "更新的描述"}
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "更新的分类"
@@ -142,10 +186,9 @@ class TestCategoryEndpoints:
     def test_delete_category(self, client):
         """测试删除分类"""
         # 先创建一个分类
-        create_response = client.post("/categories", json={
-            "name": "待删除分类",
-            "description": "测试"
-        })
+        create_response = client.post(
+            "/categories", json={"name": "待删除分类", "description": "测试"}
+        )
         category_id = create_response.json()["id"]
 
         # 然后删除它
@@ -174,13 +217,16 @@ class TestProductEndpoints:
 
     def test_create_product(self, client):
         """测试创建商品"""
-        response = client.post("/products", json={
-            "name": "新商品",
-            "description": "测试商品",
-            "price": 99.99,
-            "stock": 50,
-            "category_id": 1
-        })
+        response = client.post(
+            "/products",
+            json={
+                "name": "新商品",
+                "description": "测试商品",
+                "price": 99.99,
+                "stock": 50,
+                "category_id": 1,
+            },
+        )
         assert response.status_code == 201
         data = response.json()
         assert data["name"] == "新商品"
@@ -188,13 +234,16 @@ class TestProductEndpoints:
 
     def test_update_product(self, client):
         """测试更新商品"""
-        response = client.put("/products/1", json={
-            "name": "更新的商品",
-            "description": "更新的描述",
-            "price": 20.0,
-            "stock": 80,
-            "category_id": 1
-        })
+        response = client.put(
+            "/products/1",
+            json={
+                "name": "更新的商品",
+                "description": "更新的描述",
+                "price": 20.0,
+                "stock": 80,
+                "category_id": 1,
+            },
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "更新的商品"
@@ -202,13 +251,16 @@ class TestProductEndpoints:
     def test_delete_product(self, client):
         """测试删除商品"""
         # 先创建一个商品
-        create_response = client.post("/products", json={
-            "name": "待删除商品",
-            "description": "测试",
-            "price": 10.0,
-            "stock": 10,
-            "category_id": 1
-        })
+        create_response = client.post(
+            "/products",
+            json={
+                "name": "待删除商品",
+                "description": "测试",
+                "price": 10.0,
+                "stock": 10,
+                "category_id": 1,
+            },
+        )
         product_id = create_response.json()["id"]
 
         # 然后删除它
@@ -251,11 +303,9 @@ class TestOrderEndpoints:
 
     def test_create_order(self, client):
         """测试创建订单"""
-        response = client.post("/orders", json={
-            "order_number": "TEST-001",
-            "total_price": 500.0,
-            "status": "pending"
-        })
+        response = client.post(
+            "/orders", json={"order_number": "TEST-001", "total_price": 500.0, "status": "pending"}
+        )
         assert response.status_code == 201
         data = response.json()
         assert data["order_number"] == "TEST-001"
@@ -263,11 +313,10 @@ class TestOrderEndpoints:
 
     def test_update_order(self, client):
         """测试更新订单"""
-        response = client.put("/orders/1", json={
-            "order_number": "ORD-001-UPDATED",
-            "total_price": 200.0,
-            "status": "shipped"
-        })
+        response = client.put(
+            "/orders/1",
+            json={"order_number": "ORD-001-UPDATED", "total_price": 200.0, "status": "shipped"},
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "shipped"
@@ -275,11 +324,10 @@ class TestOrderEndpoints:
     def test_delete_order(self, client):
         """测试删除订单"""
         # 先创建一个订单
-        create_response = client.post("/orders", json={
-            "order_number": "TEST-DELETE",
-            "total_price": 100.0,
-            "status": "pending"
-        })
+        create_response = client.post(
+            "/orders",
+            json={"order_number": "TEST-DELETE", "total_price": 100.0, "status": "pending"},
+        )
         order_id = create_response.json()["id"]
 
         # 然后删除它

@@ -32,6 +32,7 @@ class TestConnectionFailure:
 
     async def test_connection_timeout(self, db_session_factory):
         """Test connection timeout handling"""
+
         async def timeout_operation():
             await asyncio.sleep(0.1)
             raise TimeoutError("Connection timeout")
@@ -41,6 +42,7 @@ class TestConnectionFailure:
 
     async def test_connection_pool_exhaustion(self, sqlalchemy_adapter):
         """Test handling of connection pool exhaustion"""
+
         # Create multiple concurrent operations
         async def operation():
             return await sqlalchemy_adapter.get_all({}, {}, {"skip": 0, "limit": 10})
@@ -59,6 +61,7 @@ class TestTimeoutHandling:
 
     async def test_query_timeout(self, sqlalchemy_adapter, sample_items):
         """Test query timeout handling"""
+
         # Simulate a slow query
         async def slow_query():
             await asyncio.sleep(0.05)
@@ -70,6 +73,7 @@ class TestTimeoutHandling:
 
     async def test_operation_timeout_exceeded(self, sqlalchemy_adapter):
         """Test when operation exceeds timeout"""
+
         async def very_slow_query():
             await asyncio.sleep(2.0)
             return await sqlalchemy_adapter.get_all({}, {}, {"skip": 0, "limit": 10})
@@ -80,6 +84,7 @@ class TestTimeoutHandling:
 
     async def test_transaction_timeout(self, db_session_factory):
         """Test transaction timeout"""
+
         async def long_transaction():
             async with db_session_factory() as session:
                 # Simulate long operation
@@ -147,7 +152,7 @@ class TestRetryMechanism:
             except Exception as e:
                 if attempt == max_retries - 1:
                     raise
-                delay = base_delay * (2 ** attempt)
+                delay = base_delay * (2**attempt)
                 await asyncio.sleep(delay)
 
         # Verify delays increased
@@ -158,6 +163,7 @@ class TestRetryMechanism:
 
     async def test_max_retries_exceeded(self, sqlalchemy_adapter):
         """Test when max retries are exceeded"""
+
         async def always_fails():
             raise Exception("Permanent error")
 
@@ -217,13 +223,13 @@ class TestErrorRecovery:
 
     async def test_concurrent_error_handling(self, sqlalchemy_adapter):
         """Test error handling in concurrent operations"""
+
         async def operation(index):
             if index == 2:
                 raise Exception(f"Error in operation {index}")
-            return await sqlalchemy_adapter.create({
-                "name": f"item_{index}",
-                "price": float(index * 10)
-            })
+            return await sqlalchemy_adapter.create(
+                {"name": f"item_{index}", "price": float(index * 10)}
+            )
 
         # Run concurrent operations
         tasks = [operation(i) for i in range(5)]
@@ -354,6 +360,7 @@ class TestGracefulDegradation:
 
     async def test_partial_data_return(self, sqlalchemy_adapter, sample_items):
         """Test returning partial data on error"""
+
         async def get_all_with_partial():
             try:
                 return await sqlalchemy_adapter.get_all({}, {}, {"skip": 0, "limit": 100})

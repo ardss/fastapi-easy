@@ -113,9 +113,7 @@ class TestPermissionEngine:
     async def test_check_resource_permission_true(self):
         """Test resource permission check returns true"""
         loader = StaticPermissionLoader({"user1": ["read"]})
-        checker = StaticResourceChecker(
-            {"resource1": {"owner_id": "user1", "permissions": {}}}
-        )
+        checker = StaticResourceChecker({"resource1": {"owner_id": "user1", "permissions": {}}})
         engine = PermissionEngine(permission_loader=loader, resource_checker=checker)
 
         has_permission = await engine.check_permission("user1", "read", "resource1")
@@ -125,9 +123,7 @@ class TestPermissionEngine:
     async def test_check_resource_permission_false(self):
         """Test resource permission check returns false"""
         loader = StaticPermissionLoader({"user1": ["read"]})
-        checker = StaticResourceChecker(
-            {"resource1": {"owner_id": "user2", "permissions": {}}}
-        )
+        checker = StaticResourceChecker({"resource1": {"owner_id": "user2", "permissions": {}}})
         engine = PermissionEngine(permission_loader=loader, resource_checker=checker)
 
         has_permission = await engine.check_permission("user1", "write", "resource1")

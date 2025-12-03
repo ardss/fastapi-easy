@@ -48,12 +48,8 @@ class TestHookRegistry:
         def hook2(context):
             return "hook2"
 
-        registry.register(
-            "hook1", "1.0.0", HookTrigger.BEFORE_DDL, hook1, priority=10
-        )
-        registry.register(
-            "hook2", "1.0.0", HookTrigger.BEFORE_DDL, hook2, priority=5
-        )
+        registry.register("hook1", "1.0.0", HookTrigger.BEFORE_DDL, hook1, priority=10)
+        registry.register("hook2", "1.0.0", HookTrigger.BEFORE_DDL, hook2, priority=5)
 
         hooks = registry.get_hooks(HookTrigger.BEFORE_DDL)
         assert len(hooks) == 2
@@ -71,12 +67,8 @@ class TestHookRegistry:
         def hook2(context):
             return "hook2"
 
-        registry.register(
-            "hook1", "1.0.0", HookTrigger.BEFORE_DDL, hook1
-        )
-        registry.register(
-            "hook2", "2.0.0", HookTrigger.BEFORE_DDL, hook2
-        )
+        registry.register("hook1", "1.0.0", HookTrigger.BEFORE_DDL, hook1)
+        registry.register("hook2", "2.0.0", HookTrigger.BEFORE_DDL, hook2)
 
         hooks = registry.get_hooks_for_version("1.0.0", HookTrigger.BEFORE_DDL)
         assert len(hooks) == 1
@@ -99,9 +91,7 @@ class TestHookRegistry:
         )
 
         context = {}
-        results = await registry.execute_hooks(
-            HookTrigger.BEFORE_DDL, context=context
-        )
+        results = await registry.execute_hooks(HookTrigger.BEFORE_DDL, context=context)
 
         assert context["executed"] is True
         assert results["test_hook"]["status"] == "ok"
@@ -124,9 +114,7 @@ class TestHookRegistry:
         )
 
         context = {}
-        results = await registry.execute_hooks(
-            HookTrigger.BEFORE_DDL, context=context
-        )
+        results = await registry.execute_hooks(HookTrigger.BEFORE_DDL, context=context)
 
         assert context["executed"] is True
         assert results["test_hook"]["status"] == "ok"
@@ -142,12 +130,8 @@ class TestHookRegistry:
         def hook2(context):
             return {"status": "ok"}
 
-        registry.register(
-            "hook1", "1.0.0", HookTrigger.BEFORE_DDL, hook1, priority=10
-        )
-        registry.register(
-            "hook2", "1.0.0", HookTrigger.BEFORE_DDL, hook2, priority=5
-        )
+        registry.register("hook1", "1.0.0", HookTrigger.BEFORE_DDL, hook1, priority=10)
+        registry.register("hook2", "1.0.0", HookTrigger.BEFORE_DDL, hook2, priority=5)
 
         results = await registry.execute_hooks(HookTrigger.BEFORE_DDL)
 
@@ -167,16 +151,10 @@ class TestHookRegistry:
         def hook2(context):
             return "hook2"
 
-        registry.register(
-            "hook1", "1.0.0", HookTrigger.BEFORE_DDL, hook1
-        )
-        registry.register(
-            "hook2", "2.0.0", HookTrigger.BEFORE_DDL, hook2
-        )
+        registry.register("hook1", "1.0.0", HookTrigger.BEFORE_DDL, hook1)
+        registry.register("hook2", "2.0.0", HookTrigger.BEFORE_DDL, hook2)
 
-        results = await registry.execute_hooks(
-            HookTrigger.BEFORE_DDL, version="1.0.0"
-        )
+        results = await registry.execute_hooks(HookTrigger.BEFORE_DDL, version="1.0.0")
 
         assert "hook1" in results
         assert "hook2" not in results

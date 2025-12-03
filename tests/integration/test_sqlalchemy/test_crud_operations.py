@@ -120,9 +120,7 @@ class TestSQLAlchemyCRUD:
 
     async def test_count_with_filters(self, sqlalchemy_adapter, sample_items):
         """Test counting with filters"""
-        filters = {
-            "price__gt": {"field": "price", "operator": "gt", "value": 10}
-        }
+        filters = {"price__gt": {"field": "price", "operator": "gt", "value": 10}}
 
         count = await sqlalchemy_adapter.count(filters)
 

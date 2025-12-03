@@ -11,11 +11,13 @@ from fastapi_easy.backends.sqlalchemy import SQLAlchemyAdapter
 
 class Base(DeclarativeBase):
     """SQLAlchemy base class"""
+
     pass
 
 
 class PerformanceItem(Base):
     """Test item model for performance tests"""
+
     __tablename__ = "performance_items"
 
     id = Column(Integer, primary_key=True)
@@ -75,7 +77,7 @@ async def large_dataset(perf_db_session_factory):
                 name=f"item_{i}",
                 description=f"Description for item {i}",
                 price=float(i % 1000),
-                quantity=i % 100
+                quantity=i % 100,
             )
             for i in range(5000)
         ]

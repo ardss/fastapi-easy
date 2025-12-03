@@ -13,7 +13,7 @@ class TestTortoiseConflictErrors:
 
     async def test_create_integrity_error(self, tortoise_adapter):
         """Test create with integrity error (duplicate key)"""
-        with patch.object(tortoise_adapter.model, 'create') as mock_create:
+        with patch.object(tortoise_adapter.model, "create") as mock_create:
             mock_create.side_effect = IntegrityError("Duplicate key")
 
             with pytest.raises(ConflictError) as exc_info:
@@ -40,9 +40,7 @@ class TestTortoiseNEFilter:
 
     async def test_filter_ne(self, tortoise_adapter, sample_items):
         """Test not equal filter"""
-        filters = {
-            "name__ne": {"field": "name", "operator": "ne", "value": "apple"}
-        }
+        filters = {"name__ne": {"field": "name", "operator": "ne", "value": "apple"}}
 
         items = await tortoise_adapter.get_all(
             filters=filters,

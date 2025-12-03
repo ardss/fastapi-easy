@@ -21,37 +21,27 @@ class TestTypeCompatibilityChecker:
 
     def test_same_type_is_safe(self):
         """相同类型应该是安全的"""
-        result = TypeCompatibilityChecker.check_compatibility(
-            "VARCHAR", "VARCHAR"
-        )
+        result = TypeCompatibilityChecker.check_compatibility("VARCHAR", "VARCHAR")
         assert result == TypeCompatibility.SAFE
 
     def test_integer_to_bigint_is_safe(self):
         """INTEGER 到 BIGINT 是安全的"""
-        result = TypeCompatibilityChecker.check_compatibility(
-            "INTEGER", "BIGINT"
-        )
+        result = TypeCompatibilityChecker.check_compatibility("INTEGER", "BIGINT")
         assert result == TypeCompatibility.SAFE
 
     def test_bigint_to_integer_is_compatible(self):
         """BIGINT 到 INTEGER 是兼容的"""
-        result = TypeCompatibilityChecker.check_compatibility(
-            "BIGINT", "INTEGER"
-        )
+        result = TypeCompatibilityChecker.check_compatibility("BIGINT", "INTEGER")
         assert result == TypeCompatibility.COMPATIBLE
 
     def test_varchar_to_text_is_safe(self):
         """VARCHAR 到 TEXT 是安全的"""
-        result = TypeCompatibilityChecker.check_compatibility(
-            "VARCHAR", "TEXT"
-        )
+        result = TypeCompatibilityChecker.check_compatibility("VARCHAR", "TEXT")
         assert result == TypeCompatibility.SAFE
 
     def test_incompatible_types(self):
         """不兼容的类型"""
-        result = TypeCompatibilityChecker.check_compatibility(
-            "INTEGER", "TEXT"
-        )
+        result = TypeCompatibilityChecker.check_compatibility("INTEGER", "TEXT")
         assert result == TypeCompatibility.INCOMPATIBLE
 
     def test_normalize_type_removes_length(self):

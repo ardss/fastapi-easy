@@ -1,4 +1,5 @@
 """Hook 系统扩展单元测试"""
+
 import asyncio
 
 import pytest
@@ -16,34 +17,31 @@ class TestHookRegistration:
 
     def test_register_sync_hook(self, hook_registry):
         """测试注册同步 Hook"""
+
         def my_hook(context):
             pass
 
         hook_registry.register(
-            name="test_hook",
-            version="001",
-            trigger=HookTrigger.BEFORE_DDL,
-            callback=my_hook
+            name="test_hook", version="001", trigger=HookTrigger.BEFORE_DDL, callback=my_hook
         )
         hooks = hook_registry.hooks.get(HookTrigger.BEFORE_DDL, [])
         assert len(hooks) > 0
 
     def test_register_async_hook(self, hook_registry):
         """测试注册异步 Hook"""
+
         async def my_hook(context):
             pass
 
         hook_registry.register(
-            name="test_hook",
-            version="001",
-            trigger=HookTrigger.BEFORE_DDL,
-            callback=my_hook
+            name="test_hook", version="001", trigger=HookTrigger.BEFORE_DDL, callback=my_hook
         )
         hooks = hook_registry.hooks.get(HookTrigger.BEFORE_DDL, [])
         assert len(hooks) > 0
 
     def test_register_multiple_hooks(self, hook_registry):
         """测试注册多个 Hook"""
+
         def hook1(context):
             pass
 
@@ -58,6 +56,7 @@ class TestHookRegistration:
 
     def test_register_with_priority(self, hook_registry):
         """测试带优先级的注册"""
+
         def hook1(context):
             pass
 
@@ -158,6 +157,7 @@ class TestHookPriority:
     @pytest.mark.asyncio
     async def test_default_priority(self, hook_registry):
         """测试默认优先级"""
+
         def hook1(context):
             pass
 
@@ -195,6 +195,7 @@ class TestHookErrorHandling:
     @pytest.mark.asyncio
     async def test_async_hook_exception(self, hook_registry):
         """测试异步 Hook 异常"""
+
         async def hook_error(context):
             raise RuntimeError("Async hook error")
 
@@ -265,6 +266,7 @@ class TestHookResults:
     @pytest.mark.asyncio
     async def test_hook_return_value(self, hook_registry):
         """测试 Hook 返回值"""
+
         def hook(context):
             return {"status": "success"}
 
@@ -276,6 +278,7 @@ class TestHookResults:
     @pytest.mark.asyncio
     async def test_multiple_hook_results(self, hook_registry):
         """测试多个 Hook 的结果"""
+
         def hook1(context):
             return {"hook": 1}
 

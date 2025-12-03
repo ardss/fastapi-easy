@@ -120,6 +120,7 @@ class TestAsyncPipeline:
     @pytest.mark.asyncio
     async def test_pipeline_chaining(self):
         """Test pipeline method chaining"""
+
         async def stage1(items):
             return [x * 2 for x in items]
 
@@ -129,12 +130,7 @@ class TestAsyncPipeline:
         async def stage3(items):
             return [x * 2 for x in items]
 
-        pipeline = (
-            AsyncPipeline()
-            .add_stage(stage1)
-            .add_stage(stage2)
-            .add_stage(stage3)
-        )
+        pipeline = AsyncPipeline().add_stage(stage1).add_stage(stage2).add_stage(stage3)
 
         result = await pipeline.execute([1, 2, 3])
         assert result == [6, 10, 14]

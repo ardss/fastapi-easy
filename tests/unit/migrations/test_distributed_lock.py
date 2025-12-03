@@ -1,4 +1,5 @@
 """分布式锁单元测试"""
+
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -191,6 +192,7 @@ class TestLockCleanup:
 
         # 创建一个旧的锁文件
         import time
+
         lock_file.write_text(f"{12345}\n{time.time() - 1000}")
 
         # 尝试获取锁，应该检测到过期

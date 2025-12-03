@@ -12,11 +12,13 @@ from fastapi_easy.backends.sqlalchemy import SQLAlchemyAdapter
 
 class Base(DeclarativeBase):
     """SQLAlchemy base class"""
+
     pass
 
 
 class Item(Base):
     """Test item model"""
+
     __tablename__ = "items"
 
     id = Column(Integer, primary_key=True)
@@ -65,10 +67,7 @@ def perf_adapter(perf_db_session_factory):
 async def perf_sample_data(perf_db_session_factory):
     """Create sample data for performance testing"""
     async with perf_db_session_factory() as session:
-        items = [
-            Item(name=f"item_{i}", price=float(i * 10))
-            for i in range(100)
-        ]
+        items = [Item(name=f"item_{i}", price=float(i * 10)) for i in range(100)]
         session.add_all(items)
         await session.commit()
 
@@ -125,9 +124,7 @@ class TestSQLAlchemyPerformance:
 
     async def test_filter_items(self, perf_adapter, perf_sample_data):
         """Test filtering items"""
-        filters = {
-            "price__gt": {"field": "price", "operator": "gt", "value": 500}
-        }
+        filters = {"price__gt": {"field": "price", "operator": "gt", "value": 500}}
         result = await perf_adapter.get_all(
             filters=filters,
             sorts={},

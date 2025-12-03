@@ -18,6 +18,7 @@ Base = declarative_base()
 
 class ItemModel(Base):
     """SQLAlchemy model for testing"""
+
     __tablename__ = "items"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -28,6 +29,7 @@ class ItemModel(Base):
 
 class ItemSchema(BaseModel):
     """Pydantic schema for testing"""
+
     id: int
     name: str
     price: float
@@ -41,21 +43,14 @@ class ItemSchema(BaseModel):
 async def async_db_session():
     """Create async database session for testing"""
     # Use in-memory SQLite database
-    engine = create_async_engine(
-        "sqlite+aiosqlite:///:memory:",
-        echo=False
-    )
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
 
     # Create tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
     # Create session factory
-    async_session_factory = async_sessionmaker(
-        engine,
-        class_=AsyncSession,
-        expire_on_commit=False
-    )
+    async_session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     yield async_session_factory
 
@@ -69,18 +64,10 @@ def app_with_crud_router(async_db_session):
     app = FastAPI()
 
     # Create adapter
-    adapter = SQLAlchemyAdapter(
-        model=ItemModel,
-        session_factory=async_db_session
-    )
+    adapter = SQLAlchemyAdapter(model=ItemModel, session_factory=async_db_session)
 
     # Create CRUD router
-    router = CRUDRouter(
-        schema=ItemSchema,
-        adapter=adapter,
-        prefix="/items",
-        tags=["Items"]
-    )
+    router = CRUDRouter(schema=ItemSchema, adapter=adapter, prefix="/items", tags=["Items"])
 
     # Include router in app
     app.include_router(router)
@@ -116,12 +103,7 @@ async def test_create_route(app_with_crud_router):
     """Test POST /items route"""
     client = TestClient(app_with_crud_router)
 
-    item_data = {
-        "id": 1,
-        "name": "Test Item",
-        "price": 19.99,
-        "description": "A test item"
-    }
+    item_data = {"id": 1, "name": "Test Item", "price": 19.99, "description": "A test item"}
 
     response = client.post("/items/", json=item_data)
     assert response.status_code == 201
@@ -135,11 +117,7 @@ async def test_get_one_route(app_with_crud_router):
     client = TestClient(app_with_crud_router)
 
     # Create an item first
-    item_data = {
-        "id": 1,
-        "name": "Test Item",
-        "price": 19.99
-    }
+    item_data = {"id": 1, "name": "Test Item", "price": 19.99}
     create_response = client.post("/items/", json=item_data)
     assert create_response.status_code == 201
 
@@ -156,20 +134,12 @@ async def test_update_route(app_with_crud_router):
     client = TestClient(app_with_crud_router)
 
     # Create an item first
-    item_data = {
-        "id": 1,
-        "name": "Original Item",
-        "price": 19.99
-    }
+    item_data = {"id": 1, "name": "Original Item", "price": 19.99}
     create_response = client.post("/items/", json=item_data)
     item_id = create_response.json()["id"]
 
     # Update the item
-    updated_data = {
-        "id": item_id,
-        "name": "Updated Item",
-        "price": 29.99
-    }
+    updated_data = {"id": item_id, "name": "Updated Item", "price": 29.99}
     response = client.put(f"/items/{item_id}", json=updated_data)
     assert response.status_code == 200
     assert response.json()["name"] == "Updated Item"
@@ -182,11 +152,7 @@ async def test_delete_one_route(app_with_crud_router):
     client = TestClient(app_with_crud_router)
 
     # Create an item first
-    item_data = {
-        "id": 1,
-        "name": "Item to Delete",
-        "price": 19.99
-    }
+    item_data = {"id": 1, "name": "Item to Delete", "price": 19.99}
     create_response = client.post("/items/", json=item_data)
     item_id = create_response.json()["id"]
 
@@ -203,11 +169,7 @@ async def test_pagination(app_with_crud_router):
 
     # Create multiple items
     for i in range(5):
-        item_data = {
-            "id": i + 1,
-            "name": f"Item {i}",
-            "price": 10.0 + i
-        }
+        item_data = {"id": i + 1, "name": f"Item {i}", "price": 10.0 + i}
         client.post("/items/", json=item_data)
 
     # Test pagination

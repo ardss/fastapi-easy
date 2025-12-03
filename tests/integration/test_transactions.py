@@ -19,13 +19,16 @@ from fastapi_easy.core.errors import ConflictError, AppError
 # Test Models
 # ============================================================================
 
+
 class Base(DeclarativeBase):
     """SQLAlchemy base class"""
+
     pass
 
 
 class TransactionItem(Base):
     """Test item model for transaction tests"""
+
     __tablename__ = "transaction_items"
 
     id = Column(Integer, primary_key=True)
@@ -40,6 +43,7 @@ class TransactionItem(Base):
 # ============================================================================
 # Fixtures
 # ============================================================================
+
 
 @pytest_asyncio.fixture
 async def transaction_engine():
@@ -121,7 +125,9 @@ class TestTransactionRollback:
         all_items = await transaction_adapter.get_all({}, {}, {"skip": 0, "limit": 100})
         assert len(all_items) == 1
 
-    async def test_rollback_on_constraint_violation(self, transaction_adapter, transaction_sample_data):
+    async def test_rollback_on_constraint_violation(
+        self, transaction_adapter, transaction_sample_data
+    ):
         """Test rollback when unique constraint is violated"""
         # Try to create item with duplicate name
         with pytest.raises(ConflictError):
@@ -161,10 +167,7 @@ class TestConcurrentTransactions:
     async def test_concurrent_reads(self, transaction_adapter, transaction_sample_data):
         """Test concurrent read operations"""
         # Create multiple concurrent read tasks
-        tasks = [
-            transaction_adapter.get_one(transaction_sample_data[0].id)
-            for _ in range(10)
-        ]
+        tasks = [transaction_adapter.get_one(transaction_sample_data[0].id) for _ in range(10)]
 
         results = await asyncio.gather(*tasks)
 
@@ -175,12 +178,15 @@ class TestConcurrentTransactions:
 
     async def test_concurrent_writes(self, transaction_adapter):
         """Test concurrent write operations"""
+
         # Create multiple concurrent write tasks
         async def create_item(index):
-            return await transaction_adapter.create({
-                "name": f"concurrent_item_{index}",
-                "price": float(index * 10),
-            })
+            return await transaction_adapter.create(
+                {
+                    "name": f"concurrent_item_{index}",
+                    "price": float(index * 10),
+                }
+            )
 
         tasks = [create_item(i) for i in range(5)]
         results = await asyncio.gather(*tasks)
@@ -195,14 +201,17 @@ class TestConcurrentTransactions:
 
     async def test_concurrent_read_write(self, transaction_adapter, transaction_sample_data):
         """Test concurrent read and write operations"""
+
         async def read_item():
             return await transaction_adapter.get_one(transaction_sample_data[0].id)
 
         async def write_item(index):
-            return await transaction_adapter.create({
-                "name": f"rw_item_{index}",
-                "price": float(index * 5),
-            })
+            return await transaction_adapter.create(
+                {
+                    "name": f"rw_item_{index}",
+                    "price": float(index * 5),
+                }
+            )
 
         # Mix read and write operations
         tasks = [
@@ -246,7 +255,9 @@ class TestConcurrentTransactions:
 class TestDeadlockHandling:
     """Test deadlock detection and handling"""
 
-    async def test_deadlock_detection(self, transaction_adapter, transaction_sample_data, transaction_session_factory):
+    async def test_deadlock_detection(
+        self, transaction_adapter, transaction_sample_data, transaction_session_factory
+    ):
         """Test deadlock detection in concurrent updates"""
         item1_id = transaction_sample_data[0].id
         item2_id = transaction_sample_data[1].id
@@ -281,6 +292,7 @@ class TestDeadlockHandling:
 
     async def test_transaction_timeout(self, transaction_adapter, transaction_session_factory):
         """Test transaction timeout handling"""
+
         async def long_running_operation():
             """Simulate a long-running operation"""
             async with transaction_session_factory() as session:
@@ -299,7 +311,9 @@ class TestDeadlockHandling:
         result = await long_running_operation()
         assert result.id is not None
 
-    async def test_transaction_isolation(self, transaction_adapter, transaction_session_factory, transaction_sample_data):
+    async def test_transaction_isolation(
+        self, transaction_adapter, transaction_session_factory, transaction_sample_data
+    ):
         """Test transaction isolation levels"""
         item_id = transaction_sample_data[0].id
         original_quantity = transaction_sample_data[0].quantity
@@ -386,10 +400,12 @@ class TestTransactionEdgeCases:
         # Create multiple items in sequence
         items = []
         for i in range(5):
-            item = await transaction_adapter.create({
-                "name": f"multi_op_item_{i}",
-                "price": float(i * 10),
-            })
+            item = await transaction_adapter.create(
+                {
+                    "name": f"multi_op_item_{i}",
+                    "price": float(i * 10),
+                }
+            )
             items.append(item)
 
         # All items should be created
@@ -404,7 +420,9 @@ class TestTransactionEdgeCases:
         updated_items = await transaction_adapter.get_all({}, {}, {"skip": 0, "limit": 100})
         assert all(item.quantity == 100 for item in updated_items)
 
-    async def test_transaction_rollback_on_delete(self, transaction_adapter, transaction_sample_data):
+    async def test_transaction_rollback_on_delete(
+        self, transaction_adapter, transaction_sample_data
+    ):
         """Test transaction rollback on delete operation"""
         item_id = transaction_sample_data[0].id
 

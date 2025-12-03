@@ -1,4 +1,5 @@
 """端到端迁移测试 - 完整流程"""
+
 import pytest
 from sqlalchemy import Column, Integer, MetaData, String, Table, create_engine
 
@@ -26,10 +27,7 @@ class TestE2EMigrationFlow:
         """初始化并记录迁移"""
         migration_engine.storage.initialize()
         migration_engine.storage.record_migration(
-            "001",
-            "Create users table",
-            "DROP TABLE users",
-            "SAFE"
+            "001", "Create users table", "DROP TABLE users", "SAFE"
         )
         history = migration_engine.storage.get_migration_history(limit=10)
         assert len(history) == 1
@@ -69,10 +67,7 @@ class TestE2EComplexScenarios:
         """大批量迁移"""
         for i in range(1, 21):
             migration_engine.storage.record_migration(
-                f"{i:03d}",
-                f"Migration {i}",
-                "ROLLBACK",
-                "SAFE"
+                f"{i:03d}", f"Migration {i}", "ROLLBACK", "SAFE"
             )
 
         history = migration_engine.storage.get_migration_history(limit=100)
@@ -82,12 +77,7 @@ class TestE2EComplexScenarios:
         """混合风险等级"""
         risks = ["SAFE", "MEDIUM", "HIGH", "SAFE", "MEDIUM"]
         for i, risk in enumerate(risks, 1):
-            migration_engine.storage.record_migration(
-                f"00{i}",
-                f"Migration {i}",
-                "ROLLBACK",
-                risk
-            )
+            migration_engine.storage.record_migration(f"00{i}", f"Migration {i}", "ROLLBACK", risk)
 
         history = migration_engine.storage.get_migration_history(limit=10)
         assert len(history) == 5
@@ -97,7 +87,7 @@ class TestE2EComplexScenarios:
         special_cases = [
             ("001", "Add 'users' table", "DROP TABLE users", "SAFE"),
             ("002", "Add @index", "DROP INDEX idx", "SAFE"),
-            ("003", "Add \"quoted\" column", "DROP COLUMN col", "SAFE"),
+            ("003", 'Add "quoted" column', "DROP COLUMN col", "SAFE"),
         ]
 
         for version, desc, rollback, risk in special_cases:
@@ -145,8 +135,8 @@ class TestE2EErrorHandling:
         # 空版本
         result = migration_engine.storage.record_migration("", "Test", "ROLLBACK", "SAFE")
         # 应该返回 OperationResult 对象
-        assert hasattr(result, 'success')
-        assert hasattr(result, 'data')
+        assert hasattr(result, "success")
+        assert hasattr(result, "data")
         # 空版本应该被记录（允许）
         assert result.success is True
 
@@ -176,10 +166,7 @@ class TestE2EWorkflowIntegration:
         # 记录多个迁移
         for i in range(1, 4):
             migration_engine.storage.record_migration(
-                f"00{i}",
-                f"Migration {i}",
-                "ROLLBACK",
-                "SAFE"
+                f"00{i}", f"Migration {i}", "ROLLBACK", "SAFE"
             )
 
         # 查询历史
@@ -193,10 +180,7 @@ class TestE2EWorkflowIntegration:
     def test_migration_with_rollback_info(self, migration_engine):
         """包含回滚信息的迁移"""
         migration_engine.storage.record_migration(
-            "001",
-            "Create users table",
-            "DROP TABLE users",
-            "SAFE"
+            "001", "Create users table", "DROP TABLE users", "SAFE"
         )
 
         history = migration_engine.storage.get_migration_history(limit=10)

@@ -60,7 +60,7 @@ class TestOptimizationIntegration:
         mock_backend.model = MagicMock()
 
         # Create optimized router with patched CRUDRouter init
-        with patch('fastapi_easy.crud_router_optimization.CRUDRouter.__init__', return_value=None):
+        with patch("fastapi_easy.crud_router_optimization.CRUDRouter.__init__", return_value=None):
             router = OptimizedCRUDRouter(
                 schema=mock_schema,
                 backend=mock_backend,

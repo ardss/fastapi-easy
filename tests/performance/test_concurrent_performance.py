@@ -11,6 +11,7 @@ class TestConcurrentPerformance:
 
     async def test_concurrent_reads(self, perf_sqlalchemy_adapter, large_dataset):
         """Test concurrent read operations (50 concurrent)"""
+
         async def read_item(item_id: int):
             return await perf_sqlalchemy_adapter.get_one(item_id)
 
@@ -26,13 +27,16 @@ class TestConcurrentPerformance:
 
     async def test_concurrent_writes(self, perf_sqlalchemy_adapter):
         """Test concurrent write operations (20 concurrent)"""
+
         async def create_item(item_id: int):
-            return await perf_sqlalchemy_adapter.create({
-                "name": f"concurrent_item_{item_id}",
-                "description": f"Concurrent item {item_id}",
-                "price": float(item_id),
-                "quantity": item_id
-            })
+            return await perf_sqlalchemy_adapter.create(
+                {
+                    "name": f"concurrent_item_{item_id}",
+                    "description": f"Concurrent item {item_id}",
+                    "price": float(item_id),
+                    "quantity": item_id,
+                }
+            )
 
         # Create 20 concurrent write tasks
         tasks = [create_item(i) for i in range(20)]
@@ -44,20 +48,17 @@ class TestConcurrentPerformance:
 
     async def test_concurrent_mixed_operations(self, perf_sqlalchemy_adapter, large_dataset):
         """Test mixed concurrent operations (reads, writes, updates)"""
+
         async def read_item(item_id: int):
             return await perf_sqlalchemy_adapter.get_one(item_id)
 
         async def create_item(item_id: int):
-            return await perf_sqlalchemy_adapter.create({
-                "name": f"mixed_item_{item_id}",
-                "price": float(item_id),
-                "quantity": item_id
-            })
+            return await perf_sqlalchemy_adapter.create(
+                {"name": f"mixed_item_{item_id}", "price": float(item_id), "quantity": item_id}
+            )
 
         async def update_item(item_id: int):
-            return await perf_sqlalchemy_adapter.update(item_id, {
-                "price": float(item_id * 2)
-            })
+            return await perf_sqlalchemy_adapter.update(item_id, {"price": float(item_id * 2)})
 
         # Mix of operations
         tasks = []
@@ -75,11 +76,10 @@ class TestConcurrentPerformance:
 
     async def test_concurrent_queries(self, perf_sqlalchemy_adapter, large_dataset):
         """Test concurrent query operations"""
+
         async def query_items(skip: int, limit: int):
             return await perf_sqlalchemy_adapter.get_all(
-                filters={},
-                sorts={},
-                pagination={"skip": skip, "limit": limit}
+                filters={}, sorts={}, pagination={"skip": skip, "limit": limit}
             )
 
         # Create 20 concurrent query tasks with different pagination
@@ -91,6 +91,7 @@ class TestConcurrentPerformance:
 
     async def test_concurrent_count_operations(self, perf_sqlalchemy_adapter, large_dataset):
         """Test concurrent count operations"""
+
         async def count_items():
             return await perf_sqlalchemy_adapter.count({})
 
@@ -104,6 +105,7 @@ class TestConcurrentPerformance:
 
     async def test_high_concurrency_stress(self, perf_sqlalchemy_adapter, large_dataset):
         """Stress test with high concurrency (100 concurrent)"""
+
         async def read_item(item_id: int):
             return await perf_sqlalchemy_adapter.get_one(item_id)
 

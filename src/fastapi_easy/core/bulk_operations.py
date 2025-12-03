@@ -3,7 +3,6 @@
 from typing import Any, Dict, List, Optional, Type
 
 
-
 class BulkOperationResult:
     """Result of a bulk operation"""
 

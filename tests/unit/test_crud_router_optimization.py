@@ -22,7 +22,7 @@ class TestOptimizedCRUDRouterIntegration:
         mock_schema.__name__ = "TestSchema"
 
         # Create router with optimization
-        with patch('fastapi_easy.crud_router_optimization.CRUDRouter.__init__', return_value=None):
+        with patch("fastapi_easy.crud_router_optimization.CRUDRouter.__init__", return_value=None):
             router = create_optimized_crud_router(
                 schema=mock_schema,
                 backend=mock_backend,
@@ -45,7 +45,7 @@ class TestOptimizedCRUDRouterIntegration:
         mock_schema.__name__ = "TestSchema"
 
         # Create router without optimization
-        with patch('fastapi_easy.crud_router_optimization.CRUDRouter.__init__', return_value=None):
+        with patch("fastapi_easy.crud_router_optimization.CRUDRouter.__init__", return_value=None):
             router = create_optimized_crud_router(
                 schema=mock_schema,
                 backend=mock_backend,
@@ -68,7 +68,7 @@ class TestOptimizedCRUDRouterIntegration:
         mock_schema.__name__ = "TestSchema"
 
         # Create router with optimization
-        with patch('fastapi_easy.crud_router_optimization.CRUDRouter.__init__', return_value=None):
+        with patch("fastapi_easy.crud_router_optimization.CRUDRouter.__init__", return_value=None):
             router = create_optimized_crud_router(
                 schema=mock_schema,
                 backend=mock_backend,

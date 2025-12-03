@@ -8,7 +8,6 @@ class ValidationError(ValueError):
     """Validation error"""
 
 
-
 class InputValidator:
     """Input validator for security"""
 

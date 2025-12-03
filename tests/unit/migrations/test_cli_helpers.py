@@ -46,7 +46,7 @@ class TestCLIErrorHandler:
         captured = capsys.readouterr()
         assert "Runtime error" in captured.err
 
-    @patch('sys.exit')
+    @patch("sys.exit")
     def test_exit_with_error(self, mock_exit, capsys):
         """测试带错误退出"""
         CLIErrorHandler.exit_with_error("Fatal error", 2)
@@ -54,7 +54,7 @@ class TestCLIErrorHandler:
         captured = capsys.readouterr()
         assert "Fatal error" in captured.err
 
-    @patch('sys.exit')
+    @patch("sys.exit")
     def test_exit_with_default_code(self, mock_exit, capsys):
         """测试默认退出码"""
         CLIErrorHandler.exit_with_error("Error")
@@ -151,7 +151,7 @@ class TestCLIFormatter:
 class TestCLIConfirm:
     """CLI 确认对话框测试"""
 
-    @patch('click.confirm', return_value=True)
+    @patch("click.confirm", return_value=True)
     def test_confirm_migration_yes(self, mock_confirm):
         """测试用户确认迁移"""
         plan = MigrationPlan(migrations=[], status="completed")
@@ -159,7 +159,7 @@ class TestCLIConfirm:
         assert result is True
         mock_confirm.assert_called_once()
 
-    @patch('click.confirm', return_value=False)
+    @patch("click.confirm", return_value=False)
     def test_confirm_migration_no(self, mock_confirm):
         """测试用户拒绝迁移"""
         plan = MigrationPlan(migrations=[], status="completed")
@@ -172,13 +172,13 @@ class TestCLIConfirm:
         result = CLIConfirm.confirm_migration(plan, force=True)
         assert result is True
 
-    @patch('click.confirm', return_value=True)
+    @patch("click.confirm", return_value=True)
     def test_confirm_rollback_yes(self, mock_confirm):
         """测试用户确认回滚"""
         result = CLIConfirm.confirm_rollback(steps=2, force=False)
         assert result is True
 
-    @patch('click.confirm', return_value=False)
+    @patch("click.confirm", return_value=False)
     def test_confirm_rollback_no(self, mock_confirm):
         """测试用户拒绝回滚"""
         result = CLIConfirm.confirm_rollback(steps=2, force=False)
@@ -189,13 +189,13 @@ class TestCLIConfirm:
         result = CLIConfirm.confirm_rollback(steps=2, force=True)
         assert result is True
 
-    @patch('click.confirm', return_value=True)
+    @patch("click.confirm", return_value=True)
     def test_confirm_clear_cache_yes(self, mock_confirm):
         """测试用户确认清理缓存"""
         result = CLIConfirm.confirm_clear_cache(force=False)
         assert result is True
 
-    @patch('click.confirm', return_value=False)
+    @patch("click.confirm", return_value=False)
     def test_confirm_clear_cache_no(self, mock_confirm):
         """测试用户拒绝清理缓存"""
         result = CLIConfirm.confirm_clear_cache(force=False)
@@ -237,7 +237,6 @@ class TestCLIProgress:
         assert "This is info" in captured.out
 
 
-
 class TestCLIFormatterIntegration:
     """CLI 格式化器集成测试"""
 
@@ -265,7 +264,6 @@ class TestCLIFormatterIntegration:
         assert "002" in result
 
 
-
 class TestCLIHelpersCombined:
     """CLI 辅助类组合测试"""
 
@@ -276,7 +274,7 @@ class TestCLIHelpersCombined:
         captured = capsys.readouterr()
         assert "Migration failed" in captured.err
 
-    @patch('click.confirm', return_value=True)
+    @patch("click.confirm", return_value=True)
     def test_confirm_then_progress(self, mock_confirm, capsys):
         """测试确认后显示进度"""
         plan = MigrationPlan(migrations=[], status="completed")
@@ -337,7 +335,7 @@ class TestCLIHelpersEdgeCases:
 
     def test_confirm_with_empty_message(self):
         """测试空消息的确认"""
-        with patch('click.confirm', return_value=True):
+        with patch("click.confirm", return_value=True):
             plan = MigrationPlan(migrations=[], status="completed")
             result = CLIConfirm.confirm_migration(plan, force=False)
             assert result is True

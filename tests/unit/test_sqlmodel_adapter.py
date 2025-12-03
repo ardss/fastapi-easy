@@ -1,6 +1,6 @@
-
 import pytest
 from typing import Optional
+
 try:
     from sqlmodel import SQLModel, Field
     from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
@@ -10,12 +10,14 @@ except ImportError:
 
 from fastapi_easy.backends.sqlmodel import SQLModelAdapter
 
+
 # Define a test model
 class Hero(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
     secret_name: str
     age: Optional[int] = None
+
 
 @pytest.fixture
 async def session_factory():
@@ -29,15 +31,14 @@ async def session_factory():
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 
-    async_session = sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     yield async_session
 
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.drop_all)
     await engine.dispose()
+
 
 @pytest.mark.asyncio
 async def test_sqlmodel_adapter_crud(session_factory):
@@ -83,6 +84,7 @@ async def test_sqlmodel_adapter_crud(session_factory):
     count = await adapter.count({})
     assert count == 0
 
+
 @pytest.mark.asyncio
 async def test_sqlmodel_adapter_filtering(session_factory):
     adapter = SQLModelAdapter(model=Hero, session_factory=session_factory)
@@ -92,13 +94,7 @@ async def test_sqlmodel_adapter_filtering(session_factory):
     await adapter.create({"name": "Rusty-Man", "secret_name": "Tommy Stark", "age": 48})
 
     # Filter by age > 20
-    filters = {
-        "age_filter": {
-            "field": "age",
-            "operator": "gt",
-            "value": 20
-        }
-    }
+    filters = {"age_filter": {"field": "age", "operator": "gt", "value": 20}}
 
     results = await adapter.get_all(filters=filters, sorts={}, pagination={})
     assert len(results) == 1

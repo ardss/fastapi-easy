@@ -123,14 +123,7 @@ class TestProjectionBuilder:
 
     def test_builder_chaining(self):
         """Test builder method chaining"""
-        projection = (
-            ProjectionBuilder()
-            .add("id")
-            .add("name")
-            .add("email")
-            .exclude("email")
-            .build()
-        )
+        projection = ProjectionBuilder().add("id").add("name").add("email").exclude("email").build()
 
         assert projection.get_fields() == ["id", "name"]
 

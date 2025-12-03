@@ -43,16 +43,12 @@ def app(jwt_auth):
 
     # Endpoint requiring one of multiple roles
     @app.get("/editor-or-admin")
-    async def editor_or_admin(
-        current_user: dict = Depends(require_role("editor", "admin"))
-    ):
+    async def editor_or_admin(current_user: dict = Depends(require_role("editor", "admin"))):
         return {"message": "editor or admin access"}
 
     # Endpoint requiring specific permission
     @app.get("/read-permission")
-    async def read_permission(
-        current_user: dict = Depends(require_permission("read"))
-    ):
+    async def read_permission(current_user: dict = Depends(require_permission("read"))):
         return {"message": "read permission"}
 
     # Endpoint requiring all roles

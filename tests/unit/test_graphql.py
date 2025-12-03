@@ -210,6 +210,7 @@ class TestGraphQLAdapter:
 
     def test_adapter_initialization(self):
         """Test adapter initialization"""
+
         class MockModel:
             pass
 
@@ -221,6 +222,7 @@ class TestGraphQLAdapter:
 
     def test_execute_query(self):
         """Test executing query"""
+
         class MockModel:
             pass
 
@@ -262,6 +264,7 @@ class TestCreateGraphQLSchema:
 
     def test_create_schema_from_model(self):
         """Test creating schema from model"""
+
         # Mock SQLAlchemy model
         class MockColumn:
             def __init__(self, name, type_str, nullable=False):
@@ -290,6 +293,7 @@ class TestCreateGraphQLSchema:
 
     def test_schema_has_default_queries(self):
         """Test schema has default queries"""
+
         class MockColumn:
             def __init__(self, name, type_str, nullable=False):
                 self.name = name
@@ -310,6 +314,7 @@ class TestCreateGraphQLSchema:
 
     def test_schema_has_default_mutations(self):
         """Test schema has default mutations"""
+
         class MockColumn:
             def __init__(self, name, type_str, nullable=False):
                 self.name = name
