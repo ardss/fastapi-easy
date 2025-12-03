@@ -26,6 +26,7 @@ from .core.hooks import HookRegistry
 TortoiseAdapter: Optional[Type[ORMAdapter]] = None
 try:
     from .backends import TortoiseAdapter as _TortoiseAdapter
+
     TortoiseAdapter = _TortoiseAdapter
 except ImportError:
     pass
@@ -33,6 +34,7 @@ except ImportError:
 SQLModelAdapter: Optional[Type[ORMAdapter]] = None
 try:
     from .backends import SQLModelAdapter as _SQLModelAdapter
+
     SQLModelAdapter = _SQLModelAdapter
 except ImportError:
     pass
@@ -40,6 +42,7 @@ except ImportError:
 MongoAdapter: Optional[Type[ORMAdapter]] = None
 try:
     from .backends import MongoAdapter as _MongoAdapter
+
     MongoAdapter = _MongoAdapter
 except ImportError:
     pass
