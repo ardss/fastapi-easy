@@ -116,34 +116,62 @@ uvicorn main:app --reload
 
 ### 🎓 新手入门
 - **[快速开始](getting-started.md)** - 5 分钟快速上手
-- **[用户指南](guides/index.md)** - 学习核心概念
+- **[教程](tutorials/index.md)** - 从基础到高级的完整学习路径
 
-### 🔧 用户指南（11 个主题）
-- [快速上手](tutorial/01-quick-start.md)
-- [数据库集成](tutorial/02-database-integration.md)
-- [查询和过滤](guides/querying.md)
-- [权限控制](guides/permissions-basic.md)
-- [错误处理](guides/error-handling.md)
-- [Hook 系统](guides/hooks-advanced.md)
-- [缓存系统](guides/caching.md)
-- [数据库迁移](guides/migrations.md)
-- [GraphQL 支持](guides/graphql-integration.md)
-- [WebSocket 支持](guides/websocket-integration.md)
-- [完整示例](tutorial/03-complete-example.md)
+### 📚 教程（13 个章节）
+
+**基础入门**
+- [快速上手](tutorials/01-basics/quick-start.md) - 创建第一个 CRUD API
+- [数据库集成](tutorials/01-basics/database-integration.md) - 连接真实数据库
+- [完整示例](tutorials/01-basics/complete-example.md) - 构建完整应用
+
+**核心功能**
+- [查询和过滤](tutorials/02-core-features/querying.md) - 9 种过滤操作符
+- [批量操作](tutorials/02-core-features/bulk-operations.md) - 批量创建、更新、删除
+- [错误处理](tutorials/02-core-features/error-handling.md) - 优雅的错误处理
+
+**高级特性**
+- [Hook 系统](tutorials/03-advanced/hooks.md) - 扩展 CRUD 操作
+- [缓存系统](tutorials/03-advanced/caching.md) - 多层缓存优化
+- [软删除](tutorials/03-advanced/soft-delete.md) - 逻辑删除
+- [审计日志](tutorials/03-advanced/audit-logging.md) - 操作历史追踪
+
+**扩展集成**
+- [GraphQL 支持](tutorials/04-integrations/graphql.md) - GraphQL API
+- [WebSocket 支持](tutorials/04-integrations/websocket.md) - 实时通信
+- [数据库迁移](tutorials/04-integrations/migrations.md) - 版本管理
+
+### 🔐 安全指南（7 个主题）
+- **[安全概览](security/index.md)** - 安全功能总览
+- [认证系统](security/authentication.md) - JWT 认证
+- [权限控制](security/permissions.md) - RBAC 权限管理
+- [多租户](security/multi-tenancy.md) - 数据隔离
+- [审计日志](security/audit-logging.md) - 操作审计
+- [速率限制](security/rate-limiting.md) - API 保护
+- [最佳实践](security/best-practices.md) - 安全建议
 
 ### 📚 参考文档
 - **[API 参考](reference/api.md)** - 完整的 API 文档
-- **[架构设计](reference/architecture.md)** - 系统架构
 - **[配置参数](reference/configuration.md)** - 所有配置选项
-- **[数据库适配器](adapters/index.md)** - ORM 适配器
+- **[Hook 参考](reference/hooks.md)** - Hook 系统参考
+- **[CLI 工具](reference/cli.md)** - 命令行工具
+- **[数据库适配器](reference/adapters/index.md)** - ORM 适配器
 
-### 🔐 安全指南
-- **[安全概览](security/index.md)** - 安全最佳实践
-- **[认证](security/authentication.md)** - 用户认证
-- **[权限](security/permissions.md)** - 权限管理
+### 🏗️ 架构设计
+- **[架构概览](architecture/index.md)** - 系统架构
+- [架构设计](architecture/design.md) - 设计理念
+- [数据流](architecture/data-flow.md) - 请求处理流程
+
+### 💡 最佳实践
+- **[最佳实践](best-practices/index.md)** - 生产环境指南
+- [代码组织](best-practices/code-organization.md) - 项目结构
+- [性能优化](best-practices/performance.md) - 性能提升
+- [测试策略](best-practices/testing.md) - 测试指南
+- [故障排查](best-practices/troubleshooting.md) - 问题解决
 
 ### 🤝 贡献
-- **[贡献指南](development/contributing.md)** - 如何贡献代码
+- **[贡献指南](contributing/index.md)** - 如何贡献代码
+- [开发测试](contributing/development.md) - 开发环境配置
 
 ---
 
