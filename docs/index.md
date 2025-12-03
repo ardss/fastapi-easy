@@ -43,6 +43,6 @@ app.include_router(router)
 
 ## 文档
 
-- **[用户指南](user-guide/index.md)** - 学习如何使用 FastAPI-Easy
+- **[用户指南](tutorial/01-quick-start.md)** - 学习如何使用 FastAPI-Easy
 - **[API 参考](reference/api.md)** - 完整的 API 文档
 - **[贡献](development/contributing.md)** - 如何贡献代码

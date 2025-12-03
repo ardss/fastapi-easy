@@ -146,8 +146,7 @@ nav:
   - 快速开始: getting-started.md
   
   - 用户指南:
-    - 概览: user-guide/index.md
-    - 基础概念: tutorial/01-quick-start.md
+    - 快速开始: tutorial/01-quick-start.md
     - 数据库集成: tutorial/02-database-integration.md
     - 查询和过滤: guides/querying.md
     - 权限控制: guides/permissions-basic.md
@@ -157,6 +156,7 @@ nav:
     - 数据库迁移: guides/migrations.md
     - GraphQL支持: guides/graphql-integration.md
     - WebSocket支持: guides/websocket-integration.md
+    - 完整示例: tutorial/03-complete-example.md
   
   - 参考:
     - API参考: reference/api.md
