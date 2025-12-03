@@ -348,9 +348,9 @@ async def after_migrate(context):
 
 ## 相关文档
 
-- [迁移引擎设计](../archive/SCHEMA_MIGRATION_ULTIMATE_DESIGN.md)
 - [错误处理](./error-handling.md)
 - [最佳实践](./best-practices.md)
+- [完整文档](https://fastapi-easy.readthedocs.io)
 
 ## 获取帮助
 
