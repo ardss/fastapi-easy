@@ -39,9 +39,9 @@
 ### 初学者
 
 1. 从[快速开始](../getting-started.md)开始
-2. 学习[快速上手](quick-start.md)基本概念
-3. 尝试[数据库集成](database-integration.md)
-4. 查看[完整示例](complete-example.md)
+2. 学习[快速上手](../tutorial/01-quick-start.md)基本概念
+3. 尝试[数据库集成](../tutorial/02-database-integration.md)
+4. 查看[完整示例](../tutorial/03-complete-example.md)
 
 ### 中级开发者
 
@@ -63,7 +63,7 @@
 
 ### 我想快速构建一个 CRUD API
 
-👉 从[快速开始](../getting-started.md)开始，然后查看[完整示例](complete-example.md)
+👉 从[快速开始](../getting-started.md)开始，然后查看[完整示例](../tutorial/03-complete-example.md)
 
 ### 我想添加过滤和排序
 

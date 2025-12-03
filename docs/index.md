@@ -119,8 +119,8 @@ uvicorn main:app --reload
 - **[用户指南](guides/index.md)** - 学习核心概念
 
 ### 🔧 用户指南（11 个主题）
-- [快速上手](guides/quick-start.md)
-- [数据库集成](guides/database-integration.md)
+- [快速上手](tutorial/01-quick-start.md)
+- [数据库集成](tutorial/02-database-integration.md)
 - [查询和过滤](guides/querying.md)
 - [权限控制](guides/permissions-basic.md)
 - [错误处理](guides/error-handling.md)
@@ -129,7 +129,7 @@ uvicorn main:app --reload
 - [数据库迁移](guides/migrations.md)
 - [GraphQL 支持](guides/graphql-integration.md)
 - [WebSocket 支持](guides/websocket-integration.md)
-- [完整示例](guides/complete-example.md)
+- [完整示例](tutorial/03-complete-example.md)
 
 ### 📚 参考文档
 - **[API 参考](reference/api.md)** - 完整的 API 文档

@@ -197,10 +197,10 @@ curl "http://localhost:8000/items?name=Apple&sort=-price&skip=0&limit=10"
 ## 📚 下一步
 
 - **[用户指南](guides/index.md)** - 深入学习各项功能
-- **[数据库集成](guides/database-integration.md)** - 学习如何集成不同的数据库
+- **[数据库集成](tutorial/02-database-integration.md)** - 学习如何集成不同的数据库
 - **[查询和过滤](guides/querying.md)** - 学习高级查询功能
 - **[API 参考](reference/api.md)** - 查看完整的 API 文档
-- **[完整示例](guides/complete-example.md)** - 查看完整的项目示例
+- **[完整示例](tutorial/03-complete-example.md)** - 查看完整的项目示例
 
 ---
 
