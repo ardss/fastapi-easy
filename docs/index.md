@@ -2,7 +2,7 @@
 
 一个现代化的 FastAPI CRUD 框架。用 **10 行代码** 替代 **240+ 行** 的重复代码。
 
-**[快速开始](getting-started.md)** | **[用户指南](user-guide/)** | **[API 参考](reference/api.md)** | **[贡献](development/contributing.md)**
+**[快速开始](getting-started.md)** | **[用户指南](tutorial/01-quick-start.md)** | **[API 参考](reference/api.md)** | **[贡献](development/contributing.md)**
 
 ---
 
