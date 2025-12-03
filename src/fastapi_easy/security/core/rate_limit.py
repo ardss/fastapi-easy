@@ -44,10 +44,10 @@ class LoginAttemptTracker:
         # Validate input
         if not isinstance(username, str):
             raise TypeError("username must be a string")
-        
+
         if len(username) > 255:
             raise ValueError("username too long (max 255 characters)")
-        
+
         if not username.strip():
             raise ValueError("username cannot be empty")
 
@@ -143,8 +143,7 @@ class LoginAttemptTracker:
 
         # Remove attempts older than reset duration
         self.attempts[username] = [
-            attempt for attempt in attempts
-            if now - attempt < self.reset_duration
+            attempt for attempt in attempts if now - attempt < self.reset_duration
         ]
 
     def reset_user(self, username: str) -> None:

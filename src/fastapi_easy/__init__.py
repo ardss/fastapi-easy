@@ -12,29 +12,37 @@ __version__ = "0.1.3"
 __author__ = "FastAPI-Easy Team"
 __license__ = "AGPL-3.0"
 
+from typing import Optional, Type
+
 from .app import FastAPIEasy
+from .backends import SQLAlchemyAdapter
 from .core.adapters import ORMAdapter
 from .core.config import CRUDConfig
 from .core.crud_router import CRUDRouter
 from .core.errors import AppError, ErrorCode
 from .core.hooks import HookRegistry
-from .backends import SQLAlchemyAdapter
 
 # Optional adapters
+TortoiseAdapter: Optional[Type[ORMAdapter]] = None
 try:
-    from .backends import TortoiseAdapter
+    from .backends import TortoiseAdapter as _TortoiseAdapter
+    TortoiseAdapter = _TortoiseAdapter
 except ImportError:
-    TortoiseAdapter = None
+    pass
 
+SQLModelAdapter: Optional[Type[ORMAdapter]] = None
 try:
-    from .backends import SQLModelAdapter
+    from .backends import SQLModelAdapter as _SQLModelAdapter
+    SQLModelAdapter = _SQLModelAdapter
 except ImportError:
-    SQLModelAdapter = None
+    pass
 
+MongoAdapter: Optional[Type[ORMAdapter]] = None
 try:
-    from .backends import MongoAdapter
+    from .backends import MongoAdapter as _MongoAdapter
+    MongoAdapter = _MongoAdapter
 except ImportError:
-    MongoAdapter = None
+    pass
 
 __all__ = [
     "CRUDRouter",

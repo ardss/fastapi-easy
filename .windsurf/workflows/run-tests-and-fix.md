@@ -1,3 +1,8 @@
+---
+description: 
+auto_execution_mode: 3
+---
+
 # /运行测试并修复
 
 在提交、合并或部署前自动运行测试并修复错误的工作流。

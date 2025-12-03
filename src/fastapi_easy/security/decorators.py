@@ -17,7 +17,7 @@ from .jwt_auth import JWTAuth
 logger = logging.getLogger(__name__)
 
 # Use ContextVar for thread-safe JWT auth instance
-_jwt_auth: ContextVar[Optional[JWTAuth]] = ContextVar('jwt_auth', default=None)
+_jwt_auth: ContextVar[Optional[JWTAuth]] = ContextVar("jwt_auth", default=None)
 
 
 def init_jwt_auth(

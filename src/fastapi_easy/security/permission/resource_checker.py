@@ -21,9 +21,7 @@ class ResourcePermissionChecker(Protocol):
         """
         ...
 
-    async def check_permission(
-        self, user_id: str, resource_id: str, permission: str
-    ) -> bool:
+    async def check_permission(self, user_id: str, resource_id: str, permission: str) -> bool:
         """Check if user has permission on resource
 
         Args:
@@ -77,9 +75,7 @@ class StaticResourceChecker:
 
         return is_owner
 
-    async def check_permission(
-        self, user_id: str, resource_id: str, permission: str
-    ) -> bool:
+    async def check_permission(self, user_id: str, resource_id: str, permission: str) -> bool:
         """Check if user has permission on resource
 
         Args:
@@ -149,9 +145,7 @@ class DatabaseResourceChecker:
 
         return False
 
-    async def check_permission(
-        self, user_id: str, resource_id: str, permission: str
-    ) -> bool:
+    async def check_permission(self, user_id: str, resource_id: str, permission: str) -> bool:
         """Check if user has permission on resource
 
         Args:
@@ -236,9 +230,7 @@ class CachedResourceChecker:
 
         return result
 
-    async def check_permission(
-        self, user_id: str, resource_id: str, permission: str
-    ) -> bool:
+    async def check_permission(self, user_id: str, resource_id: str, permission: str) -> bool:
         """Check if user has permission on resource with caching
 
         Args:

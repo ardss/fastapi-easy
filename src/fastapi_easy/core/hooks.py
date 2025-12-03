@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ExecutionContext:
     """Execution context for operations
-    
+
     Contains all information needed for operation execution.
     """
-    
+
     schema: Any  # Pydantic schema
     adapter: Any  # ORM adapter
     request: Any  # FastAPI request
@@ -29,10 +29,10 @@ class ExecutionContext:
 
 class HookRegistry:
     """Hook registry for managing operation hooks
-    
+
     Supports registering and triggering hooks for various events.
     """
-    
+
     # Supported hook events
     HOOK_EVENTS = {
         "before_create": "Before create operation",
@@ -46,54 +46,54 @@ class HookRegistry:
         "before_get_one": "Before get one operation",
         "after_get_one": "After get one operation",
     }
-    
+
     def __init__(self):
         """Initialize hook registry"""
         self.hooks: Dict[str, List[Callable]] = {}
-    
+
     def register(self, event: str, callback: Callable) -> None:
         """Register a hook callback
-        
+
         Args:
             event: Hook event name
             callback: Callback function
-            
+
         Raises:
             ValueError: If event is not supported
         """
         if event not in self.HOOK_EVENTS:
             raise ValueError(f"Unsupported hook event: {event}")
-        
+
         if event not in self.hooks:
             self.hooks[event] = []
-        
+
         self.hooks[event].append(callback)
-    
+
     def unregister(self, event: str, callback: Callable) -> None:
         """Unregister a hook callback
-        
+
         Args:
             event: Hook event name
             callback: Callback function
         """
         if event in self.hooks and callback in self.hooks[event]:
             self.hooks[event].remove(callback)
-    
+
     async def trigger(self, event: str, context: ExecutionContext) -> None:
         """Trigger all hooks for an event
-        
+
         Args:
             event: Hook event name
             context: Execution context
         """
         if event not in self.hooks:
             return
-        
+
         for callback in self.hooks[event]:
             if not callable(callback):
                 logger.warning(f"Hook callback {callback} is not callable, skipping")
                 continue
-            
+
             try:
                 # Support both async and sync callbacks
                 if asyncio.iscoroutinefunction(callback):
@@ -105,33 +105,38 @@ class HookRegistry:
                         await result
             except TypeError as e:
                 # Invalid callback signature
-                logger.error(f"Invalid callback signature for {callback.__name__} in event {event}: {str(e)}", exc_info=True)
+                logger.error(
+                    f"Invalid callback signature for {callback.__name__} in event {event}: {str(e)}",
+                    exc_info=True,
+                )
             except Exception as e:
                 # Log error but don't stop other hooks
-                logger.error(f"Error in hook {callback.__name__} for event {event}: {str(e)}", exc_info=True)
-    
+                logger.error(
+                    f"Error in hook {callback.__name__} for event {event}: {str(e)}", exc_info=True
+                )
+
     def get_hooks(self, event: str) -> List[Callable]:
         """Get all hooks for an event
-        
+
         Args:
             event: Hook event name
-            
+
         Returns:
             List of callbacks
         """
         return self.hooks.get(event, [])
-    
+
     def get_all(self) -> Dict[str, List[Callable]]:
         """Get all hooks
-        
+
         Returns:
             Dictionary of all hooks
         """
         return self.hooks.copy()
-    
+
     def clear(self, event: Optional[str] = None) -> None:
         """Clear hooks
-        
+
         Args:
             event: Specific event to clear, or None to clear all
         """

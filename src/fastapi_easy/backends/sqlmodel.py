@@ -6,14 +6,15 @@ from .sqlalchemy import SQLAlchemyAdapter
 try:
     from sqlmodel import SQLModel
 except ImportError:
-    SQLModel = Any # type: ignore
+    SQLModel = Any  # type: ignore
+
 
 class SQLModelAdapter(SQLAlchemyAdapter):
     """SQLModel async ORM adapter
-    
+
     Inherits from SQLAlchemyAdapter since SQLModel is built on top of SQLAlchemy.
     """
-    
+
     def __init__(
         self,
         model: Type[SQLModel],
@@ -21,7 +22,7 @@ class SQLModelAdapter(SQLAlchemyAdapter):
         pk_field: str = "id",
     ):
         """Initialize SQLModel adapter
-        
+
         Args:
             model: SQLModel class
             session_factory: Async session factory

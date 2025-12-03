@@ -152,8 +152,6 @@ class BatchPermissionCheckRequest(BaseModel):
             if len(perm) > 100:
                 raise ValueError("permission too long (max 100 characters)")
             if not re.match(r"^[a-z_]+$", perm):
-                raise ValueError(
-                    "permission contains invalid characters (allowed: lowercase, _)"
-                )
+                raise ValueError("permission contains invalid characters (allowed: lowercase, _)")
 
         return v

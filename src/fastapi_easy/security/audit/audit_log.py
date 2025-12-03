@@ -194,7 +194,9 @@ class AuditLogger:
             # Return most recent logs
             return [log.to_dict() for log in filtered_logs[-limit:]]
 
-    def get_user_activity(self, user_id: Optional[str] = None, username: Optional[str] = None, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_user_activity(
+        self, user_id: Optional[str] = None, username: Optional[str] = None, limit: int = 50
+    ) -> List[Dict[str, Any]]:
         """Get user activity logs
 
         Args:
@@ -219,9 +221,9 @@ class AuditLogger:
         """
         with self._lock:
             failed_logins = [
-                log for log in self.logs
-                if log.username == username
-                and log.event_type == AuditEventType.LOGIN_FAILURE
+                log
+                for log in self.logs
+                if log.username == username and log.event_type == AuditEventType.LOGIN_FAILURE
             ]
 
             return [log.to_dict() for log in failed_logins[-limit:]]

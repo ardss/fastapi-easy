@@ -33,10 +33,10 @@ logger = logging.getLogger(__name__)
 
 def _mask_database_url(database_url: str) -> str:
     """隐藏数据库 URL 中的敏感信息
-    
+
     Args:
         database_url: 数据库连接字符串
-        
+
     Returns:
         隐藏敏感信息后的 URL
     """
@@ -51,14 +51,9 @@ def _mask_database_url(database_url: str) -> str:
         else:
             netloc = parsed.netloc
 
-        masked = urlunparse((
-            parsed.scheme,
-            netloc,
-            parsed.path,
-            parsed.params,
-            parsed.query,
-            parsed.fragment
-        ))
+        masked = urlunparse(
+            (parsed.scheme, netloc, parsed.path, parsed.params, parsed.query, parsed.fragment)
+        )
         return masked
     except Exception:
         return "***"
@@ -93,12 +88,8 @@ def plan(database_url: str, dry_run: bool):
         CLIProgress.show_step(2, 3, "检测 Schema 变更...")
         # 根据 --dry-run 标志选择执行模式
         mode = ExecutionMode.DRY_RUN if dry_run else ExecutionMode.SAFE
-        migration_engine = MigrationEngine(
-            engine, metadata, mode=mode
-        )
-        plan_result = asyncio.run(
-            migration_engine.auto_migrate()
-        )
+        migration_engine = MigrationEngine(engine, metadata, mode=mode)
+        plan_result = asyncio.run(migration_engine.auto_migrate())
 
         CLIProgress.show_step(3, 3, "生成迁移计划...")
         click.echo("")
@@ -115,9 +106,7 @@ def plan(database_url: str, dry_run: bool):
         sys.exit(1)
     except Exception as e:
         click.echo("")
-        CLIErrorHandler.handle_error(
-            e, context="检测 Schema 变更"
-        )
+        CLIErrorHandler.handle_error(e, context="检测 Schema 变更")
         sys.exit(1)
 
 
@@ -144,7 +133,7 @@ def apply(database_url: str, mode: str, force: bool):
     try:
         # 转换 mode 字符串为 ExecutionMode 枚举
         mode_enum = ExecutionMode(mode)
-        
+
         click.echo("🚀 开始执行迁移...")
         click.echo(f"📝 模式: {mode_enum.value}")
         click.echo("")
@@ -153,22 +142,20 @@ def apply(database_url: str, mode: str, force: bool):
         engine = create_engine(database_url)
         metadata = MetaData()
         migration_engine = MigrationEngine(engine, metadata, mode=mode_enum)
-        
+
         # 步骤 1: 检测变更 (不执行)
         CLIProgress.show_step(1, 3, "检测 Schema 变更...")
-        changes = asyncio.run(
-            migration_engine.detector.detect_changes()
-        )
-        
+        changes = asyncio.run(migration_engine.detector.detect_changes())
+
         if not changes:
             click.echo("")
             CLIProgress.show_success("Schema 已是最新")
             return
-        
+
         # 步骤 2: 生成迁移计划
         CLIProgress.show_step(2, 3, "生成迁移计划...")
         plan_result = migration_engine.generator.generate_plan(changes)
-        
+
         click.echo("")
         click.echo(CLIFormatter.format_plan(plan_result))
         click.echo("")
@@ -184,14 +171,14 @@ def apply(database_url: str, mode: str, force: bool):
         plan_result, executed_migrations = asyncio.run(
             migration_engine.executor.execute_plan(plan_result, mode=mode_enum)
         )
-        
+
         # 记录已执行的迁移
         for migration in executed_migrations:
             migration_engine.storage.record_migration(
                 version=migration.version,
                 description=migration.description,
                 rollback_sql=migration.downgrade_sql,
-                risk_level=migration.risk_level.value
+                risk_level=migration.risk_level.value,
             )
 
         # 显示结果
@@ -243,20 +230,15 @@ def rollback(database_url: str, steps: int, force: bool):
         # 执行回滚
         engine = create_engine(database_url)
         migration_engine = MigrationEngine(engine, MetaData())
-        result = asyncio.run(
-            migration_engine.rollback(steps=steps, continue_on_error=False)
-        )
+        result = asyncio.run(migration_engine.rollback(steps=steps, continue_on_error=False))
 
         # 显示结果
         click.echo("")
         if result.success:
-            CLIProgress.show_success(
-                f"成功回滚 {result.data['rolled_back']} 个迁移"
-            )
+            CLIProgress.show_success(f"成功回滚 {result.data['rolled_back']} 个迁移")
         else:
             CLIProgress.show_warning(
-                f"回滚完成: {result.data['rolled_back']} 成功, "
-                f"{result.data['failed']} 失败"
+                f"回滚完成: {result.data['rolled_back']} 成功, " f"{result.data['failed']} 失败"
             )
             if result.errors:
                 click.echo("")

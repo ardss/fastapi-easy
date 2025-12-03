@@ -33,8 +33,7 @@ class PermissionCheckRequest(BaseModel):
             raise ValueError("user_id too long (max 255 characters)")
         if not re.match(r"^[a-zA-Z0-9_\-\.@]+$", v):
             raise ValueError(
-                "user_id contains invalid characters "
-                "(allowed: alphanumeric, _, -, ., @)"
+                "user_id contains invalid characters " "(allowed: alphanumeric, _, -, ., @)"
             )
         return v
 
@@ -57,10 +56,7 @@ class PermissionCheckRequest(BaseModel):
         if len(v) > 100:
             raise ValueError("permission too long (max 100 characters)")
         if not re.match(r"^[a-z_]+$", v):
-            raise ValueError(
-                "permission contains invalid characters "
-                "(allowed: lowercase, _)"
-            )
+            raise ValueError("permission contains invalid characters " "(allowed: lowercase, _)")
         return v
 
     @field_validator("resource_id")
@@ -86,8 +82,7 @@ class PermissionCheckRequest(BaseModel):
             raise ValueError("resource_id too long (max 255 characters)")
         if not re.match(r"^[a-zA-Z0-9_\-\.:/]+$", v):
             raise ValueError(
-                "resource_id contains invalid characters "
-                "(allowed: alphanumeric, _, -, ., :, /)"
+                "resource_id contains invalid characters " "(allowed: alphanumeric, _, -, ., :, /)"
             )
         return v
 
@@ -108,8 +103,7 @@ class ResourceOwnershipCheckRequest(BaseModel):
             raise ValueError("user_id too long (max 255 characters)")
         if not re.match(r"^[a-zA-Z0-9_\-\.@]+$", v):
             raise ValueError(
-                "user_id contains invalid characters "
-                "(allowed: alphanumeric, _, -, ., @)"
+                "user_id contains invalid characters " "(allowed: alphanumeric, _, -, ., @)"
             )
         return v
 
@@ -123,8 +117,7 @@ class ResourceOwnershipCheckRequest(BaseModel):
             raise ValueError("resource_id too long (max 255 characters)")
         if not re.match(r"^[a-zA-Z0-9_\-\.:/]+$", v):
             raise ValueError(
-                "resource_id contains invalid characters "
-                "(allowed: alphanumeric, _, -, ., :, /)"
+                "resource_id contains invalid characters " "(allowed: alphanumeric, _, -, ., :, /)"
             )
         return v
 
@@ -145,8 +138,7 @@ class BatchPermissionCheckRequest(BaseModel):
             raise ValueError("user_id too long (max 255 characters)")
         if not re.match(r"^[a-zA-Z0-9_\-\.@]+$", v):
             raise ValueError(
-                "user_id contains invalid characters "
-                "(allowed: alphanumeric, _, -, ., @)"
+                "user_id contains invalid characters " "(allowed: alphanumeric, _, -, ., @)"
             )
         return v
 
@@ -168,8 +160,7 @@ class BatchPermissionCheckRequest(BaseModel):
                 raise ValueError("permission too long (max 100 characters)")
             if not re.match(r"^[a-z_]+$", perm):
                 raise ValueError(
-                    "permission contains invalid characters "
-                    "(allowed: lowercase, _)"
+                    "permission contains invalid characters " "(allowed: lowercase, _)"
                 )
 
         return v

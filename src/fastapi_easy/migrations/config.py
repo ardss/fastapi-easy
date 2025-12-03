@@ -62,80 +62,62 @@ class MigrationConfig:
 
     def validate(self) -> None:
         """验证配置的有效性
-        
+
         Raises:
             ValueError: 配置无效时抛出异常
         """
         # 验证执行模式
         valid_modes = {"safe", "auto", "aggressive", "dry_run"}
         if self.mode not in valid_modes:
-            raise ValueError(
-                f"Invalid mode '{self.mode}'. "
-                f"Must be one of {valid_modes}"
-            )
+            raise ValueError(f"Invalid mode '{self.mode}'. " f"Must be one of {valid_modes}")
 
         # 验证超时时间
         if self.timeout_seconds <= 0:
-            raise ValueError(
-                f"timeout_seconds must be > 0, got {self.timeout_seconds}"
-            )
+            raise ValueError(f"timeout_seconds must be > 0, got {self.timeout_seconds}")
 
         if self.lock_timeout_seconds <= 0:
             raise ValueError(
-                f"lock_timeout_seconds must be > 0, "
-                f"got {self.lock_timeout_seconds}"
+                f"lock_timeout_seconds must be > 0, " f"got {self.lock_timeout_seconds}"
             )
 
         # 验证重试配置
         if self.lock_retry_count < 0:
-            raise ValueError(
-                f"lock_retry_count must be >= 0, "
-                f"got {self.lock_retry_count}"
-            )
+            raise ValueError(f"lock_retry_count must be >= 0, " f"got {self.lock_retry_count}")
 
         if self.lock_retry_delay_seconds < 0:
             raise ValueError(
-                f"lock_retry_delay_seconds must be >= 0, "
-                f"got {self.lock_retry_delay_seconds}"
+                f"lock_retry_delay_seconds must be >= 0, " f"got {self.lock_retry_delay_seconds}"
             )
 
         # 验证日志级别
         valid_levels = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
         if self.log_level.upper() not in valid_levels:
             raise ValueError(
-                f"Invalid log_level '{self.log_level}'. "
-                f"Must be one of {valid_levels}"
+                f"Invalid log_level '{self.log_level}'. " f"Must be one of {valid_levels}"
             )
 
         # 验证日志格式
         valid_formats = {"emoji", "plain", "json"}
         if self.log_format not in valid_formats:
             raise ValueError(
-                f"Invalid log_format '{self.log_format}'. "
-                f"Must be one of {valid_formats}"
+                f"Invalid log_format '{self.log_format}'. " f"Must be one of {valid_formats}"
             )
 
         # 验证批次大小
         if self.batch_size <= 0:
-            raise ValueError(
-                f"batch_size must be > 0, got {self.batch_size}"
-            )
+            raise ValueError(f"batch_size must be > 0, got {self.batch_size}")
 
         # 验证最大工作线程数
         if self.max_workers <= 0:
-            raise ValueError(
-                f"max_workers must be > 0, got {self.max_workers}"
-            )
+            raise ValueError(f"max_workers must be > 0, got {self.max_workers}")
 
         # 验证互斥选项
         if self.strict_mode and self.continue_on_error:
-            raise ValueError(
-                "strict_mode and continue_on_error are mutually exclusive"
-            )
+            raise ValueError("strict_mode and continue_on_error are mutually exclusive")
 
     def to_dict(self) -> dict:
         """转换为字典
-        
+
         Returns:
             配置字典
         """
@@ -159,10 +141,10 @@ class MigrationConfig:
     @classmethod
     def from_dict(cls, data: dict) -> "MigrationConfig":
         """从字典创建配置
-        
+
         Args:
             data: 配置字典
-        
+
         Returns:
             MigrationConfig 实例
         """
@@ -170,102 +152,91 @@ class MigrationConfig:
 
     def __repr__(self) -> str:
         """返回字符串表示"""
-        items = ", ".join(
-            f"{k}={v!r}" for k, v in self.to_dict().items()
-        )
+        items = ", ".join(f"{k}={v!r}" for k, v in self.to_dict().items())
         return f"MigrationConfig({items})"
-
 
     @classmethod
     def from_file(cls, filepath: str) -> "MigrationConfig":
         """从配置文件加载配置
-        
+
         Args:
             filepath: 配置文件路径 (JSON 或 YAML)
-        
+
         Returns:
             MigrationConfig 实例
-            
+
         Raises:
             FileNotFoundError: 文件不存在
             ValueError: 文件格式不支持
         """
         import json
         import os
-        
+
         if not os.path.exists(filepath):
             raise FileNotFoundError(f"配置文件不存在: {filepath}")
-        
+
         # 根据文件扩展名选择解析方式
-        if filepath.endswith('.json'):
-            with open(filepath, 'r', encoding='utf-8') as f:
+        if filepath.endswith(".json"):
+            with open(filepath, "r", encoding="utf-8") as f:
                 data = json.load(f)
-        elif filepath.endswith(('.yaml', '.yml')):
+        elif filepath.endswith((".yaml", ".yml")):
             try:
                 import yaml
-                with open(filepath, 'r', encoding='utf-8') as f:
+
+                with open(filepath, "r", encoding="utf-8") as f:
                     data = yaml.safe_load(f)
             except ImportError:
-                raise ValueError(
-                    "YAML 支持需要安装 PyYAML: pip install pyyaml"
-                )
+                raise ValueError("YAML 支持需要安装 PyYAML: pip install pyyaml")
         else:
-            raise ValueError(
-                f"不支持的文件格式: {filepath}. "
-                f"支持的格式: .json, .yaml, .yml"
-            )
-        
+            raise ValueError(f"不支持的文件格式: {filepath}. " f"支持的格式: .json, .yaml, .yml")
+
         return cls.from_dict(data)
-    
+
     def to_file(self, filepath: str) -> None:
         """保存配置到文件
-        
+
         Args:
             filepath: 配置文件路径 (JSON 或 YAML)
-            
+
         Raises:
             ValueError: 文件格式不支持
         """
         import json
         import os
-        
+
         # 创建目录如果不存在
-        os.makedirs(os.path.dirname(filepath) or '.', exist_ok=True)
-        
+        os.makedirs(os.path.dirname(filepath) or ".", exist_ok=True)
+
         # 根据文件扩展名选择保存方式
-        if filepath.endswith('.json'):
-            with open(filepath, 'w', encoding='utf-8') as f:
+        if filepath.endswith(".json"):
+            with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(self.to_dict(), f, indent=2, ensure_ascii=False)
-        elif filepath.endswith(('.yaml', '.yml')):
+        elif filepath.endswith((".yaml", ".yml")):
             try:
                 import yaml
-                with open(filepath, 'w', encoding='utf-8') as f:
+
+                with open(filepath, "w", encoding="utf-8") as f:
                     yaml.dump(self.to_dict(), f, default_flow_style=False)
             except ImportError:
-                raise ValueError(
-                    "YAML 支持需要安装 PyYAML: pip install pyyaml"
-                )
+                raise ValueError("YAML 支持需要安装 PyYAML: pip install pyyaml")
         else:
-            raise ValueError(
-                f"不支持的文件格式: {filepath}. "
-                f"支持的格式: .json, .yaml, .yml"
-            )
-    
+            raise ValueError(f"不支持的文件格式: {filepath}. " f"支持的格式: .json, .yaml, .yml")
+
     def merge(self, other: "MigrationConfig") -> "MigrationConfig":
         """合并两个配置
-        
+
         Args:
             other: 另一个配置对象
-        
+
         Returns:
             合并后的新配置对象 (当前配置作为基础)
         """
         merged_dict = self.to_dict()
         other_dict = other.to_dict()
-        
+
         # 合并配置，other 的值覆盖 self 的值
         merged_dict.update(other_dict)
-        
+
         return self.from_dict(merged_dict)
 
 

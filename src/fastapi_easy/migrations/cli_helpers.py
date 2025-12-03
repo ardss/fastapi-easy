@@ -74,9 +74,7 @@ class CLIFormatter:
             return "无迁移历史"
 
         lines = ["迁移历史:"]
-        lines.append(
-            "版本        | 描述              | 状态    | 时间"
-        )
+        lines.append("版本        | 描述              | 状态    | 时间")
         lines.append("-" * 60)
 
         for record in history:
@@ -85,10 +83,7 @@ class CLIFormatter:
             status = record.get("status", "")[:6]
             applied_at = str(record.get("applied_at", ""))[:10]
 
-            lines.append(
-                f"{version:12} | {description:15} | "
-                f"{status:6} | {applied_at}"
-            )
+            lines.append(f"{version:12} | {description:15} | " f"{status:6} | {applied_at}")
 
         return "\n".join(lines)
 
@@ -97,9 +92,7 @@ class CLIConfirm:
     """CLI 确认对话框"""
 
     @staticmethod
-    def confirm_migration(
-        plan: MigrationPlan, force: bool = False
-    ) -> bool:
+    def confirm_migration(plan: MigrationPlan, force: bool = False) -> bool:
         """确认执行迁移"""
         if force:
             return True

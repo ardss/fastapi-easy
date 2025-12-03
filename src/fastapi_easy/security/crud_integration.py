@@ -62,7 +62,7 @@ class ProtectedCRUDRouter:
         for route in self.crud_router.routes:
             if hasattr(route, "endpoint"):
                 original_endpoint = route.endpoint
-                
+
                 # Check if endpoint is async
                 if asyncio.iscoroutinefunction(original_endpoint):
                     route.endpoint = self._wrap_with_security_async(original_endpoint)
@@ -73,13 +73,12 @@ class ProtectedCRUDRouter:
         self, endpoint: Callable[..., Awaitable[Any]]
     ) -> Callable[..., Awaitable[Any]]:
         """Wrap async endpoint with security checks"""
+
         async def secured_endpoint(*args: Any, **kwargs: Any) -> Any:
             current_user = kwargs.get("current_user")
             if current_user is None:
                 try:
-                    current_user = await get_current_user(
-                        kwargs.get("authorization")
-                    )
+                    current_user = await get_current_user(kwargs.get("authorization"))
                 except TokenExpiredError as e:
                     logger.warning(f"Token expired: {e}")
                     if self.security_config.enable_auth:
@@ -91,15 +90,11 @@ class ProtectedCRUDRouter:
                 except (ValueError, TypeError, AttributeError) as e:
                     logger.error(f"Token payload error: {e}")
                     if self.security_config.enable_auth:
-                        raise HTTPException(
-                            status_code=401, detail="Unauthorized"
-                        )
+                        raise HTTPException(status_code=401, detail="Unauthorized")
                 except Exception as e:
                     logger.error(f"Unexpected error in get_current_user: {e}")
                     if self.security_config.enable_auth:
-                        raise HTTPException(
-                            status_code=401, detail="Unauthorized"
-                        )
+                        raise HTTPException(status_code=401, detail="Unauthorized")
 
             # Check roles
             if self.security_config.require_roles and current_user:
@@ -110,17 +105,18 @@ class ProtectedCRUDRouter:
             # Check permissions
             if self.security_config.require_permissions and current_user:
                 user_permissions = current_user.get("permissions", [])
-                if not any(perm in user_permissions for perm in self.security_config.require_permissions):
+                if not any(
+                    perm in user_permissions for perm in self.security_config.require_permissions
+                ):
                     raise HTTPException(status_code=403, detail="Insufficient permission")
 
             return await endpoint(*args, **kwargs)
 
         return secured_endpoint
 
-    def _wrap_with_security_sync(
-        self, endpoint: Callable[..., Any]
-    ) -> Callable[..., Any]:
+    def _wrap_with_security_sync(self, endpoint: Callable[..., Any]) -> Callable[..., Any]:
         """Wrap sync endpoint with security checks"""
+
         def secured_endpoint(*args: Any, **kwargs: Any) -> Any:
             # Sync endpoints cannot use async get_current_user
             # This is a limitation of FastAPI dependency injection

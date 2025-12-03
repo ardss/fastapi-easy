@@ -32,9 +32,9 @@ SkipLimit: TypeAlias = tuple[int, int]  # (skip, limit)
 
 class ORM(Protocol):
     """Protocol for ORM models"""
-    
+
     id: Any
-    
+
     def __init__(self, **kwargs: Any) -> None:
         """Initialize ORM model"""
         ...
@@ -42,15 +42,15 @@ class ORM(Protocol):
 
 class Adapter(Protocol):
     """Protocol for ORM adapters"""
-    
+
     async def create(self, data: CreateData) -> Any:
         """Create a new record"""
         ...
-    
+
     async def get_one(self, pk: Any) -> Optional[Any]:
         """Get a single record by primary key"""
         ...
-    
+
     async def get_all(
         self,
         filters: Optional[FilterDict] = None,
@@ -59,19 +59,19 @@ class Adapter(Protocol):
     ) -> List[Any]:
         """Get multiple records"""
         ...
-    
+
     async def update(self, pk: Any, data: UpdateData) -> Optional[Any]:
         """Update a record"""
         ...
-    
+
     async def delete_one(self, pk: Any) -> Optional[Any]:
         """Delete a single record"""
         ...
-    
+
     async def delete_all(self, filters: Optional[FilterDict] = None) -> int:
         """Delete multiple records"""
         ...
-    
+
     async def count(self, filters: Optional[FilterDict] = None) -> int:
         """Count records"""
         ...
@@ -79,7 +79,7 @@ class Adapter(Protocol):
 
 class Operation(Protocol):
     """Protocol for CRUD operations"""
-    
+
     async def execute(self, *args: Any, **kwargs: Any) -> Any:
         """Execute the operation"""
         ...
@@ -87,7 +87,7 @@ class Operation(Protocol):
 
 class Hook(Protocol):
     """Protocol for hooks"""
-    
+
     async def execute(self, context: Dict[str, Any]) -> Any:
         """Execute the hook"""
         ...
@@ -95,7 +95,7 @@ class Hook(Protocol):
 
 class Validator(Protocol):
     """Protocol for validators"""
-    
+
     def validate(self, value: Any) -> Any:
         """Validate a value"""
         ...
@@ -103,7 +103,7 @@ class Validator(Protocol):
 
 class Formatter(Protocol):
     """Protocol for response formatters"""
-    
+
     def format(self, data: ResponseData) -> Any:
         """Format response data"""
         ...
@@ -111,19 +111,19 @@ class Formatter(Protocol):
 
 class Cache(Protocol):
     """Protocol for cache backends"""
-    
+
     async def get(self, key: str) -> Optional[Any]:
         """Get value from cache"""
         ...
-    
+
     async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
         """Set value in cache"""
         ...
-    
+
     async def delete(self, key: str) -> None:
         """Delete value from cache"""
         ...
-    
+
     async def clear(self) -> None:
         """Clear all cache"""
         ...
@@ -131,19 +131,19 @@ class Cache(Protocol):
 
 class Logger(Protocol):
     """Protocol for loggers"""
-    
+
     def debug(self, message: str, extra_fields: Optional[Dict[str, Any]] = None) -> None:
         """Log debug message"""
         ...
-    
+
     def info(self, message: str, extra_fields: Optional[Dict[str, Any]] = None) -> None:
         """Log info message"""
         ...
-    
+
     def warning(self, message: str, extra_fields: Optional[Dict[str, Any]] = None) -> None:
         """Log warning message"""
         ...
-    
+
     def error(
         self,
         message: str,
@@ -156,7 +156,7 @@ class Logger(Protocol):
 
 class PermissionChecker(Protocol):
     """Protocol for permission checkers"""
-    
+
     def check_permission(self, context: Dict[str, Any], permission: str) -> None:
         """Check if permission is granted"""
         ...
@@ -164,7 +164,7 @@ class PermissionChecker(Protocol):
 
 class AuditLogger(Protocol):
     """Protocol for audit loggers"""
-    
+
     def log(
         self,
         entity_type: str,

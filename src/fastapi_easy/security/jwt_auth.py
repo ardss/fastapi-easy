@@ -10,7 +10,9 @@ logger = logging.getLogger(__name__)
 try:
     import jwt
 except ImportError:
-    raise ImportError("PyJWT is required for JWT authentication. Install it with: pip install PyJWT")
+    raise ImportError(
+        "PyJWT is required for JWT authentication. Install it with: pip install PyJWT"
+    )
 
 from .exceptions import (
     InvalidCredentialsError,

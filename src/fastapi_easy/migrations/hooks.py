@@ -19,15 +19,17 @@ logger = logging.getLogger(__name__)
 
 class HookTrigger(str, Enum):
     """Hook 触发时机"""
+
     BEFORE_DDL = "before_ddl"  # DDL 执行前
-    AFTER_DDL = "after_ddl"    # DDL 执行后
+    AFTER_DDL = "after_ddl"  # DDL 执行后
     BEFORE_DML = "before_dml"  # DML 执行前
-    AFTER_DML = "after_dml"    # DML 执行后
+    AFTER_DML = "after_dml"  # DML 执行后
 
 
 @dataclass
 class MigrationHook:
     """迁移 Hook 定义"""
+
     name: str
     version: str  # 迁移版本
     trigger: HookTrigger
@@ -73,8 +75,7 @@ class HookRegistry:
         self.hooks[trigger].sort(key=lambda h: h.priority, reverse=True)
 
         logger.info(
-            f"Registered hook: {name} (v{version}, {trigger.value}, "
-            f"priority={priority})"
+            f"Registered hook: {name} (v{version}, {trigger.value}, " f"priority={priority})"
         )
         return hook
 
@@ -82,13 +83,9 @@ class HookRegistry:
         """获取特定触发时机的所有 Hook"""
         return self.hooks[trigger]
 
-    def get_hooks_for_version(
-        self, version: str, trigger: HookTrigger
-    ) -> List[MigrationHook]:
+    def get_hooks_for_version(self, version: str, trigger: HookTrigger) -> List[MigrationHook]:
         """获取特定版本的 Hook"""
-        return [
-            h for h in self.hooks[trigger] if h.version == version
-        ]
+        return [h for h in self.hooks[trigger] if h.version == version]
 
     async def execute_hooks(
         self,
@@ -100,32 +97,20 @@ class HookRegistry:
         if context is None:
             context = {}
 
-        hooks = (
-            self.get_hooks_for_version(version, trigger)
-            if version
-            else self.get_hooks(trigger)
-        )
+        hooks = self.get_hooks_for_version(version, trigger) if version else self.get_hooks(trigger)
 
         results = {}
 
         for hook in hooks:
             try:
-                logger.debug(
-                    f"Executing hook: {hook.name} ({trigger.value})"
-                )
+                logger.debug(f"Executing hook: {hook.name} ({trigger.value})")
 
                 if hook.is_async:
                     # 异步 Hook 有超时控制
-                    result = await asyncio.wait_for(
-                        hook.callback(context),
-                        timeout=30
-                    )
+                    result = await asyncio.wait_for(hook.callback(context), timeout=30)
                 else:
                     # 同步 Hook 在线程池中运行，避免阻塞
-                    result = await asyncio.to_thread(
-                        hook.callback,
-                        context
-                    )
+                    result = await asyncio.to_thread(hook.callback, context)
 
                 results[hook.name] = result
                 logger.debug(f"Hook {hook.name} completed successfully")

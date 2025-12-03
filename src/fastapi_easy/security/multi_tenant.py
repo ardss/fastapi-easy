@@ -195,9 +195,7 @@ class MultiTenantResourceChecker:
             raise ValueError("Tenant context not set")
 
         # In real implementation, check permission within tenant
-        has_permission = await self.base_checker.check_permission(
-            user_id, resource_id, permission
-        )
+        has_permission = await self.base_checker.check_permission(user_id, resource_id, permission)
 
         logger.debug(
             f"Checked permission {permission} for user {user_id} on resource {resource_id} "

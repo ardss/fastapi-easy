@@ -9,7 +9,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 class AuditAction(str, Enum):
     """Audit action enumeration"""
-    
+
     CREATE = "CREATE"
     READ = "READ"
     UPDATE = "UPDATE"
@@ -19,7 +19,7 @@ class AuditAction(str, Enum):
 
 class AuditLog:
     """Audit log entry"""
-    
+
     def __init__(
         self,
         entity_type: str,
@@ -32,7 +32,7 @@ class AuditLog:
         user_agent: Optional[str] = None,
     ):
         """Initialize audit log entry
-        
+
         Args:
             entity_type: Type of entity (e.g., 'User', 'Product')
             entity_id: ID of the entity
@@ -51,7 +51,7 @@ class AuditLog:
         self.timestamp = timestamp or datetime.utcnow()
         self.ip_address = ip_address
         self.user_agent = user_agent
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
@@ -68,11 +68,11 @@ class AuditLog:
 
 class AuditLogger:
     """Audit logger for tracking operations"""
-    
+
     def __init__(self):
         """Initialize audit logger"""
         self.logs: List[AuditLog] = []
-    
+
     def log(
         self,
         entity_type: str,
@@ -84,7 +84,7 @@ class AuditLogger:
         user_agent: Optional[str] = None,
     ) -> AuditLog:
         """Log an action
-        
+
         Args:
             entity_type: Type of entity
             entity_id: ID of the entity
@@ -93,7 +93,7 @@ class AuditLogger:
             changes: Dictionary of changes
             ip_address: IP address
             user_agent: User agent
-            
+
         Returns:
             AuditLog entry
         """
@@ -108,7 +108,7 @@ class AuditLogger:
         )
         self.logs.append(log_entry)
         return log_entry
-    
+
     def get_logs(
         self,
         entity_type: Optional[str] = None,
@@ -117,66 +117,66 @@ class AuditLogger:
         action: Optional[str] = None,
     ) -> List[AuditLog]:
         """Get audit logs with optional filters
-        
+
         Args:
             entity_type: Filter by entity type
             entity_id: Filter by entity ID
             user_id: Filter by user ID
             action: Filter by action
-            
+
         Returns:
             List of matching audit logs
         """
         results = self.logs
-        
+
         if entity_type:
             results = [log for log in results if log.entity_type == entity_type]
-        
+
         if entity_id is not None:
             results = [log for log in results if log.entity_id == entity_id]
-        
+
         if user_id is not None:
             results = [log for log in results if log.user_id == user_id]
-        
+
         if action:
             results = [log for log in results if log.action == action]
-        
+
         return results
-    
+
     def get_entity_history(
         self,
         entity_type: str,
         entity_id: Any,
     ) -> List[AuditLog]:
         """Get complete history for an entity
-        
+
         Args:
             entity_type: Type of entity
             entity_id: ID of the entity
-            
+
         Returns:
             List of audit logs for the entity
         """
         return self.get_logs(entity_type=entity_type, entity_id=entity_id)
-    
+
     def get_user_actions(self, user_id: int) -> List[AuditLog]:
         """Get all actions performed by a user
-        
+
         Args:
             user_id: ID of the user
-            
+
         Returns:
             List of audit logs for the user
         """
         return self.get_logs(user_id=user_id)
-    
+
     def clear(self) -> None:
         """Clear all logs"""
         self.logs.clear()
-    
+
     def export_logs(self) -> List[Dict[str, Any]]:
         """Export all logs as dictionaries
-        
+
         Returns:
             List of log dictionaries
         """
@@ -185,7 +185,7 @@ class AuditLogger:
 
 class AuditLogContext:
     """Context for audit logging"""
-    
+
     def __init__(
         self,
         user_id: Optional[int] = None,
@@ -193,7 +193,7 @@ class AuditLogContext:
         user_agent: Optional[str] = None,
     ):
         """Initialize audit log context
-        
+
         Args:
             user_id: ID of the user
             ip_address: IP address
@@ -206,7 +206,7 @@ class AuditLogContext:
 
 class AuditLogConfig:
     """Configuration for audit logging"""
-    
+
     def __init__(
         self,
         enabled: bool = True,
@@ -216,7 +216,7 @@ class AuditLogConfig:
         retention_days: int = 90,
     ):
         """Initialize audit log configuration
-        
+
         Args:
             enabled: Enable audit logging
             log_reads: Log READ operations
@@ -233,43 +233,44 @@ class AuditLogConfig:
 
 class AuditLogDecorator:
     """Decorator for audit logging"""
-    
+
     def __init__(self, logger: AuditLogger, config: AuditLogConfig):
         """Initialize decorator
-        
+
         Args:
             logger: AuditLogger instance
             config: AuditLogConfig instance
         """
         self.logger = logger
         self.config = config
-    
+
     def track_operation(
         self,
         entity_type: str,
         action: str,
     ):
         """Decorator to track operations
-        
+
         Args:
             entity_type: Type of entity
             action: Action being performed
         """
+
         def decorator(func):
             async def wrapper(*args, **kwargs):
                 result = await func(*args, **kwargs)
-                
+
                 # Skip READ operations if not configured to log them
                 if action == AuditAction.READ and not self.config.log_reads:
                     return result
-                
+
                 # Extract entity ID from result
                 entity_id = None
-                if hasattr(result, 'id'):
+                if hasattr(result, "id"):
                     entity_id = result.id
-                elif isinstance(result, dict) and 'id' in result:
-                    entity_id = result['id']
-                
+                elif isinstance(result, dict) and "id" in result:
+                    entity_id = result["id"]
+
                 # Log the operation
                 if entity_id is not None:
                     self.logger.log(
@@ -277,9 +278,9 @@ class AuditLogDecorator:
                         entity_id=entity_id,
                         action=action,
                     )
-                
+
                 return result
-            
+
             return wrapper
-        
+
         return decorator

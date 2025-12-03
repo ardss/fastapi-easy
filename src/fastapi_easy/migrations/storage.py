@@ -11,36 +11,35 @@ from .types import OperationResult, RecordStatus
 
 logger = logging.getLogger(__name__)
 
+
 class MigrationStorage:
     """Manages migration history in the database"""
-    
+
     TABLE_NAME = "_fastapi_easy_migrations"
-    
+
     def __init__(self, engine: Engine):
         self.engine = engine
         self.metadata = MetaData()
-        
+
         # Define migration history table
         self.table = Table(
             self.TABLE_NAME,
             self.metadata,
-            Column('id', Integer, primary_key=True, autoincrement=True),
-            Column('version', String(100), unique=True, nullable=False),
-            Column('description', String(500)),
-            Column('applied_at', DateTime, default=datetime.now),
-            Column('rollback_sql', String(10000)),
-            Column('risk_level', String(20)),
-            Column('status', String(20), default='applied'),
+            Column("id", Integer, primary_key=True, autoincrement=True),
+            Column("version", String(100), unique=True, nullable=False),
+            Column("description", String(500)),
+            Column("applied_at", DateTime, default=datetime.now),
+            Column("rollback_sql", String(10000)),
+            Column("risk_level", String(20)),
+            Column("status", String(20), default="applied"),
         )
-    
+
     def initialize(self, max_retries: int = 3):
         """Create migration history table if it doesn't exist"""
         for attempt in range(max_retries):
             try:
                 self.metadata.create_all(self.engine, checkfirst=True)
-                logger.debug(
-                    f"✅ Migration history table '{self.TABLE_NAME}' ready"
-                )
+                logger.debug(f"✅ Migration history table '{self.TABLE_NAME}' ready")
                 return
             except Exception as e:
                 if attempt < max_retries - 1:
@@ -51,20 +50,15 @@ class MigrationStorage:
                     time.sleep(1)
                 else:
                     logger.error(
-                        f"Failed to initialize storage after "
-                        f"{max_retries} attempts: {e}"
+                        f"Failed to initialize storage after " f"{max_retries} attempts: {e}"
                     )
                     raise
 
     def record_migration(
-        self,
-        version: str,
-        description: str,
-        rollback_sql: str,
-        risk_level: str
+        self, version: str, description: str, rollback_sql: str, risk_level: str
     ) -> OperationResult:
         """Record a successful migration
-        
+
         Returns:
             OperationResult with success status
         """
@@ -83,20 +77,14 @@ class MigrationStorage:
                 )
             logger.info(f"📝 Recorded migration: {version}")
             return OperationResult(
-                success=True,
-                data={"version": version},
-                metadata={"idempotent": False}
+                success=True, data={"version": version}, metadata={"idempotent": False}
             )
 
         except IntegrityError:
             # 迁移已记录，这不是错误（幂等性）
-            logger.warning(
-                f"Migration {version} already recorded (idempotent)"
-            )
+            logger.warning(f"Migration {version} already recorded (idempotent)")
             return OperationResult(
-                success=True,
-                data={"version": version},
-                metadata={"idempotent": True}
+                success=True, data={"version": version}, metadata={"idempotent": True}
             )
 
         except Exception as e:
@@ -106,15 +94,11 @@ class MigrationStorage:
                 f"迁移已执行，但历史记录失败。"
                 f"这不会影响迁移本身，但会影响回滚功能。"
             )
-            return OperationResult(
-                success=False,
-                errors=[str(e)],
-                metadata={"non_blocking": True}
-            )
-    
+            return OperationResult(success=False, errors=[str(e)], metadata={"non_blocking": True})
+
     def get_applied_versions(self) -> List[str]:
         """Get list of applied migration versions
-        
+
         Returns:
             List of applied migration version strings
         """
@@ -122,9 +106,9 @@ class MigrationStorage:
             with self.engine.connect() as conn:
                 # 使用表对象而不是字符串格式化
                 result = conn.execute(
-                    self.table.select().where(
-                        self.table.c.status == RecordStatus.APPLIED.value
-                    ).order_by(self.table.c.applied_at)
+                    self.table.select()
+                    .where(self.table.c.status == RecordStatus.APPLIED.value)
+                    .order_by(self.table.c.applied_at)
                 )
                 return [row[0] for row in result]
         except (OperationalError, DatabaseError) as e:
@@ -140,9 +124,7 @@ class MigrationStorage:
             with self.engine.connect() as conn:
                 # 使用表对象而不是字符串格式化
                 result = conn.execute(
-                    self.table.select().order_by(
-                        self.table.c.applied_at.desc()
-                    ).limit(limit)
+                    self.table.select().order_by(self.table.c.applied_at.desc()).limit(limit)
                 )
                 return [
                     {

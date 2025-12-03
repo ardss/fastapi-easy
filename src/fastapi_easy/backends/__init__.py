@@ -9,6 +9,7 @@ _optional_backends = []
 # Tortoise is optional
 try:
     from .tortoise import TortoiseAdapter
+
     _optional_backends.append("TortoiseAdapter")
 except ImportError:
     pass
@@ -16,6 +17,7 @@ except ImportError:
 # SQLModel is optional
 try:
     from .sqlmodel import SQLModelAdapter
+
     _optional_backends.append("SQLModelAdapter")
 except ImportError:
     pass
@@ -23,6 +25,7 @@ except ImportError:
 # MongoDB (Motor) is optional
 try:
     from .mongo import MongoAdapter
+
     _optional_backends.append("MongoAdapter")
 except ImportError:
     pass

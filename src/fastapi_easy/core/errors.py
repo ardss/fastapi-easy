@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional
 
 class ErrorCode(str, Enum):
     """Standard error codes"""
-    
+
     NOT_FOUND = "NOT_FOUND"
     VALIDATION_ERROR = "VALIDATION_ERROR"
     PERMISSION_DENIED = "PERMISSION_DENIED"
@@ -18,15 +18,15 @@ class ErrorCode(str, Enum):
 
 class AppError(Exception):
     """Base application error class
-    
+
     All application errors should inherit from this class.
     """
-    
+
     code: ErrorCode
     status_code: int
     message: str
     details: Dict[str, Any]
-    
+
     def __init__(
         self,
         code: ErrorCode,
@@ -35,7 +35,7 @@ class AppError(Exception):
         details: Optional[Dict[str, Any]] = None,
     ):
         """Initialize AppError
-        
+
         Args:
             code: Error code
             status_code: HTTP status code
@@ -47,7 +47,7 @@ class AppError(Exception):
         self.message = message
         self.details = details or {}
         super().__init__(message)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert error to dictionary"""
         return {
@@ -59,7 +59,7 @@ class AppError(Exception):
 
 class NotFoundError(AppError):
     """Resource not found error"""
-    
+
     def __init__(self, resource: str, id: Any):
         super().__init__(
             code=ErrorCode.NOT_FOUND,
@@ -71,7 +71,7 @@ class NotFoundError(AppError):
 
 class ValidationError(AppError):
     """Validation error"""
-    
+
     def __init__(self, field: str, message: str):
         super().__init__(
             code=ErrorCode.VALIDATION_ERROR,
@@ -83,7 +83,7 @@ class ValidationError(AppError):
 
 class PermissionDeniedError(AppError):
     """Permission denied error"""
-    
+
     def __init__(self, action: str, reason: Optional[str] = None):
         super().__init__(
             code=ErrorCode.PERMISSION_DENIED,
@@ -95,7 +95,7 @@ class PermissionDeniedError(AppError):
 
 class ConflictError(AppError):
     """Resource conflict error"""
-    
+
     def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
         super().__init__(
             code=ErrorCode.CONFLICT,
@@ -107,7 +107,7 @@ class ConflictError(AppError):
 
 class UnauthorizedError(AppError):
     """Unauthorized error"""
-    
+
     def __init__(self, message: str = "Unauthorized"):
         super().__init__(
             code=ErrorCode.UNAUTHORIZED,
@@ -118,7 +118,7 @@ class UnauthorizedError(AppError):
 
 class BadRequestError(AppError):
     """Bad request error"""
-    
+
     def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
         super().__init__(
             code=ErrorCode.BAD_REQUEST,

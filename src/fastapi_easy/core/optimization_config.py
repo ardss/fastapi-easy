@@ -8,7 +8,7 @@ from pathlib import Path
 
 class OptimizationConfig:
     """Configuration for performance optimizations"""
-    
+
     def __init__(
         self,
         enable_cache: bool = True,
@@ -22,7 +22,7 @@ class OptimizationConfig:
         hit_rate_threshold: float = 50.0,
     ):
         """Initialize optimization config
-        
+
         Args:
             enable_cache: Enable caching
             enable_async: Enable async optimization
@@ -43,11 +43,11 @@ class OptimizationConfig:
         self.max_concurrent = max_concurrent
         self.enable_monitoring = enable_monitoring
         self.hit_rate_threshold = hit_rate_threshold
-    
+
     @classmethod
     def from_env(cls) -> "OptimizationConfig":
         """Load configuration from environment variables
-        
+
         Supported variables:
         - FASTAPI_EASY_ENABLE_CACHE (true/false)
         - FASTAPI_EASY_ENABLE_ASYNC (true/false)
@@ -58,59 +58,52 @@ class OptimizationConfig:
         - FASTAPI_EASY_MAX_CONCURRENT (int)
         - FASTAPI_EASY_ENABLE_MONITORING (true/false)
         - FASTAPI_EASY_HIT_RATE_THRESHOLD (float)
-        
+
         Returns:
             Configuration instance
         """
+
         def parse_bool(value: str, default: bool) -> bool:
             if value.lower() in ("true", "1", "yes"):
                 return True
             elif value.lower() in ("false", "0", "no"):
                 return False
             return default
-        
+
         return cls(
-            enable_cache=parse_bool(
-                os.getenv("FASTAPI_EASY_ENABLE_CACHE", "true"), True
-            ),
-            enable_async=parse_bool(
-                os.getenv("FASTAPI_EASY_ENABLE_ASYNC", "true"), True
-            ),
+            enable_cache=parse_bool(os.getenv("FASTAPI_EASY_ENABLE_CACHE", "true"), True),
+            enable_async=parse_bool(os.getenv("FASTAPI_EASY_ENABLE_ASYNC", "true"), True),
             l1_size=int(os.getenv("FASTAPI_EASY_L1_SIZE", "1000")),
             l1_ttl=int(os.getenv("FASTAPI_EASY_L1_TTL", "60")),
             l2_size=int(os.getenv("FASTAPI_EASY_L2_SIZE", "10000")),
             l2_ttl=int(os.getenv("FASTAPI_EASY_L2_TTL", "600")),
             max_concurrent=int(os.getenv("FASTAPI_EASY_MAX_CONCURRENT", "10")),
-            enable_monitoring=parse_bool(
-                os.getenv("FASTAPI_EASY_ENABLE_MONITORING", "true"), True
-            ),
-            hit_rate_threshold=float(
-                os.getenv("FASTAPI_EASY_HIT_RATE_THRESHOLD", "50.0")
-            ),
+            enable_monitoring=parse_bool(os.getenv("FASTAPI_EASY_ENABLE_MONITORING", "true"), True),
+            hit_rate_threshold=float(os.getenv("FASTAPI_EASY_HIT_RATE_THRESHOLD", "50.0")),
         )
-    
+
     @classmethod
     def from_file(cls, path: str) -> "OptimizationConfig":
         """Load configuration from JSON file
-        
+
         Args:
             path: Path to JSON configuration file
-            
+
         Returns:
             Configuration instance
         """
         config_path = Path(path)
         if not config_path.exists():
             raise FileNotFoundError(f"Configuration file not found: {path}")
-        
+
         with open(config_path) as f:
             config_dict = json.load(f)
-        
+
         return cls(**config_dict)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary
-        
+
         Returns:
             Configuration dictionary
         """
@@ -125,24 +118,24 @@ class OptimizationConfig:
             "enable_monitoring": self.enable_monitoring,
             "hit_rate_threshold": self.hit_rate_threshold,
         }
-    
+
     def to_json(self) -> str:
         """Convert configuration to JSON string
-        
+
         Returns:
             JSON string
         """
         return json.dumps(self.to_dict(), indent=2)
-    
+
     def save_to_file(self, path: str) -> None:
         """Save configuration to JSON file
-        
+
         Args:
             path: Path to save configuration
         """
         config_path = Path(path)
         config_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         with open(config_path, "w") as f:
             f.write(self.to_json())
 
@@ -153,12 +146,12 @@ def create_optimization_config(
     **kwargs,
 ) -> OptimizationConfig:
     """Create optimization configuration
-    
+
     Args:
         enable_cache: Enable caching
         enable_async: Enable async optimization
         **kwargs: Additional configuration parameters
-        
+
     Returns:
         Configuration instance
     """

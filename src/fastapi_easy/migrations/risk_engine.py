@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 class TypeCompatibility(Enum):
     """类型兼容性等级"""
+
     SAFE = "safe"  # 完全兼容，无数据丢失
     COMPATIBLE = "compatible"  # 兼容但可能改变数据
     INCOMPATIBLE = "incompatible"  # 不兼容，可能丢失数据
@@ -28,6 +29,7 @@ class TypeCompatibility(Enum):
 @dataclass
 class RiskRule:
     """风险规则"""
+
     name: str
     description: str
     condition: callable  # 返回 True 表示规则匹配
@@ -45,31 +47,25 @@ class TypeCompatibilityChecker:
         ("INTEGER", "SMALLINT"): TypeCompatibility.COMPATIBLE,
         ("BIGINT", "INTEGER"): TypeCompatibility.COMPATIBLE,
         ("SMALLINT", "INTEGER"): TypeCompatibility.SAFE,
-
         # 字符串类型
         ("VARCHAR", "VARCHAR"): TypeCompatibility.SAFE,
         ("VARCHAR", "TEXT"): TypeCompatibility.SAFE,
         ("TEXT", "VARCHAR"): TypeCompatibility.COMPATIBLE,
         ("CHAR", "VARCHAR"): TypeCompatibility.SAFE,
-
         # 数字类型
         ("DECIMAL", "NUMERIC"): TypeCompatibility.SAFE,
         ("FLOAT", "DOUBLE"): TypeCompatibility.SAFE,
         ("DOUBLE", "FLOAT"): TypeCompatibility.COMPATIBLE,
-
         # 日期类型
         ("DATE", "TIMESTAMP"): TypeCompatibility.COMPATIBLE,
         ("TIMESTAMP", "DATE"): TypeCompatibility.COMPATIBLE,
-
         # 布尔类型
         ("BOOLEAN", "INTEGER"): TypeCompatibility.COMPATIBLE,
         ("INTEGER", "BOOLEAN"): TypeCompatibility.COMPATIBLE,
     }
 
     @classmethod
-    def check_compatibility(
-        cls, old_type: str, new_type: str
-    ) -> TypeCompatibility:
+    def check_compatibility(cls, old_type: str, new_type: str) -> TypeCompatibility:
         """检查类型兼容性"""
         old_base = cls._normalize_type(old_type)
         new_base = cls._normalize_type(new_type)
@@ -110,7 +106,8 @@ class AdvancedRiskAssessor:
                 RiskRule(
                     name="sqlite_column_modification",
                     description="SQLite 不支持直接修改列，需要 Copy-Swap",
-                    condition=lambda change: change.type in [
+                    condition=lambda change: change.type
+                    in [
                         "change_column",
                         "drop_column",
                     ],
@@ -156,17 +153,12 @@ class AdvancedRiskAssessor:
         for rule in self.custom_rules:
             try:
                 if rule.condition(change):
-                    logger.info(
-                        f"Risk rule matched: {rule.name} - {rule.description}"
-                    )
+                    logger.info(f"Risk rule matched: {rule.name} - {rule.description}")
                     if rule.mitigation:
                         logger.warning(f"Mitigation: {rule.mitigation}")
                     return rule.risk_level
             except Exception as e:
-                logger.error(
-                    f"Error evaluating rule {rule.name}: {e}",
-                    exc_info=True
-                )
+                logger.error(f"Error evaluating rule {rule.name}: {e}", exc_info=True)
                 # 规则异常时使用保守的风险等级
                 return RiskLevel.HIGH
 

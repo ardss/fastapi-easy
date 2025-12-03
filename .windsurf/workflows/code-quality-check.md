@@ -1,3 +1,8 @@
+---
+description: 
+auto_execution_mode: 3
+---
+
 # /代码质量检查
 
 在提交前自动检查和改进代码质量的工作流。

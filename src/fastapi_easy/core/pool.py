@@ -7,45 +7,45 @@ from dataclasses import dataclass
 @dataclass
 class PoolConfig:
     """Database connection pool configuration"""
-    
+
     # Pool size settings
     pool_size: int = 20
     """Number of connections to maintain in the pool"""
-    
+
     max_overflow: int = 10
     """Maximum number of connections to create beyond pool_size"""
-    
+
     # Connection timeout settings
     pool_timeout: int = 30
     """Timeout for getting a connection from the pool (seconds)"""
-    
+
     connect_timeout: int = 10
     """Timeout for establishing a new connection (seconds)"""
-    
+
     # Connection lifecycle settings
     pool_recycle: int = 3600
     """Recycle connections after this many seconds (1 hour)"""
-    
+
     pool_pre_ping: bool = True
     """Test connections before using them"""
-    
+
     # Connection behavior
     echo: bool = False
     """Log all SQL statements"""
-    
+
     echo_pool: bool = False
     """Log connection pool events"""
-    
+
     # Advanced settings
     max_cached_statement_lifetime: int = 3600
     """Maximum lifetime of cached statements (seconds)"""
-    
+
     max_overflow_recycle: int = 1800
     """Recycle overflow connections after this many seconds"""
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert config to dictionary
-        
+
         Returns:
             Configuration dictionary
         """
@@ -65,110 +65,110 @@ class PoolConfig:
 
 class PoolConfigBuilder:
     """Builder for creating pool configurations"""
-    
+
     def __init__(self):
         """Initialize builder with default config"""
         self.config = PoolConfig()
-    
+
     def with_pool_size(self, size: int) -> "PoolConfigBuilder":
         """Set pool size
-        
+
         Args:
             size: Number of connections in pool
-            
+
         Returns:
             Self for chaining
         """
         self.config.pool_size = size
         return self
-    
+
     def with_max_overflow(self, overflow: int) -> "PoolConfigBuilder":
         """Set max overflow
-        
+
         Args:
             overflow: Maximum overflow connections
-            
+
         Returns:
             Self for chaining
         """
         self.config.max_overflow = overflow
         return self
-    
+
     def with_pool_timeout(self, timeout: int) -> "PoolConfigBuilder":
         """Set pool timeout
-        
+
         Args:
             timeout: Timeout in seconds
-            
+
         Returns:
             Self for chaining
         """
         self.config.pool_timeout = timeout
         return self
-    
+
     def with_connect_timeout(self, timeout: int) -> "PoolConfigBuilder":
         """Set connect timeout
-        
+
         Args:
             timeout: Timeout in seconds
-            
+
         Returns:
             Self for chaining
         """
         self.config.connect_timeout = timeout
         return self
-    
+
     def with_pool_recycle(self, seconds: int) -> "PoolConfigBuilder":
         """Set pool recycle time
-        
+
         Args:
             seconds: Recycle time in seconds
-            
+
         Returns:
             Self for chaining
         """
         self.config.pool_recycle = seconds
         return self
-    
+
     def with_pool_pre_ping(self, enabled: bool) -> "PoolConfigBuilder":
         """Enable/disable pool pre-ping
-        
+
         Args:
             enabled: Whether to enable pre-ping
-            
+
         Returns:
             Self for chaining
         """
         self.config.pool_pre_ping = enabled
         return self
-    
+
     def with_echo(self, enabled: bool) -> "PoolConfigBuilder":
         """Enable/disable SQL echo
-        
+
         Args:
             enabled: Whether to enable echo
-            
+
         Returns:
             Self for chaining
         """
         self.config.echo = enabled
         return self
-    
+
     def with_echo_pool(self, enabled: bool) -> "PoolConfigBuilder":
         """Enable/disable pool echo
-        
+
         Args:
             enabled: Whether to enable pool echo
-            
+
         Returns:
             Self for chaining
         """
         self.config.echo_pool = enabled
         return self
-    
+
     def build(self) -> PoolConfig:
         """Build the configuration
-        
+
         Returns:
             Pool configuration
         """
@@ -178,7 +178,7 @@ class PoolConfigBuilder:
 # Predefined configurations
 def development_pool_config() -> PoolConfig:
     """Get development environment pool configuration
-    
+
     Returns:
         Development pool configuration
     """
@@ -195,7 +195,7 @@ def development_pool_config() -> PoolConfig:
 
 def production_pool_config() -> PoolConfig:
     """Get production environment pool configuration
-    
+
     Returns:
         Production pool configuration
     """
@@ -213,7 +213,7 @@ def production_pool_config() -> PoolConfig:
 
 def high_performance_pool_config() -> PoolConfig:
     """Get high-performance pool configuration
-    
+
     Returns:
         High-performance pool configuration
     """
@@ -231,7 +231,7 @@ def high_performance_pool_config() -> PoolConfig:
 
 def testing_pool_config() -> PoolConfig:
     """Get testing environment pool configuration
-    
+
     Returns:
         Testing pool configuration
     """

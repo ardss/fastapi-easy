@@ -38,26 +38,20 @@ class PermissionEngine:
 
         # Wrap with cache if enabled
         if enable_cache:
-            self.permission_loader = CachedPermissionLoader(
-                permission_loader, cache_ttl=cache_ttl
-            )
+            self.permission_loader = CachedPermissionLoader(permission_loader, cache_ttl=cache_ttl)
         else:
             self.permission_loader = permission_loader
 
         # Wrap resource checker with cache if enabled
         if resource_checker and enable_cache:
-            self.resource_checker = CachedResourceChecker(
-                resource_checker, cache_ttl=cache_ttl
-            )
+            self.resource_checker = CachedResourceChecker(resource_checker, cache_ttl=cache_ttl)
         else:
             self.resource_checker = resource_checker
 
         self.enable_cache = enable_cache
         self.cache_ttl = cache_ttl
 
-        logger.debug(
-            f"PermissionEngine initialized (cache={enable_cache}, ttl={cache_ttl}s)"
-        )
+        logger.debug(f"PermissionEngine initialized (cache={enable_cache}, ttl={cache_ttl}s)")
 
     async def check_permission(
         self,
@@ -151,9 +145,7 @@ class PermissionEngine:
             if not isinstance(permission, str):
                 raise TypeError("All permissions must be strings")
 
-            has_permission = await self.check_permission(
-                user_id, permission, resource_id
-            )
+            has_permission = await self.check_permission(user_id, permission, resource_id)
             if not has_permission:
                 return False
 
@@ -185,9 +177,7 @@ class PermissionEngine:
             if not isinstance(permission, str):
                 raise TypeError("All permissions must be strings")
 
-            has_permission = await self.check_permission(
-                user_id, permission, resource_id
-            )
+            has_permission = await self.check_permission(user_id, permission, resource_id)
             if has_permission:
                 return True
 

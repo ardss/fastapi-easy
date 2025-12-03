@@ -130,14 +130,9 @@ class FileSchemaCacheProvider(SchemaCacheProvider):
                     # 定期让出控制权，防止阻塞事件循环
                     if count % batch_size == 0:
                         await asyncio.sleep(0)
-                        logger.debug(
-                            f"Cleared {count} cache files, "
-                            f"yielding control..."
-                        )
+                        logger.debug(f"Cleared {count} cache files, " f"yielding control...")
                 except OSError as e:
-                    logger.warning(
-                        f"Failed to delete cache file {cache_file}: {e}"
-                    )
+                    logger.warning(f"Failed to delete cache file {cache_file}: {e}")
                     continue
 
             logger.info(f"Cleared {count} cache files")
@@ -159,13 +154,12 @@ class RedisSchemaCacheProvider(SchemaCacheProvider):
         """初始化 Redis 连接"""
         try:
             import redis
+
             self.redis_client = redis.from_url(self.redis_url)
             self.redis_client.ping()
             logger.info(f"Redis cache connected: {self.redis_url}")
         except ImportError:
-            logger.warning(
-                "Redis not installed. Install with: pip install redis"
-            )
+            logger.warning("Redis not installed. Install with: pip install redis")
         except Exception as e:
             logger.warning(f"Failed to connect to Redis: {e}")
 
@@ -192,17 +186,13 @@ class RedisSchemaCacheProvider(SchemaCacheProvider):
             logger.error(f"Error reading from Redis: {e}")
             return None
 
-    async def set(
-        self, key: str, value: Dict[str, Any], ttl: int = 3600
-    ) -> bool:
+    async def set(self, key: str, value: Dict[str, Any], ttl: int = 3600) -> bool:
         """将缓存写入 Redis"""
         if not self.redis_client:
             return False
 
         try:
-            self.redis_client.setex(
-                key, ttl, json.dumps(value)
-            )
+            self.redis_client.setex(key, ttl, json.dumps(value))
             logger.debug(f"Cache set: {key} (TTL: {ttl}s)")
             return True
         except (TypeError, ValueError) as e:
@@ -292,9 +282,7 @@ class SchemaCacheManager:
         self, database_url: str, schema_name: str
     ) -> Optional[Dict[str, Any]]:
         """获取缓存的 Schema"""
-        cache_key = SchemaHashCalculator.create_cache_key(
-            database_url, schema_name
-        )
+        cache_key = SchemaHashCalculator.create_cache_key(database_url, schema_name)
         cached = await self.provider.get(cache_key)
 
         with self.stats_lock:
@@ -314,9 +302,7 @@ class SchemaCacheManager:
         schema_dict: Dict[str, Any],
     ) -> bool:
         """缓存 Schema"""
-        cache_key = SchemaHashCalculator.create_cache_key(
-            database_url, schema_name
-        )
+        cache_key = SchemaHashCalculator.create_cache_key(database_url, schema_name)
         cache_data = {
             "schema": schema_dict,
             "hash": SchemaHashCalculator.calculate_hash(schema_dict),
@@ -330,13 +316,9 @@ class SchemaCacheManager:
             logger.debug(f"Schema cached: {schema_name}")
         return success
 
-    async def invalidate_schema(
-        self, database_url: str, schema_name: str
-    ) -> bool:
+    async def invalidate_schema(self, database_url: str, schema_name: str) -> bool:
         """使 Schema 缓存失效"""
-        cache_key = SchemaHashCalculator.create_cache_key(
-            database_url, schema_name
-        )
+        cache_key = SchemaHashCalculator.create_cache_key(database_url, schema_name)
         success = await self.provider.delete(cache_key)
         if success:
             with self.stats_lock:
@@ -351,11 +333,7 @@ class SchemaCacheManager:
     def get_stats(self) -> Dict[str, int]:
         """获取缓存统计"""
         total = self.stats["hits"] + self.stats["misses"]
-        hit_rate = (
-            (self.stats["hits"] / total * 100)
-            if total > 0
-            else 0
-        )
+        hit_rate = (self.stats["hits"] / total * 100) if total > 0 else 0
 
         return {
             **self.stats,

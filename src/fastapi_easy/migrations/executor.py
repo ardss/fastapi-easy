@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class MigrationExecutor:
     """Executes migrations with transaction safety"""
-    
+
     def __init__(self, engine: Engine):
         """Initialize migration executor
 
@@ -22,10 +22,12 @@ class MigrationExecutor:
         self.engine = engine
         self.dialect = engine.dialect.name
 
-    async def execute_plan(self, plan: MigrationPlan, mode: ExecutionMode = ExecutionMode.SAFE) -> tuple[MigrationPlan, List[Migration]]:
+    async def execute_plan(
+        self, plan: MigrationPlan, mode: ExecutionMode = ExecutionMode.SAFE
+    ) -> tuple[MigrationPlan, List[Migration]]:
         """
         Execute a migration plan based on mode.
-        
+
         Args:
             plan: The migration plan to execute
             mode: Execution mode (ExecutionMode enum)
@@ -33,7 +35,7 @@ class MigrationExecutor:
                 - AUTO: Execute SAFE and MEDIUM automatically
                 - AGGRESSIVE: Execute all migrations
                 - DRY_RUN: Don't execute, just log
-        
+
         Returns:
             Tuple of (updated plan, list of successfully executed migrations)
         """
@@ -90,10 +92,12 @@ class MigrationExecutor:
         else:
             # Warn about unexecuted risky migrations
             if risky_migrations:
-                logger.warning(f"{len(risky_migrations)} high-risk migrations require manual review")
+                logger.warning(
+                    f"{len(risky_migrations)} high-risk migrations require manual review"
+                )
                 for migration in risky_migrations:
                     logger.warning(f"- {migration.description}")
-        
+
         plan.status = "completed" if len(executed) == len(plan.migrations) else "partial"
         return plan, executed
 
@@ -111,9 +115,7 @@ class MigrationExecutor:
 
         # Run in thread pool to avoid blocking
         try:
-            await asyncio.to_thread(
-                self._execute_sql_sync, migration.upgrade_sql
-            )
+            await asyncio.to_thread(self._execute_sql_sync, migration.upgrade_sql)
             logger.info(f"成功: {migration.description}")
             return True
         except (OSError, IOError) as e:
@@ -131,15 +133,13 @@ class MigrationExecutor:
 
     async def _attempt_rollback(self, migration: Migration) -> None:
         """尝试执行回滚 SQL
-        
+
         Args:
             migration: 迁移对象
         """
         try:
             logger.info(f"尝试回滚: {migration.description}")
-            await asyncio.to_thread(
-                self._execute_sql_sync, migration.downgrade_sql
-            )
+            await asyncio.to_thread(self._execute_sql_sync, migration.downgrade_sql)
             logger.info(f"回滚成功: {migration.description}")
         except (OSError, IOError) as e:
             logger.error(f"回滚失败 (I/O error): {migration.description} - {e}")
@@ -148,10 +148,10 @@ class MigrationExecutor:
 
     def _execute_sql_sync(self, sql: str) -> None:
         """Execute SQL synchronously within a transaction
-        
+
         Args:
             sql: SQL string to execute
-            
+
         Raises:
             Exception: If SQL execution fails
         """
@@ -168,22 +168,22 @@ class MigrationExecutor:
             logger.error(f"Migration failed: {e}")
             # 自动回滚
             raise
-    
+
     def _split_sql_statements(self, sql: str) -> List[str]:
         """Split SQL into individual statements, handling multi-line statements
-        
+
         Args:
             sql: SQL string to split
-            
+
         Returns:
             List of individual SQL statements
         """
         # Remove leading/trailing whitespace and split by semicolon
         statements = []
-        for stmt in sql.split(';'):
+        for stmt in sql.split(";"):
             stmt = stmt.strip()
-            if stmt and not stmt.upper().startswith('--'):  # Skip comments
+            if stmt and not stmt.upper().startswith("--"):  # Skip comments
                 # Skip BEGIN/COMMIT keywords as they're handled by SQLAlchemy
-                if stmt.upper() not in ['BEGIN', 'BEGIN TRANSACTION', 'COMMIT']:
+                if stmt.upper() not in ["BEGIN", "BEGIN TRANSACTION", "COMMIT"]:
                     statements.append(stmt)
         return statements

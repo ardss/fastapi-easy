@@ -5,7 +5,7 @@ from typing import Dict, Any, List
 
 class FilterParser:
     """Parser for filter query parameters
-    
+
     Supports multiple filter operators:
     - exact: field=value
     - ne: field__ne=value (not equal)
@@ -17,7 +17,7 @@ class FilterParser:
     - like: field__like=pattern (contains)
     - ilike: field__ilike=pattern (case-insensitive contains)
     """
-    
+
     OPERATORS = {
         "ne": "not_equal",
         "gt": "greater_than",
@@ -28,7 +28,7 @@ class FilterParser:
         "like": "contains",
         "ilike": "case_insensitive_contains",
     }
-    
+
     @classmethod
     def parse(
         cls,
@@ -36,24 +36,24 @@ class FilterParser:
         allowed_fields: List[str] = None,
     ) -> Dict[str, Any]:
         """Parse filter query parameters
-        
+
         Args:
             query_params: Query parameters from request
             allowed_fields: List of allowed filter fields
-            
+
         Returns:
             Dictionary of parsed filters
         """
         filters = {}
-        
+
         for key, value in query_params.items():
             if key.startswith("_"):
                 continue
-            
+
             # Check if field is allowed
             if allowed_fields and key.split("__")[0] not in allowed_fields:
                 continue
-            
+
             # Parse field and operator
             if "__" in key:
                 field, operator = key.rsplit("__", 1)
@@ -77,16 +77,16 @@ class FilterParser:
                     "operator": "exact",
                     "value": value,
                 }
-        
+
         return filters
-    
+
     @classmethod
     def get_operator_description(cls, operator: str) -> str:
         """Get description of an operator
-        
+
         Args:
             operator: Operator name
-            
+
         Returns:
             Operator description
         """

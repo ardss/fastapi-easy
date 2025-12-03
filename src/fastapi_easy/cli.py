@@ -19,18 +19,19 @@ def cli():
 def init(name: str, path: str):
     """Initialize a new FastAPI-Easy project"""
     project_path = Path(path) / name
-    
+
     try:
         project_path.mkdir(parents=True, exist_ok=True)
-        
+
         # Create directory structure
         (project_path / "src").mkdir(exist_ok=True)
         (project_path / "tests").mkdir(exist_ok=True)
         (project_path / "docs").mkdir(exist_ok=True)
-        
+
         # Create main.py
         main_py = project_path / "src" / "main.py"
-        main_py.write_text("""from fastapi import FastAPI
+        main_py.write_text(
+            """from fastapi import FastAPI
 from fastapi_easy import CRUDRouter
 
 app = FastAPI()
@@ -40,20 +41,24 @@ app = FastAPI()
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-""")
-        
+"""
+        )
+
         # Create requirements.txt
         requirements = project_path / "requirements.txt"
-        requirements.write_text("""fastapi>=0.100.0
+        requirements.write_text(
+            """fastapi>=0.100.0
 fastapi-easy>=1.0.0
 sqlalchemy>=2.0.0
 uvicorn>=0.23.0
 pydantic>=2.0.0
-""")
-        
+"""
+        )
+
         # Create README.md
         readme = project_path / "README.md"
-        readme.write_text(f"""# {name}
+        readme.write_text(
+            f"""# {name}
 
 FastAPI-Easy project: {name}
 
@@ -68,10 +73,11 @@ pip install -r requirements.txt
 ```bash
 python src/main.py
 ```
-""")
-        
+"""
+        )
+
         click.secho(f"✅ Project '{name}' created successfully at {project_path}", fg="green")
-        
+
     except Exception as e:
         click.secho(f"❌ Error creating project: {e}", fg="red")
         sys.exit(1)
@@ -84,7 +90,7 @@ def generate(model: str, fields: str):
     """Generate CRUD router for a model"""
     try:
         field_list = [f.strip() for f in fields.split(",")]
-        
+
         # Generate model code
         model_code = f"""from pydantic import BaseModel
 from typing import Optional
@@ -92,10 +98,10 @@ from typing import Optional
 class {model}(BaseModel):
     id: Optional[int] = None
 """
-        
+
         for field in field_list:
             model_code += f"    {field}: str\n"
-        
+
         # Generate schema code
         schema_code = f"""from pydantic import BaseModel, ConfigDict
 
@@ -104,10 +110,10 @@ class {model}Schema(BaseModel):
     
     id: int
 """
-        
+
         for field in field_list:
             schema_code += f"    {field}: str\n"
-        
+
         # Generate router code
         router_code = f"""from fastapi import APIRouter
 from fastapi_easy import CRUDRouter
@@ -128,16 +134,16 @@ router = CRUDRouter(
     tags=["{model}"],
 )
 """
-        
+
         click.echo("\n=== Model Code ===")
         click.echo(model_code)
         click.echo("\n=== Schema Code ===")
         click.echo(schema_code)
         click.echo("\n=== Router Code ===")
         click.echo(router_code)
-        
+
         click.secho("\n✅ Code generated successfully", fg="green")
-        
+
     except Exception as e:
         click.secho(f"❌ Error generating code: {e}", fg="red")
         sys.exit(1)
@@ -207,9 +213,10 @@ def status(format: str):
             "Response formatters",
         ],
     }
-    
+
     if format == "json":
         import json
+
         click.echo(json.dumps(status_info, indent=2))
     else:
         click.echo("FastAPI-Easy Status")
@@ -219,10 +226,10 @@ def status(format: str):
         click.echo(f"Tests: {status_info['tests']}")
         click.echo(f"Coverage: {status_info['coverage']}")
         click.echo(f"\nSupported ORMs:")
-        for orm in status_info['orms']:
+        for orm in status_info["orms"]:
             click.echo(f"  - {orm}")
         click.echo(f"\nFeatures:")
-        for feature in status_info['features']:
+        for feature in status_info["features"]:
             click.echo(f"  ✅ {feature}")
 
 

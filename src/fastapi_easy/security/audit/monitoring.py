@@ -60,9 +60,7 @@ class PermissionCheckMetrics:
         Returns:
             Dictionary with metrics
         """
-        avg_duration = (
-            self.total_duration / self.total_checks if self.total_checks > 0 else 0
-        )
+        avg_duration = self.total_duration / self.total_checks if self.total_checks > 0 else 0
         cache_hit_rate = (
             self.cache_hits / (self.cache_hits + self.cache_misses) * 100
             if (self.cache_hits + self.cache_misses) > 0
@@ -76,7 +74,9 @@ class PermissionCheckMetrics:
             "error_checks": self.error_checks,
             "total_duration": f"{self.total_duration:.4f}s",
             "avg_duration": f"{avg_duration:.6f}s",
-            "min_duration": f"{self.min_duration:.6f}s" if self.min_duration != float("inf") else "N/A",
+            "min_duration": (
+                f"{self.min_duration:.6f}s" if self.min_duration != float("inf") else "N/A"
+            ),
             "max_duration": f"{self.max_duration:.6f}s",
             "cache_hits": self.cache_hits,
             "cache_misses": self.cache_misses,
@@ -135,17 +135,19 @@ class MonitoredPermissionEngine:
                 loader = self.base_engine.permission_loader
                 if hasattr(loader, "cache"):
                     # Get current cache state before check
-                    cache_size_before = len(loader.cache.cache) if hasattr(loader.cache, "cache") else 0
+                    cache_size_before = (
+                        len(loader.cache.cache) if hasattr(loader.cache, "cache") else 0
+                    )
 
-            result = await self.base_engine.check_permission(
-                user_id, permission, resource_id
-            )
+            result = await self.base_engine.check_permission(user_id, permission, resource_id)
 
             # Check if result is from cache
             if hasattr(self.base_engine, "permission_loader"):
                 loader = self.base_engine.permission_loader
                 if hasattr(loader, "cache"):
-                    cache_size_after = len(loader.cache.cache) if hasattr(loader.cache, "cache") else 0
+                    cache_size_after = (
+                        len(loader.cache.cache) if hasattr(loader.cache, "cache") else 0
+                    )
                     cache_hit = cache_size_after == cache_size_before
 
             success = True
@@ -169,9 +171,7 @@ class MonitoredPermissionEngine:
                 f"cache_hit={cache_hit}, success={success}"
             )
 
-    async def check_all_permissions(
-        self, user_id: str, permissions: list
-    ) -> bool:
+    async def check_all_permissions(self, user_id: str, permissions: list) -> bool:
         """Check all permissions with monitoring
 
         Args:
@@ -185,9 +185,7 @@ class MonitoredPermissionEngine:
         error = False
 
         try:
-            result = await self.base_engine.check_all_permissions(
-                user_id, permissions
-            )
+            result = await self.base_engine.check_all_permissions(user_id, permissions)
             return result
 
         except Exception as e:
@@ -204,9 +202,7 @@ class MonitoredPermissionEngine:
                 cache_hit=False,
             )
 
-    async def check_any_permission(
-        self, user_id: str, permissions: list
-    ) -> bool:
+    async def check_any_permission(self, user_id: str, permissions: list) -> bool:
         """Check any permission with monitoring
 
         Args:
@@ -220,9 +216,7 @@ class MonitoredPermissionEngine:
         error = False
 
         try:
-            result = await self.base_engine.check_any_permission(
-                user_id, permissions
-            )
+            result = await self.base_engine.check_any_permission(user_id, permissions)
             return result
 
         except Exception as e:

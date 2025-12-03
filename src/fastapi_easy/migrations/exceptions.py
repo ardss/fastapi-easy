@@ -3,32 +3,26 @@
 
 统一的异常类型，便于错误处理和诊断
 """
+
 import re
 
 
 def _sanitize_error_message(error: str) -> str:
     """清理错误消息中的敏感信息
-    
+
     Args:
         error: 原始错误消息
-        
+
     Returns:
         清理后的错误消息
     """
     # 移除数据库连接信息
     sanitized = re.sub(
-        r'(password|passwd|pwd)\s*=\s*[^\s,;]+',
-        r'\1=***',
-        error,
-        flags=re.IGNORECASE
+        r"(password|passwd|pwd)\s*=\s*[^\s,;]+", r"\1=***", error, flags=re.IGNORECASE
     )
 
     # 移除 IP 地址和主机名
-    sanitized = re.sub(
-        r'\b(?:\d{1,3}\.){3}\d{1,3}\b',
-        '***',
-        sanitized
-    )
+    sanitized = re.sub(r"\b(?:\d{1,3}\.){3}\d{1,3}\b", "***", sanitized)
 
     return sanitized
 
@@ -93,7 +87,7 @@ class MigrationExecutionError(MigrationError):
 
     def __init__(self, migration_version: str, sql_error: str):
         message = f"迁移执行失败 (版本: {migration_version})"
-        
+
         # 根据错误类型提供具体建议
         if "permission" in sql_error.lower():
             suggestion = (
@@ -124,7 +118,7 @@ class MigrationExecutionError(MigrationError):
                 "  3. 检查数据库状态: fastapi-easy migrate status\n"
                 f"  4. 原始错误: {sql_error}"
             )
-        
+
         super().__init__(message, suggestion)
 
 
@@ -139,16 +133,18 @@ class LockAcquisitionError(MigrationError):
             "  1. 等待另一个实例完成 (通常需要几分钟)\n"
             "  2. 如果卡住，手动清理锁:\n"
         )
-        
+
         if lock_type == "file":
             suggestion += f"     rm {lock_info.get('file', '.fastapi_easy_migration.lock')}\n"
         elif lock_type == "postgresql":
             suggestion += f"     SELECT pg_advisory_unlock({lock_info.get('id', 1)})\n"
         elif lock_type == "mysql":
-            suggestion += f"     SELECT RELEASE_LOCK('{lock_info.get('name', 'fastapi_easy_migration')}')\n"
-        
+            suggestion += (
+                f"     SELECT RELEASE_LOCK('{lock_info.get('name', 'fastapi_easy_migration')}')\n"
+            )
+
         suggestion += "  3. 重新运行迁移"
-        
+
         super().__init__(message, suggestion)
 
 
@@ -172,7 +168,7 @@ class CacheError(MigrationError):
 
     def __init__(self, operation: str, reason: str):
         message = f"缓存操作失败 ({operation})"
-        
+
         if "permission" in reason.lower():
             suggestion = (
                 "权限错误 - 解决方案:\n"
@@ -194,7 +190,7 @@ class CacheError(MigrationError):
                 "  2. 检查缓存目录权限\n"
                 "  3. 查看详细日志: 设置 LOG_LEVEL=DEBUG"
             )
-        
+
         super().__init__(message, suggestion)
 
 

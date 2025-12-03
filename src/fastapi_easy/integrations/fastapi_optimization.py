@@ -9,7 +9,7 @@ from ..core.optimized_adapter import OptimizedSQLAlchemyAdapter
 
 class OptimizationConfig:
     """Configuration for FastAPI optimization integration"""
-    
+
     def __init__(
         self,
         enable_cache: bool = True,
@@ -20,7 +20,7 @@ class OptimizationConfig:
         enable_health_check: bool = True,
     ):
         """Initialize optimization config
-        
+
         Args:
             enable_cache: Enable caching
             enable_async: Enable async optimization
@@ -39,10 +39,10 @@ class OptimizationConfig:
 
 class FastAPIOptimization:
     """FastAPI optimization integration"""
-    
+
     def __init__(self, app: FastAPI, config: Optional[OptimizationConfig] = None):
         """Initialize FastAPI optimization
-        
+
         Args:
             app: FastAPI application
             config: Optimization configuration
@@ -51,10 +51,10 @@ class FastAPIOptimization:
         self.config = config or OptimizationConfig()
         self.adapters: Dict[str, OptimizedSQLAlchemyAdapter] = {}
         self.monitors = {}
-        
+
         self._setup_hooks()
         self._setup_health_check()
-    
+
     def _setup_hooks(self) -> None:
         """Setup application lifecycle hooks"""
         from contextlib import asynccontextmanager
@@ -66,10 +66,7 @@ class FastAPIOptimization:
             for adapter_name, adapter in self.adapters.items():
                 if self.config.enable_cache:
                     warmed = await adapter.warmup_cache(limit=1000)
-                    print(
-                        f"[Optimization] Warmed up {warmed} items "
-                        f"for {adapter_name}"
-                    )
+                    print(f"[Optimization] Warmed up {warmed} items " f"for {adapter_name}")
             yield
             # Shutdown
             for adapter_name, adapter in self.adapters.items():
@@ -77,12 +74,12 @@ class FastAPIOptimization:
                 print(f"[Optimization] Cleared cache for {adapter_name}")
 
         self.app.router.lifespan_context = lifespan
-    
+
     def _setup_health_check(self) -> None:
         """Setup health check endpoint"""
         if not self.config.enable_health_check:
             return
-        
+
         @self.app.get("/health/optimization")
         async def health_check():
             """Health check endpoint for optimization"""
@@ -90,7 +87,7 @@ class FastAPIOptimization:
                 "status": "healthy",
                 "adapters": {},
             }
-            
+
             for adapter_name, adapter in self.adapters.items():
                 stats = adapter.get_cache_stats()
                 if stats:
@@ -100,28 +97,28 @@ class FastAPIOptimization:
                         "l1_size": stats.get("l1_stats", {}).get("size", 0),
                         "l2_size": stats.get("l2_stats", {}).get("size", 0),
                     }
-            
+
             return health_status
-    
+
     def register_adapter(
         self,
         name: str,
         adapter: OptimizedSQLAlchemyAdapter,
     ) -> None:
         """Register an optimized adapter
-        
+
         Args:
             name: Adapter name
             adapter: Optimized adapter instance
         """
         self.adapters[name] = adapter
-    
+
     def get_adapter(self, name: str) -> Optional[OptimizedSQLAlchemyAdapter]:
         """Get registered adapter
-        
+
         Args:
             name: Adapter name
-            
+
         Returns:
             Adapter instance or None
         """
@@ -138,7 +135,7 @@ def setup_optimization(
     enable_health_check: bool = True,
 ) -> FastAPIOptimization:
     """Setup FastAPI optimization
-    
+
     Args:
         app: FastAPI application
         enable_cache: Enable caching
@@ -147,7 +144,7 @@ def setup_optimization(
         async_config: Async configuration
         enable_monitoring: Enable monitoring
         enable_health_check: Enable health check endpoint
-        
+
     Returns:
         FastAPI optimization instance
     """
@@ -159,5 +156,5 @@ def setup_optimization(
         enable_monitoring=enable_monitoring,
         enable_health_check=enable_health_check,
     )
-    
+
     return FastAPIOptimization(app, config)

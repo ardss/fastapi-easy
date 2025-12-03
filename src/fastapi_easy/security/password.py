@@ -7,7 +7,9 @@ logger = logging.getLogger(__name__)
 try:
     import bcrypt
 except ImportError:
-    raise ImportError("bcrypt is required for password hashing. Install it with: pip install bcrypt")
+    raise ImportError(
+        "bcrypt is required for password hashing. Install it with: pip install bcrypt"
+    )
 
 
 class PasswordManager:
