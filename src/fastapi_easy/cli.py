@@ -1,8 +1,9 @@
 """Command-line interface for FastAPI-Easy"""
 
 import sys
-import click
 from pathlib import Path
+
+import click
 
 
 @click.group()
@@ -223,10 +224,10 @@ def status(format: str):
         click.echo(f"Status: {status_info['status']}")
         click.echo(f"Tests: {status_info['tests']}")
         click.echo(f"Coverage: {status_info['coverage']}")
-        click.echo(f"\nSupported ORMs:")
+        click.echo("\nSupported ORMs:")
         for orm in status_info["orms"]:
             click.echo(f"  - {orm}")
-        click.echo(f"\nFeatures:")
+        click.echo("\nFeatures:")
         for feature in status_info["features"]:
             click.echo(f"  ✅ {feature}")
 
