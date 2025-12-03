@@ -1,9 +1,9 @@
 """Tortoise ORM adapter"""
 
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 from tortoise import Model
-from tortoise.exceptions import DoesNotExist, IntegrityError
+from tortoise.exceptions import IntegrityError
 
 from ..core.errors import AppError, ConflictError, ErrorCode
 from .base import BaseORMAdapter
@@ -21,7 +21,7 @@ class TortoiseAdapter(BaseORMAdapter):
     def __init__(
         self,
         model: Type[Model],
-        session_factory=None,
+        session_factory: Optional[Callable] = None,
         pk_field: str = "id",
     ):
         """Initialize Tortoise adapter

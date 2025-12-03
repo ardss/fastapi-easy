@@ -3,14 +3,12 @@
 import sys
 import click
 from pathlib import Path
-from typing import Optional
 
 
 @click.group()
 @click.version_option(version="1.0.0")
 def cli():
     """FastAPI-Easy CLI - CRUD Router Framework for FastAPI"""
-    pass
 
 
 @cli.command()

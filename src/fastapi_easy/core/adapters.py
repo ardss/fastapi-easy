@@ -36,7 +36,6 @@ class ORMAdapter(ABC):
             ValueError: If invalid pagination parameters
             RuntimeError: If database query fails
         """
-        pass
 
     @abstractmethod
     async def get_one(self, id: Any) -> Optional[Any]:
@@ -48,7 +47,6 @@ class ORMAdapter(ABC):
         Returns:
             Item or None if not found
         """
-        pass
 
     @abstractmethod
     async def create(self, data: Dict[str, Any]) -> Any:
@@ -60,7 +58,6 @@ class ORMAdapter(ABC):
         Returns:
             Created item
         """
-        pass
 
     @abstractmethod
     async def update(self, id: Any, data: Dict[str, Any]) -> Any:
@@ -73,7 +70,6 @@ class ORMAdapter(ABC):
         Returns:
             Updated item
         """
-        pass
 
     @abstractmethod
     async def delete_one(self, id: Any) -> Any:
@@ -85,7 +81,6 @@ class ORMAdapter(ABC):
         Returns:
             Deleted item
         """
-        pass
 
     @abstractmethod
     async def delete_all(self) -> List[Any]:
@@ -94,7 +89,6 @@ class ORMAdapter(ABC):
         Returns:
             List of deleted items
         """
-        pass
 
     @abstractmethod
     async def count(self, filters: Dict[str, Any]) -> int:
@@ -106,4 +100,3 @@ class ORMAdapter(ABC):
         Returns:
             Total count
         """
-        pass

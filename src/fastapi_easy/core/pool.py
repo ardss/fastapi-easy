@@ -1,6 +1,6 @@
 """Database connection pool configuration and management"""
 
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 from dataclasses import dataclass
 
 

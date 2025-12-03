@@ -1,13 +1,12 @@
 """Input validation utilities for security"""
 
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 import re
 
 
 class ValidationError(ValueError):
     """Validation error"""
 
-    pass
 
 
 class InputValidator:

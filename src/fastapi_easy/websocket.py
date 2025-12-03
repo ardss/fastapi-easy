@@ -2,7 +2,6 @@
 
 import asyncio
 import json
-from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Optional, Set
 
@@ -110,7 +109,6 @@ class WebSocketConnectionManager:
                 logger = getattr(self, "logger", None)
                 if logger:
                     logger.debug(f"Failed to send message to {client_id}: {e}")
-                pass
 
     def register_handler(self, message_type: str, handler: Callable) -> None:
         """Register message handler

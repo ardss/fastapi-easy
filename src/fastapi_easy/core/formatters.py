@@ -2,7 +2,6 @@
 
 from typing import Any, Dict, List, Optional
 from abc import ABC, abstractmethod
-import json
 
 
 class BaseFormatter(ABC):
@@ -18,7 +17,6 @@ class BaseFormatter(ABC):
         Returns:
             Formatted data
         """
-        pass
 
     @abstractmethod
     def format_list(self, items: List[Any]) -> Any:
@@ -30,7 +28,6 @@ class BaseFormatter(ABC):
         Returns:
             Formatted list
         """
-        pass
 
     @abstractmethod
     def format_error(self, error: Dict[str, Any]) -> Any:
@@ -42,7 +39,6 @@ class BaseFormatter(ABC):
         Returns:
             Formatted error
         """
-        pass
 
 
 class JSONFormatter(BaseFormatter):

@@ -51,7 +51,7 @@ class TestMigrationEngineErrorHandling:
         """测试 Schema 检测超时"""
         with patch.object(migration_engine, 'detector') as mock_detector:
             mock_detector.detect_changes.side_effect = TimeoutError("Detection timeout")
-            
+
             try:
                 await migration_engine.auto_migrate()
             except Exception:
@@ -62,7 +62,7 @@ class TestMigrationEngineErrorHandling:
         """测试迁移执行错误"""
         with patch.object(migration_engine, 'executor') as mock_executor:
             mock_executor.execute.side_effect = Exception("SQL execution failed")
-            
+
             try:
                 await migration_engine.auto_migrate()
             except Exception as e:
@@ -80,7 +80,7 @@ class TestMigrationEngineErrorHandling:
         """测试存储错误处理"""
         with patch.object(migration_engine, 'storage') as mock_storage:
             mock_storage.record_migration.side_effect = Exception("Storage failed")
-            
+
             # 应该记录错误但不中断
             try:
                 await migration_engine.auto_migrate()
@@ -104,7 +104,7 @@ class TestMigrationEngineExceptionRecovery:
         with patch.object(migration_engine, 'executor') as mock_executor:
             # 第一个迁移成功，第二个失败
             mock_executor.execute.side_effect = [None, Exception("Second migration failed")]
-            
+
             try:
                 await migration_engine.auto_migrate()
             except Exception:
@@ -115,7 +115,7 @@ class TestMigrationEngineExceptionRecovery:
         """测试事务回滚"""
         with patch.object(migration_engine, 'executor') as mock_executor:
             mock_executor.execute.side_effect = Exception("Execution failed")
-            
+
             try:
                 await migration_engine.auto_migrate()
             except Exception:
@@ -131,7 +131,7 @@ class TestMigrationEngineErrorMessages:
         """测试错误消息包含诊断信息"""
         with patch.object(migration_engine, 'detector') as mock_detector:
             mock_detector.detect_changes.side_effect = Exception("Detection failed")
-            
+
             try:
                 await migration_engine.auto_migrate()
             except Exception as e:
@@ -144,7 +144,7 @@ class TestMigrationEngineErrorMessages:
         """测试错误消息包含调试步骤"""
         with patch.object(migration_engine, 'executor') as mock_executor:
             mock_executor.execute.side_effect = Exception("SQL syntax error")
-            
+
             try:
                 await migration_engine.auto_migrate()
             except Exception as e:
@@ -161,7 +161,7 @@ class TestMigrationEngineErrorContext:
         """测试错误包含迁移版本"""
         with patch.object(migration_engine, 'executor') as mock_executor:
             mock_executor.execute.side_effect = Exception("Execution failed")
-            
+
             try:
                 await migration_engine.auto_migrate()
             except Exception:
@@ -172,7 +172,7 @@ class TestMigrationEngineErrorContext:
         """测试错误包含数据库信息"""
         with patch.object(migration_engine, 'detector') as mock_detector:
             mock_detector.detect_changes.side_effect = Exception("Detection failed")
-            
+
             try:
                 await migration_engine.auto_migrate()
             except Exception:
@@ -183,7 +183,7 @@ class TestMigrationEngineErrorContext:
         """测试错误包含时间戳"""
         with patch.object(migration_engine, 'executor') as mock_executor:
             mock_executor.execute.side_effect = Exception("Execution failed")
-            
+
             try:
                 await migration_engine.auto_migrate()
             except Exception:
@@ -202,7 +202,7 @@ class TestMigrationEngineErrorRecoveryStrategies:
                 Exception("Transient error"),
                 []
             ]
-            
+
             try:
                 await migration_engine.auto_migrate()
             except Exception:
@@ -213,7 +213,7 @@ class TestMigrationEngineErrorRecoveryStrategies:
         """测试优雅降级"""
         with patch.object(migration_engine, 'storage') as mock_storage:
             mock_storage.initialize.side_effect = Exception("Storage unavailable")
-            
+
             # 应该继续而不是完全失败
             try:
                 await migration_engine.auto_migrate()
@@ -226,12 +226,12 @@ class TestMigrationEngineErrorRecoveryStrategies:
         with patch('fastapi_easy.migrations.engine.logger') as mock_logger:
             with patch.object(migration_engine, 'detector') as mock_detector:
                 mock_detector.detect_changes.side_effect = Exception("Detection failed")
-                
+
                 try:
                     await migration_engine.auto_migrate()
                 except Exception:
                     pass
-                
+
                 # 应该记录错误
                 # mock_logger.error.assert_called()
 
@@ -244,7 +244,7 @@ class TestMigrationEngineErrorPropagation:
         """测试关键错误传播"""
         with patch.object(migration_engine, 'detector') as mock_detector:
             mock_detector.detect_changes.side_effect = Exception("Critical error")
-            
+
             with pytest.raises(Exception):
                 await migration_engine.auto_migrate()
 
@@ -253,7 +253,7 @@ class TestMigrationEngineErrorPropagation:
         """测试非关键错误处理"""
         with patch.object(migration_engine, 'storage') as mock_storage:
             mock_storage.record_migration.side_effect = Exception("Non-critical error")
-            
+
             # 非关键错误不应该中断迁移
             try:
                 await migration_engine.auto_migrate()
@@ -270,9 +270,9 @@ class TestMigrationEngineErrorPropagation:
                     raise Exception("Original error")
                 except Exception as e:
                     raise Exception("Wrapped error") from e
-            
+
             mock_executor.execute.side_effect = raise_chained_error
-            
+
             try:
                 await migration_engine.auto_migrate()
             except Exception as e:
@@ -288,7 +288,7 @@ class TestMigrationEngineErrorRecoveryCleanup:
         """测试错误时的清理"""
         with patch.object(migration_engine, 'detector') as mock_detector:
             mock_detector.detect_changes.side_effect = Exception("Detection failed")
-            
+
             try:
                 await migration_engine.auto_migrate()
             except Exception:
@@ -299,7 +299,7 @@ class TestMigrationEngineErrorRecoveryCleanup:
         """测试错误时的资源清理"""
         with patch.object(migration_engine, 'executor') as mock_executor:
             mock_executor.execute.side_effect = Exception("Execution failed")
-            
+
             try:
                 await migration_engine.auto_migrate()
             except Exception:

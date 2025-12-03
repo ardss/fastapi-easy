@@ -6,7 +6,7 @@ to ensure data consistency while minimizing cache clearing.
 
 import logging
 from enum import Enum
-from typing import Any, Dict, Optional, Set
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 

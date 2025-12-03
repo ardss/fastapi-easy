@@ -449,6 +449,6 @@ HTTP 响应
 
 ## 下一步
 
-- 学习[搜索和过滤](../guides/querying.md)
-- 了解[排序功能](../guides/querying.md)
-- 查看[完整示例](../tutorial/03-complete-example.md)
+- 学习[搜索和过滤](../tutorials/02-core-features/querying.md)
+- 了解[排序功能](../tutorials/02-core-features/querying.md)
+- 查看[完整示例](../tutorials/01-basics/complete-example.md)

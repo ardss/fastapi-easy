@@ -16,7 +16,7 @@ from fastapi_easy.core.crud_router import CRUDRouter
 class ItemSchema(BaseModel):
     """Test item schema"""
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: int
     name: str
     price: float
@@ -25,7 +25,7 @@ class ItemSchema(BaseModel):
 class UserSchema(BaseModel):
     """Test user schema"""
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: int
     username: str
     email: str
@@ -39,7 +39,7 @@ class UserSchema(BaseModel):
 def mock_adapter():
     """Mock ORM adapter for testing"""
     adapter = AsyncMock(spec=ORMAdapter)
-    
+
     # Default return values
     adapter.get_all.return_value = []
     adapter.get_one.return_value = None
@@ -48,7 +48,7 @@ def mock_adapter():
     adapter.delete_one.return_value = {"id": 1, "name": "test", "price": 10.0}
     adapter.delete_all.return_value = []
     adapter.count.return_value = 0
-    
+
     return adapter
 
 
@@ -56,19 +56,19 @@ def mock_adapter():
 def mock_adapter_with_data():
     """Mock ORM adapter with test data"""
     adapter = AsyncMock(spec=ORMAdapter)
-    
+
     test_items = [
         {"id": 1, "name": "apple", "price": 10.0},
         {"id": 2, "name": "banana", "price": 5.0},
         {"id": 3, "name": "orange", "price": 8.0},
     ]
-    
+
     adapter.get_all.return_value = test_items
     adapter.get_one.side_effect = lambda id: next(
         (item for item in test_items if item["id"] == id), None
     )
     adapter.count.return_value = len(test_items)
-    
+
     return adapter
 
 

@@ -1,11 +1,10 @@
 """Rate limiting support for FastAPI-Easy"""
 
 import asyncio
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 from abc import ABC, abstractmethod
 import time
-from collections import defaultdict, deque
-from datetime import datetime, timedelta
+from collections import deque
 
 
 class RateLimitEntry:
@@ -87,7 +86,6 @@ class BaseRateLimiter(ABC):
         Returns:
             True if request is allowed
         """
-        pass
 
     @abstractmethod
     async def get_remaining(self, key: str, limit: int, window: int) -> int:
@@ -101,7 +99,6 @@ class BaseRateLimiter(ABC):
         Returns:
             Number of remaining requests
         """
-        pass
 
     @abstractmethod
     async def get_reset_time(self, key: str, limit: int, window: int) -> float:
@@ -115,7 +112,6 @@ class BaseRateLimiter(ABC):
         Returns:
             Seconds until reset
         """
-        pass
 
 
 class MemoryRateLimiter(BaseRateLimiter):

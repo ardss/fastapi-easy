@@ -218,7 +218,7 @@ class TestJWTAuth:
     def test_multiple_tokens_are_different(self, jwt_auth):
         """Test that multiple tokens can be created"""
         import time
-        
+
         token1 = jwt_auth.create_access_token(subject="user123")
         time.sleep(1.1)  # Delay to ensure different iat (at least 1 second)
         token2 = jwt_auth.create_access_token(subject="user123")

@@ -1,7 +1,7 @@
 """Main CRUD router for FastAPI"""
 
 import logging
-from typing import Any, Dict, List, Optional, Type, Callable
+from typing import Any, List, Optional, Type
 from fastapi import APIRouter, Query, Path, Request, HTTPException, Body
 from pydantic import BaseModel
 from .config import CRUDConfig

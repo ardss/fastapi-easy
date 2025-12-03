@@ -1,7 +1,7 @@
 """Audit log storage interface and implementations"""
 
 import logging
-from typing import Any, Dict, List, Optional, Protocol
+from typing import Any, Dict, List, Protocol
 
 logger = logging.getLogger(__name__)
 

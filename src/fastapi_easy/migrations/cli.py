@@ -63,7 +63,6 @@ def _mask_database_url(database_url: str) -> str:
 @click.version_option()
 def cli():
     """FastAPI-Easy 迁移工具"""
-    pass
 
 
 @cli.command()

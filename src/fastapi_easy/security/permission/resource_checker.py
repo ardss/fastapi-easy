@@ -1,7 +1,7 @@
 """Resource-level permission checking"""
 
 import logging
-from typing import Any, Callable, Optional, Protocol
+from typing import Optional, Protocol
 
 logger = logging.getLogger(__name__)
 

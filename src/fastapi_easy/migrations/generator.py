@@ -6,7 +6,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.schema import CreateTable
 from sqlalchemy.sql import quoted_name
 
-from .types import Migration, MigrationPlan, RiskLevel, SchemaChange
+from .types import Migration, MigrationPlan, SchemaChange
 
 logger = logging.getLogger(__name__)
 

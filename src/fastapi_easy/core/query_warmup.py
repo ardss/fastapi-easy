@@ -1,7 +1,7 @@
 """Query warmup mechanism for preloading hot data into cache"""
 
 import asyncio
-from typing import Any, Callable, Awaitable, List, Optional, Dict
+from typing import Any, Callable, Awaitable, List, Dict
 
 
 class QueryWarmupStrategy:

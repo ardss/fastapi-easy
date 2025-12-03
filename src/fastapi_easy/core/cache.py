@@ -3,7 +3,7 @@
 import asyncio
 import hashlib
 import json
-from typing import Any, Dict, Optional, Callable
+from typing import Any, Dict, Optional
 from datetime import datetime, timedelta
 
 

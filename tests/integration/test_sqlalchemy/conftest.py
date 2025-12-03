@@ -17,11 +17,11 @@ class Base(DeclarativeBase):
 class Item(Base):
     """Test item model"""
     __tablename__ = "items"
-    
+
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
     price = Column(Float, nullable=False)
-    
+
     def __repr__(self):
         return f"<Item(id={self.id}, name={self.name}, price={self.price})>"
 
@@ -29,12 +29,12 @@ class Item(Base):
 class TransactionItem(Base):
     """Test item model for transaction tests"""
     __tablename__ = "transaction_items"
-    
+
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False, unique=True)
     price = Column(Float, nullable=False)
     quantity = Column(Integer, default=0)
-    
+
     def __repr__(self):
         return f"<TransactionItem(id={self.id}, name={self.name}, price={self.price}, quantity={self.quantity})>"
 
@@ -46,12 +46,12 @@ async def db_engine():
         "sqlite+aiosqlite:///:memory:",
         echo=False,
     )
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     yield engine
-    
+
     await engine.dispose()
 
 
@@ -89,11 +89,11 @@ async def sample_items(db_session_factory):
         ]
         session.add_all(items)
         await session.commit()
-        
+
         # Refresh to get IDs
         for item in items:
             await session.refresh(item)
-        
+
         yield items
 
 
@@ -118,9 +118,9 @@ async def transaction_sample_data(db_session_factory):
         ]
         session.add_all(items)
         await session.commit()
-        
+
         # Refresh to get IDs
         for item in items:
             await session.refresh(item)
-        
+
         yield items

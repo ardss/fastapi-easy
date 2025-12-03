@@ -13,10 +13,10 @@ class Item(Model):
     id = fields.IntField(pk=True)
     name = fields.CharField(max_length=100)
     price = fields.FloatField()
-    
+
     class Meta:
         table = "items"
-    
+
     def __repr__(self):
         return f"<Item(id={self.id}, name={self.name}, price={self.price})>"
 
@@ -26,10 +26,10 @@ class UniqueItem(Model):
     id = fields.IntField(pk=True)
     name = fields.CharField(max_length=100, unique=True)
     price = fields.FloatField()
-    
+
     class Meta:
         table = "unique_items"
-    
+
     def __repr__(self):
         return f"<UniqueItem(id={self.id}, name={self.name}, price={self.price})>"
 
@@ -42,9 +42,9 @@ async def tortoise_db():
         modules={"models": ["tests.integration.test_tortoise.conftest"]}
     )
     await Tortoise.generate_schemas()
-    
+
     yield
-    
+
     await Tortoise.close_connections()
 
 
@@ -78,11 +78,11 @@ async def sample_items(tortoise_db):
         Item(name="grape", price=15.0),
         Item(name="mango", price=12.0),
     ]
-    
+
     for item in items:
         await item.save()
-    
+
     yield items
-    
+
     # Cleanup
     await Item.all().delete()

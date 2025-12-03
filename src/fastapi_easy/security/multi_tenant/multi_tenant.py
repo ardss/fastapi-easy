@@ -1,7 +1,7 @@
 """Multi-tenant support for security module"""
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from ..permission import PermissionLoader, ResourcePermissionChecker
 

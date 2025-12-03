@@ -1,8 +1,6 @@
 """GraphQL support for FastAPI-Easy"""
 
 from typing import Any, Dict, List, Optional, Type
-from abc import ABC, abstractmethod
-import json
 
 
 class GraphQLField:

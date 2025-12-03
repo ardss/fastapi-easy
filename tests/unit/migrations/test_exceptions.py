@@ -274,7 +274,7 @@ class TestExceptionInheritance:
             CacheError("read", "test"),
             RiskAssessmentError("rule", "test"),
         ]
-        
+
         for exc in exceptions:
             assert isinstance(exc, MigrationError)
             assert isinstance(exc, Exception)
@@ -290,7 +290,7 @@ class TestExceptionInheritance:
             CacheError("read", "test"),
             RiskAssessmentError("rule", "test"),
         ]
-        
+
         for exc in exceptions:
             assert hasattr(exc, 'message')
             assert exc.message is not None
@@ -306,7 +306,7 @@ class TestExceptionInheritance:
             CacheError("read", "test"),
             RiskAssessmentError("rule", "test"),
         ]
-        
+
         for exc in exceptions:
             assert hasattr(exc, 'suggestion')
 

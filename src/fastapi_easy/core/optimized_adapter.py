@@ -6,12 +6,9 @@ import time
 from typing import Any, Dict, List, Optional
 
 from .async_batch import AsyncBatchProcessor
-from .cache_invalidation import get_invalidation_manager
 from .cache_key_generator import generate_cache_key
 from .lock_manager import LockManager
 from .multilayer_cache import MultiLayerCache
-from .query_projection import QueryProjection
-from .reentrant_lock import get_lock_manager
 
 logger = logging.getLogger(__name__)
 

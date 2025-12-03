@@ -8,22 +8,22 @@ from typing import List
 @pytest.mark.asyncio
 class TestConcurrentPerformance:
     """Performance tests for concurrent operations"""
-    
+
     async def test_concurrent_reads(self, perf_sqlalchemy_adapter, large_dataset):
         """Test concurrent read operations (50 concurrent)"""
         async def read_item(item_id: int):
             return await perf_sqlalchemy_adapter.get_one(item_id)
-        
+
         # Create 50 concurrent read tasks (use valid IDs from large_dataset)
         tasks = [read_item(i + 1) for i in range(50)]
-        
+
         results = await asyncio.gather(*tasks)
-        
+
         # All reads should succeed
         assert len(results) == 50
         # Some reads may return None if IDs don't exist, that's ok
         assert len([r for r in results if r is not None]) > 0
-    
+
     async def test_concurrent_writes(self, perf_sqlalchemy_adapter):
         """Test concurrent write operations (20 concurrent)"""
         async def create_item(item_id: int):
@@ -33,32 +33,32 @@ class TestConcurrentPerformance:
                 "price": float(item_id),
                 "quantity": item_id
             })
-        
+
         # Create 20 concurrent write tasks
         tasks = [create_item(i) for i in range(20)]
         results = await asyncio.gather(*tasks)
-        
+
         # All writes should succeed
         assert len(results) == 20
         assert all(r is not None for r in results)
-    
+
     async def test_concurrent_mixed_operations(self, perf_sqlalchemy_adapter, large_dataset):
         """Test mixed concurrent operations (reads, writes, updates)"""
         async def read_item(item_id: int):
             return await perf_sqlalchemy_adapter.get_one(item_id)
-        
+
         async def create_item(item_id: int):
             return await perf_sqlalchemy_adapter.create({
                 "name": f"mixed_item_{item_id}",
                 "price": float(item_id),
                 "quantity": item_id
             })
-        
+
         async def update_item(item_id: int):
             return await perf_sqlalchemy_adapter.update(item_id, {
                 "price": float(item_id * 2)
             })
-        
+
         # Mix of operations
         tasks = []
         for i in range(15):
@@ -67,12 +67,12 @@ class TestConcurrentPerformance:
             tasks.append(create_item(5000 + i))
         for i in range(5):
             tasks.append(update_item(i * 100))
-        
+
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        
+
         # All operations should complete
         assert len(results) == 30
-    
+
     async def test_concurrent_queries(self, perf_sqlalchemy_adapter, large_dataset):
         """Test concurrent query operations"""
         async def query_items(skip: int, limit: int):
@@ -81,36 +81,36 @@ class TestConcurrentPerformance:
                 sorts={},
                 pagination={"skip": skip, "limit": limit}
             )
-        
+
         # Create 20 concurrent query tasks with different pagination
         tasks = [query_items(i * 100, 100) for i in range(20)]
         results = await asyncio.gather(*tasks)
-        
+
         # All queries should succeed
         assert len(results) == 20
-    
+
     async def test_concurrent_count_operations(self, perf_sqlalchemy_adapter, large_dataset):
         """Test concurrent count operations"""
         async def count_items():
             return await perf_sqlalchemy_adapter.count({})
-        
+
         # Create 30 concurrent count tasks
         tasks = [count_items() for _ in range(30)]
         results = await asyncio.gather(*tasks)
-        
+
         # All counts should return same value
         assert len(results) == 30
         assert all(r == 5000 for r in results)
-    
+
     async def test_high_concurrency_stress(self, perf_sqlalchemy_adapter, large_dataset):
         """Stress test with high concurrency (100 concurrent)"""
         async def read_item(item_id: int):
             return await perf_sqlalchemy_adapter.get_one(item_id)
-        
+
         # Create 100 concurrent read tasks (use valid IDs)
         tasks = [read_item((i % 50) + 1) for i in range(100)]
         results = await asyncio.gather(*tasks)
-        
+
         # All reads should succeed
         assert len(results) == 100
         # Most reads should return results

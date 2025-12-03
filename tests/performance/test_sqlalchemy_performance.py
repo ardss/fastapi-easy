@@ -18,7 +18,7 @@ class Base(DeclarativeBase):
 class Item(Base):
     """Test item model"""
     __tablename__ = "items"
-    
+
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
     price = Column(Float, nullable=False)
@@ -31,12 +31,12 @@ async def perf_db_engine():
         "sqlite+aiosqlite:///:memory:",
         echo=False,
     )
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     yield engine
-    
+
     await engine.dispose()
 
 
@@ -71,23 +71,23 @@ async def perf_sample_data(perf_db_session_factory):
         ]
         session.add_all(items)
         await session.commit()
-        
+
         for item in items:
             await session.refresh(item)
-        
+
         yield items
 
 
 @pytest.mark.asyncio
 class TestSQLAlchemyPerformance:
     """Performance tests for SQLAlchemy adapter"""
-    
+
     async def test_create_single_item(self, perf_adapter):
         """Test creating a single item"""
         result = await perf_adapter.create({"name": "test", "price": 10.0})
         assert result is not None
         assert result.name == "test"
-    
+
     async def test_get_all_items(self, perf_adapter, perf_sample_data):
         """Test getting all items"""
         result = await perf_adapter.get_all(
@@ -96,33 +96,33 @@ class TestSQLAlchemyPerformance:
             pagination={"skip": 0, "limit": 100},
         )
         assert len(result) == 100
-    
+
     async def test_get_one_item(self, perf_adapter, perf_sample_data):
         """Test getting a single item"""
         item_id = perf_sample_data[0].id
         result = await perf_adapter.get_one(item_id)
         assert result is not None
         assert result.id == item_id
-    
+
     async def test_update_item(self, perf_adapter, perf_sample_data):
         """Test updating an item"""
         item_id = perf_sample_data[0].id
         result = await perf_adapter.update(item_id, {"name": "updated"})
         assert result is not None
         assert result.name == "updated"
-    
+
     async def test_delete_item(self, perf_adapter, perf_sample_data):
         """Test deleting an item"""
         item_id = perf_sample_data[-1].id
         result = await perf_adapter.delete_one(item_id)
         assert result is not None
         assert result.id == item_id
-    
+
     async def test_count_items(self, perf_adapter, perf_sample_data):
         """Test counting items"""
         result = await perf_adapter.count({})
         assert result == 100
-    
+
     async def test_filter_items(self, perf_adapter, perf_sample_data):
         """Test filtering items"""
         filters = {

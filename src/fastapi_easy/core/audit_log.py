@@ -1,10 +1,8 @@
 """Audit logging support for FastAPI-Easy"""
 
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 from enum import Enum
-from sqlalchemy import Column, Integer, String, DateTime, JSON, create_engine
-from sqlalchemy.orm import DeclarativeBase
 
 
 class AuditAction(str, Enum):

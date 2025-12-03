@@ -8,7 +8,7 @@ edit_uri: edit/main/docs/
 docs_dir: docs
 site_dir: site
 use_directory_urls: true
-strict: false
+strict: true
 dev_addr: 127.0.0.1:8000
 copyright: Copyright &copy; 2025 FastAPI-Easy Team
 

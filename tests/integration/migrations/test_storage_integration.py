@@ -46,7 +46,7 @@ class TestStorageWithEngine:
             rollback_sql="ROLLBACK",
             risk_level="SAFE"
         )
-        
+
         # 验证记录
         history = migration_engine.storage.get_migration_history(limit=10)
         assert len(history) == 1
@@ -61,7 +61,7 @@ class TestStorageWithEngine:
                 rollback_sql="ROLLBACK",
                 risk_level="SAFE"
             )
-        
+
         history = migration_engine.storage.get_migration_history(limit=10)
         assert len(history) == 3
 
@@ -71,11 +71,11 @@ class TestStorageWithEngine:
         storage1 = MigrationStorage(in_memory_engine)
         storage1.initialize()
         storage1.record_migration("001", "First", "ROLLBACK", "SAFE")
-        
+
         # 第二个存储实例
         storage2 = MigrationStorage(in_memory_engine)
         history = storage2.get_migration_history(limit=10)
-        
+
         assert len(history) == 1
         assert history[0]["version"] == "001"
 
@@ -90,10 +90,10 @@ class TestStorageWithMultipleMigrations:
             ("002", "Add email column", "ALTER TABLE users DROP COLUMN email", "MEDIUM"),
             ("003", "Create indexes", "DROP INDEX idx_email", "HIGH"),
         ]
-        
+
         for version, desc, rollback, risk in migrations:
             storage.record_migration(version, desc, rollback, risk)
-        
+
         history = storage.get_migration_history(limit=10)
         assert len(history) == 3
 
@@ -101,7 +101,7 @@ class TestStorageWithMultipleMigrations:
         """测试迁移历史顺序"""
         for i in range(1, 6):
             storage.record_migration(f"00{i}", f"Migration {i}", "ROLLBACK", "SAFE")
-        
+
         history = storage.get_migration_history(limit=10)
         assert len(history) == 5
 
@@ -109,7 +109,7 @@ class TestStorageWithMultipleMigrations:
         """测试迁移历史限制"""
         for i in range(1, 11):
             storage.record_migration(f"{i:03d}", f"Migration {i}", "ROLLBACK", "SAFE")
-        
+
         history = storage.get_migration_history(limit=5)
         assert len(history) <= 5
 
@@ -122,7 +122,7 @@ class TestStorageErrorRecovery:
         storage.record_migration("001", "First", "ROLLBACK", "SAFE")
         # 再次记录相同版本
         storage.record_migration("001", "First", "ROLLBACK", "SAFE")
-        
+
         history = storage.get_migration_history(limit=10)
         # 应该幂等
         assert len(history) >= 1
@@ -135,16 +135,17 @@ class TestStorageErrorRecovery:
             "DROP TABLE users",
             "SAFE"
         )
-        
+
         history = storage.get_migration_history(limit=10)
         assert len(history) == 1
         assert "users" in history[0]["description"]
 
     def test_storage_with_long_sql(self, storage):
         """测试存储处理长 SQL"""
-        long_sql = "SELECT * FROM users WHERE " + " AND ".join([f"col{i} = {i}" for i in range(100)])
+        long_sql = "SELECT * FROM users WHERE " + \
+            " AND ".join([f"col{i} = {i}" for i in range(100)])
         storage.record_migration("001", "Complex query", long_sql, "SAFE")
-        
+
         history = storage.get_migration_history(limit=10)
         assert len(history) == 1
 
@@ -156,7 +157,7 @@ class TestStorageAndEngineIntegration:
         """测试引擎正确使用存储"""
         # 初始化
         migration_engine.storage.initialize()
-        
+
         # 记录迁移
         migration_engine.storage.record_migration(
             "001",
@@ -164,7 +165,7 @@ class TestStorageAndEngineIntegration:
             "ROLLBACK",
             "SAFE"
         )
-        
+
         # 检索迁移
         history = migration_engine.storage.get_migration_history(limit=10)
         assert len(history) == 1
@@ -172,16 +173,16 @@ class TestStorageAndEngineIntegration:
     def test_multiple_engines_share_storage(self, in_memory_engine):
         """测试多个引擎共享存储"""
         metadata = MetaData()
-        
+
         # 创建第一个引擎并记录迁移
         engine1 = MigrationEngine(in_memory_engine, metadata)
         engine1.storage.initialize()
         engine1.storage.record_migration("001", "First", "ROLLBACK", "SAFE")
-        
+
         # 创建第二个引擎并检索迁移
         engine2 = MigrationEngine(in_memory_engine, metadata)
         history = engine2.storage.get_migration_history(limit=10)
-        
+
         assert len(history) == 1
         assert history[0]["version"] == "001"
 
@@ -195,9 +196,9 @@ class TestStorageAndEngineIntegration:
                 "ROLLBACK",
                 "SAFE"
             )
-        
+
         # 多次检索应该返回相同结果
         history1 = migration_engine.storage.get_migration_history(limit=10)
         history2 = migration_engine.storage.get_migration_history(limit=10)
-        
+
         assert len(history1) == len(history2) == 3

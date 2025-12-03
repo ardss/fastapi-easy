@@ -4,7 +4,6 @@ FastAPIEasy 应用类 - 集成迁移引擎的 FastAPI 应用
 提供零配置的 Schema 迁移功能
 """
 
-import asyncio
 import logging
 from contextlib import asynccontextmanager
 from typing import List, Optional, Type

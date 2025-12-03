@@ -208,8 +208,8 @@ config = CRUDConfig(
 
 更多详细的使用指南，请参考：
 
-- [快速上手](../tutorial/01-quick-start.md)
-- [数据库集成](../tutorial/02-database-integration.md)
-- [完整示例](../tutorial/03-complete-example.md)
+- [快速上手](../tutorials/01-basics/quick-start.md)
+- [数据库集成](../tutorials/01-basics/database-integration.md)
+- [完整示例](../tutorials/01-basics/complete-example.md)
 - [Hook 系统](../reference/hooks.md)
 - [配置管理](../reference/configuration.md)

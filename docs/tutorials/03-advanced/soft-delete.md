@@ -234,4 +234,4 @@ A: 会有轻微影响，因为需要检查 `is_deleted` 字段。建议在该字
 
 ---
 
-**下一步**: [批量操作](bulk-operations.md) →
+**下一步**: [批量操作](../02-core-features/bulk-operations.md) →

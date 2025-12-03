@@ -7,8 +7,6 @@ from typing import Optional
 from fastapi import Depends, Header, HTTPException
 
 from .exceptions import (
-    AuthenticationError,
-    AuthorizationError,
     InvalidTokenError,
     TokenExpiredError,
 )

@@ -40,9 +40,9 @@ async def test_migration_engine_detects_changes(temp_db):
     """Test: Detect missing table"""
     engine = create_engine(temp_db, connect_args={"check_same_thread": False})
     migration_engine = MigrationEngine(engine, Base.metadata, mode=ExecutionMode.SAFE)
-    
+
     plan = await migration_engine.auto_migrate()
-    
+
     assert len(plan.migrations) == 1
     assert plan.migrations[0].risk_level == RiskLevel.SAFE
     assert "Create table 'users'" in plan.migrations[0].description
@@ -52,14 +52,14 @@ async def test_migration_engine_detects_changes(temp_db):
 async def test_migration_engine_detects_new_column(temp_db):
     """Test: Detect missing column"""
     engine = create_engine(temp_db, connect_args={"check_same_thread": False})
-    
+
     with engine.connect() as conn:
         conn.execute(text("CREATE TABLE users (id INTEGER PRIMARY KEY, name VARCHAR)"))
         conn.commit()
-        
+
     migration_engine = MigrationEngine(engine, Base.metadata, mode=ExecutionMode.SAFE)
     plan = await migration_engine.auto_migrate()
-    
+
     assert len(plan.migrations) == 1
     migration = plan.migrations[0]
     assert migration.risk_level == RiskLevel.SAFE
@@ -70,20 +70,20 @@ async def test_migration_engine_detects_new_column(temp_db):
 async def test_migration_engine_detects_type_change_sqlite(temp_db):
     """Test: Detect type change and generate Copy-Swap SQL"""
     engine = create_engine(temp_db, connect_args={"check_same_thread": False})
-    
+
     with engine.connect() as conn:
         conn.execute(text("CREATE TABLE users (id INTEGER PRIMARY KEY, name VARCHAR, age VARCHAR)"))
         conn.commit()
-        
+
     migration_engine = MigrationEngine(engine, Base.metadata, mode=ExecutionMode.SAFE)
     plan = await migration_engine.auto_migrate()
-    
+
     assert len(plan.migrations) == 1
     migration = plan.migrations[0]
-    
+
     assert migration.risk_level == RiskLevel.HIGH
     assert "Change column 'users.age' type" in migration.description
-    
+
     sql = migration.upgrade_sql
     assert "BEGIN TRANSACTION" in sql
     assert "CREATE TABLE users_new_" in sql
@@ -96,19 +96,20 @@ async def test_migration_engine_detects_type_change_sqlite(temp_db):
 async def test_migration_engine_executes_safe_migrations(temp_db):
     """Test: Execute safe migrations in safe mode"""
     engine = create_engine(temp_db, connect_args={"check_same_thread": False})
-    
+
     # Start with empty database
     migration_engine = MigrationEngine(engine, Base.metadata, mode=ExecutionMode.SAFE)
     plan = await migration_engine.auto_migrate()
-    
+
     # Should have created the table
     assert plan.status == "completed"
-    
+
     # Verify table exists
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='users'"))
+        result = conn.execute(
+            text("SELECT name FROM sqlite_master WHERE type='table' AND name='users'"))
         assert result.fetchone() is not None
-    
+
     # Verify migration history was recorded
     history = migration_engine.get_history()
     assert len(history) == 1
@@ -118,20 +119,20 @@ async def test_migration_engine_executes_safe_migrations(temp_db):
 async def test_migration_engine_skips_risky_migrations_in_safe_mode(temp_db):
     """Test: Risky migrations are not executed in safe mode"""
     engine = create_engine(temp_db, connect_args={"check_same_thread": False})
-    
+
     # Create table with wrong type
     with engine.connect() as conn:
         conn.execute(text("CREATE TABLE users (id INTEGER PRIMARY KEY, name VARCHAR, age VARCHAR)"))
         conn.commit()
-    
+
     migration_engine = MigrationEngine(engine, Base.metadata, mode=ExecutionMode.SAFE)
     plan = await migration_engine.auto_migrate()
-    
+
     # Should detect the change but not execute it
     assert len(plan.migrations) == 1
     assert plan.migrations[0].risk_level == RiskLevel.HIGH
     assert plan.status == "partial"  # Not all migrations executed
-    
+
     # Verify age is still VARCHAR
     with engine.connect() as conn:
         result = conn.execute(text("PRAGMA table_info(users)"))
@@ -142,18 +143,18 @@ async def test_migration_engine_skips_risky_migrations_in_safe_mode(temp_db):
 async def test_migration_engine_executes_risky_migrations_in_aggressive_mode(temp_db):
     """Test: Risky migrations are executed in aggressive mode"""
     engine = create_engine(temp_db, connect_args={"check_same_thread": False})
-    
+
     # Create table with wrong type
     with engine.connect() as conn:
         conn.execute(text("CREATE TABLE users (id INTEGER PRIMARY KEY, name VARCHAR, age VARCHAR)"))
         conn.commit()
-    
+
     migration_engine = MigrationEngine(engine, Base.metadata, mode=ExecutionMode.AGGRESSIVE)
     plan = await migration_engine.auto_migrate()
-    
+
     # Should execute the risky migration
     assert plan.status == "completed"
-    
+
     # Verify age is now INTEGER
     with engine.connect() as conn:
         result = conn.execute(text("PRAGMA table_info(users)"))

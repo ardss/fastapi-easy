@@ -1,7 +1,7 @@
 """Query projection optimization for reducing network transfer"""
 
 import logging
-from typing import List, Optional, Dict, Any
+from typing import List, Dict, Any
 
 logger = logging.getLogger(__name__)
 

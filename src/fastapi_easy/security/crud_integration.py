@@ -4,9 +4,9 @@ import asyncio
 import logging
 from typing import Any, Awaitable, Callable, List, Optional
 
-from fastapi import Depends, HTTPException
+from fastapi import HTTPException
 
-from .decorators import get_current_user, require_permission, require_role
+from .decorators import get_current_user
 from .exceptions import InvalidTokenError, TokenExpiredError
 
 logger = logging.getLogger(__name__)

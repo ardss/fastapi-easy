@@ -1,10 +1,8 @@
 import asyncio
 import logging
-from typing import Optional
 
 from sqlalchemy import Engine
 
-from .config import MigrationConfig
 from .detector import SchemaDetector
 from .distributed_lock import get_lock_provider
 from .executor import MigrationExecutor

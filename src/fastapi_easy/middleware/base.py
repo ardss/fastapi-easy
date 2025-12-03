@@ -27,7 +27,6 @@ class BaseMiddleware(ABC):
         Returns:
             Modified context
         """
-        pass
 
     @abstractmethod
     async def process_response(self, context: Dict[str, Any], response: Any) -> Any:
@@ -40,7 +39,6 @@ class BaseMiddleware(ABC):
         Returns:
             Modified response
         """
-        pass
 
     async def process_error(self, context: Dict[str, Any], error: Exception) -> Exception:
         """Process error

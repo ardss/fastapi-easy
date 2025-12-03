@@ -72,7 +72,7 @@ class TestSecurityConfig:
         """Test creating config from environment"""
         import os
         os.environ["JWT_SECRET_KEY"] = "test-secret-key"
-        
+
         try:
             config = SecurityConfig.from_env()
             assert config.jwt_auth is not None

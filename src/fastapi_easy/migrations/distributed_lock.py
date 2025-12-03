@@ -169,17 +169,14 @@ class LockProvider(ABC):
     @abstractmethod
     async def acquire(self, timeout: int = 30) -> bool:
         """获取锁"""
-        pass
 
     @abstractmethod
     async def release(self) -> bool:
         """释放锁"""
-        pass
 
     @abstractmethod
     async def is_locked(self) -> bool:
         """检查是否已锁定"""
-        pass
 
 
 class PostgresLockProvider(LockProvider):

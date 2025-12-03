@@ -1,6 +1,6 @@
 """Batch operations optimization for better performance"""
 
-from typing import Any, List, Dict, Optional, Callable, Awaitable
+from typing import Any, List, Dict, Callable, Awaitable
 import asyncio
 
 

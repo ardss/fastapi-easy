@@ -2,7 +2,6 @@
 
 from typing import Any, Callable, List, Optional, Set
 from enum import Enum
-from functools import wraps
 
 from .errors import AppError, ErrorCode
 

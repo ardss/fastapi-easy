@@ -15,7 +15,6 @@ except ImportError:
     )
 
 from .exceptions import (
-    InvalidCredentialsError,
     InvalidTokenError,
     TokenExpiredError,
 )

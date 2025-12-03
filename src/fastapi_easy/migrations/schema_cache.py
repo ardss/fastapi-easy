@@ -27,22 +27,18 @@ class SchemaCacheProvider(ABC):
     @abstractmethod
     async def get(self, key: str) -> Optional[Dict[str, Any]]:
         """获取缓存"""
-        pass
 
     @abstractmethod
     async def set(self, key: str, value: Dict[str, Any]) -> bool:
         """设置缓存"""
-        pass
 
     @abstractmethod
     async def delete(self, key: str) -> bool:
         """删除缓存"""
-        pass
 
     @abstractmethod
     async def clear(self) -> bool:
         """清空所有缓存"""
-        pass
 
 
 class FileSchemaCacheProvider(SchemaCacheProvider):

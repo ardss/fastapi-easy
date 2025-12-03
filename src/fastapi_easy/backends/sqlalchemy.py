@@ -1,10 +1,9 @@
 """SQLAlchemy async ORM adapter"""
 
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Callable, Dict, List, Optional, Type
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
 from ..core.errors import AppError, ConflictError, ErrorCode
@@ -23,7 +22,7 @@ class SQLAlchemyAdapter(BaseORMAdapter):
     def __init__(
         self,
         model: Type[DeclarativeBase],
-        session_factory,
+        session_factory: Callable,
         pk_field: str = "id",
     ):
         """Initialize SQLAlchemy adapter

@@ -68,7 +68,7 @@ def app(jwt_auth):
         current_user: dict = Depends(require_all_permissions("read", "write"))
     ):
         return {"message": "all permissions"}
-    
+
     return app
 
 

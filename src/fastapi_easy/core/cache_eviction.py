@@ -5,8 +5,7 @@ memory growth while maintaining optimal hit rates.
 """
 
 import time
-from typing import Any, Dict, Optional, Tuple
-from collections import OrderedDict
+from typing import Any, Dict
 import logging
 
 

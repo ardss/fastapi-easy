@@ -2,9 +2,9 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Optional
 
-from sqlalchemy import ARRAY, JSON, Boolean, DateTime, Float, Integer, String
+from sqlalchemy import ARRAY, JSON, Float, Integer, String
 from sqlalchemy.types import TypeEngine
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,6 @@ class TypeComparator(ABC):
         Returns:
             True 表示相同，False 表示不同
         """
-        pass
 
     @abstractmethod
     def get_migration_sql(
@@ -42,7 +41,6 @@ class TypeComparator(ABC):
         Returns:
             迁移 SQL，如果无法迁移则返回 None
         """
-        pass
 
 
 class DefaultTypeComparator(TypeComparator):

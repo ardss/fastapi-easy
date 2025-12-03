@@ -6,7 +6,7 @@ import pytest
 @pytest.mark.asyncio
 class TestMemoryPerformance:
     """Performance tests for memory usage"""
-    
+
     async def test_large_dataset_memory(self, perf_sqlalchemy_adapter, large_dataset):
         """Test memory usage with large dataset retrieval"""
         result = await perf_sqlalchemy_adapter.get_all(
@@ -15,7 +15,7 @@ class TestMemoryPerformance:
             pagination={"skip": 0, "limit": 5000}
         )
         assert len(result) == 5000
-    
+
     async def test_paginated_retrieval_memory(self, perf_sqlalchemy_adapter, large_dataset):
         """Test memory usage with paginated retrieval"""
         all_items = []
@@ -27,7 +27,7 @@ class TestMemoryPerformance:
             )
             all_items.extend(result)
         assert len(all_items) == 5000
-    
+
     async def test_repeated_queries_memory(self, perf_sqlalchemy_adapter, large_dataset):
         """Test memory usage with repeated queries"""
         for _ in range(5):
@@ -37,7 +37,7 @@ class TestMemoryPerformance:
                 pagination={"skip": 0, "limit": 1000}
             )
             assert len(result) == 1000
-    
+
     async def test_create_many_items_memory(self, perf_sqlalchemy_adapter):
         """Test memory usage when creating many items"""
         for i in range(100):
@@ -48,7 +48,7 @@ class TestMemoryPerformance:
                 "quantity": i % 100
             })
             assert result is not None
-    
+
     async def test_filtered_query_memory(self, perf_sqlalchemy_adapter, large_dataset):
         """Test memory usage with filtered queries"""
         result = await perf_sqlalchemy_adapter.get_all(

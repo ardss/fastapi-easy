@@ -17,13 +17,13 @@ class Base(DeclarativeBase):
 class PerformanceItem(Base):
     """Test item model for performance tests"""
     __tablename__ = "performance_items"
-    
+
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
     description = Column(String(500), nullable=True)
     price = Column(Float, nullable=False)
     quantity = Column(Integer, default=0)
-    
+
     def __repr__(self):
         return f"<PerformanceItem(id={self.id}, name={self.name}, price={self.price})>"
 
@@ -35,12 +35,12 @@ async def perf_db_engine():
         "sqlite+aiosqlite:///:memory:",
         echo=False,
     )
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     yield engine
-    
+
     await engine.dispose()
 
 
@@ -81,5 +81,5 @@ async def large_dataset(perf_db_session_factory):
         ]
         session.add_all(items)
         await session.commit()
-        
+
         yield items
