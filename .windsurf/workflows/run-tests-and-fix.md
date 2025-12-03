@@ -1,61 +1,64 @@
-# /run-tests-and-fix
+# /运行测试并修复
 
-Automated workflow to run tests and fix errors before committing, merging, or deploying.
+在提交、合并或部署前自动运行测试并修复错误的工作流。
 
-## Steps
+## 步骤
 
-1. **Run all tests to check current status**
+1. **运行所有测试检查当前状态**
+
    ```bash
    python -m pytest tests/ -v --tb=short
    ```
 
-2. **Analyze test results**
-   - Count passed, failed, and skipped tests
-   - Identify common failure patterns
-   - Categorize errors by type (import errors, type errors, assertion errors, etc.)
+2. **分析测试结果**
+   - 统计通过、失败和跳过的测试数量
+   - 识别常见的失败模式
+   - 按类型分类错误（导入错误、类型错误、断言错误等）
 
-3. **For each failed test, do the following:**
-   a. Read the test file to understand what's being tested
-   b. Read the source file that's being tested
-   c. Analyze the error message and identify the root cause
-   d. If it's a simple fix (missing import, typo, type error), fix it immediately
-   e. If it's a complex issue, ask for clarification or suggest a solution
-   f. After fixing, re-run the specific test to verify the fix
+3. **对于每个失败的测试，执行以下操作：**
+   a. 阅读测试文件以理解被测试的内容
+   b. 阅读被测试的源文件
+   c. 分析错误消息并识别根本原因
+   d. 如果是简单的修复（缺少导入、拼写错误、类型错误），立即修复
+   e. 如果是复杂问题，请求澄清或提出解决方案
+   f. 修复后，重新运行特定测试以验证修复
 
-4. **Run full test suite again**
+4. **再次运行完整测试套件**
+
    ```bash
    python -m pytest tests/ -v --tb=short
    ```
 
-5. **If all tests pass:**
-   - Generate a summary of what was fixed
-   - Suggest committing the changes with a descriptive message
-   - Provide coverage report if requested
+5. **如果所有测试都通过：**
+   - 生成修复内容的总结
+   - 建议使用描述性消息提交更改
+   - 如果需要，提供覆盖率报告
 
-6. **If tests still fail:**
-   - Provide detailed analysis of remaining failures
-   - Suggest next steps for resolution
-   - Ask for user input on how to proceed
+6. **如果测试仍然失败：**
+   - 提供剩余失败的详细分析
+   - 建议解决的后续步骤
+   - 询问用户如何继续
 
-## Coverage Report (Optional)
+## 覆盖率报告（可选）
 
-If you want to see code coverage:
+如果你想查看代码覆盖率：
+
 ```bash
 python -m pytest tests/ --cov=src/fastapi_easy --cov-report=term-missing
 ```
 
-## Test Levels
+## 测试级别
 
-You can run specific test levels:
+你可以运行特定的测试级别：
 
-- **Unit tests only**: `python -m pytest tests/ -m unit -v`
-- **Integration tests only**: `python -m pytest tests/ -m integration -v`
-- **E2E tests only**: `python -m pytest tests/ -m e2e -v`
+- **仅单元测试**: `python -m pytest tests/ -m unit -v`
+- **仅集成测试**: `python -m pytest tests/ -m integration -v`
+- **仅端到端测试**: `python -m pytest tests/ -m e2e -v`
 
-## Best Practices
+## 最佳实践
 
-- Always run tests before committing
-- Fix one error at a time
-- Re-run tests after each fix to ensure no regressions
-- Keep test output for documentation
-- Update tests when fixing bugs to prevent regressions
+- 提交前始终运行测试
+- 一次修复一个错误
+- 每次修复后重新运行测试以确保没有回归
+- 保留测试输出用于文档
+- 修复错误时更新测试以防止回归

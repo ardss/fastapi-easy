@@ -1,57 +1,57 @@
-# /code-quality-check
+# /代码质量检查
 
-Automated workflow to check and improve code quality before committing.
+在提交前自动检查和改进代码质量的工作流。
 
-## Steps
+## 步骤
 
-1. **Run code formatting check with Black**
+1. **使用 Black 运行代码格式检查**
 
    ```bash
    black --check src/fastapi_easy
    ```
 
-2. **Run import sorting check with isort**
+2. **使用 isort 运行 import 排序检查**
 
    ```bash
    isort --check-only src/fastapi_easy
    ```
 
-3. **Run linting with flake8**
+3. **使用 flake8 运行代码风格检查**
 
    ```bash
    flake8 src/fastapi_easy --count --select=E9,F63,F7,F82 --show-source --statistics
    ```
 
-4. **Run type checking with mypy**
+4. **使用 mypy 运行类型检查**
 
    ```bash
    mypy src/fastapi_easy --ignore-missing-imports
    ```
 
-5. **If any checks fail, ask user if they want to auto-fix:**
-   - For Black: `black src/fastapi_easy`
-   - For isort: `isort src/fastapi_easy`
-   - For flake8: Show specific issues that need manual fixing
-   - For mypy: Show type errors that need manual fixing
+5. **如果任何检查失败，询问用户是否要自动修复：**
+   - 对于 Black: `black src/fastapi_easy`
+   - 对于 isort: `isort src/fastapi_easy`
+   - 对于 flake8: 显示需要手动修复的具体问题
+   - 对于 mypy: 显示需要手动修复的类型错误
 
-6. **After fixes, re-run all checks to verify**
+6. **修复后，重新运行所有检查以验证**
 
-7. **Generate a summary report:**
-   - List all checks that passed
-   - List any remaining issues
-   - Provide recommendations for improvement
+7. **生成总结报告：**
+   - 列出所有通过的检查
+   - 列出任何剩余的问题
+   - 提供改进建议
 
-## Tools Used
+## 使用的工具
 
-- **Black**: Code formatter (PEP 8 compliance)
-- **isort**: Import statement sorter
-- **flake8**: Style guide enforcement
-- **mypy**: Static type checker
+- **Black**: 代码格式化工具（PEP 8 合规）
+- **isort**: Import 语句排序工具
+- **flake8**: 代码风格检查工具
+- **mypy**: 静态类型检查工具
 
-## Best Practices
+## 最佳实践
 
-- Run this workflow before committing code
-- Fix formatting issues automatically when possible
-- Address type errors and linting issues manually
-- Keep code style consistent across the project
-- Use meaningful commit messages after quality checks
+- 提交代码前运行此工作流
+- 尽可能自动修复格式问题
+- 手动处理类型错误和代码风格问题
+- 保持项目中代码风格的一致性
+- 质量检查后使用有意义的提交消息
