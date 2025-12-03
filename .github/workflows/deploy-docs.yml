@@ -3,35 +3,127 @@ name: Deploy Documentation
 on:
   push:
     branches: [ master, main ]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/deploy-docs.yml'
   pull_request:
     branches: [ master, main ]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
+    name: Build Documentation
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.10"
+        python-version: "3.11"
+        cache: 'pip'
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install mkdocs mkdocs-material pymdown-extensions
+        python -m pip install --upgrade pip setuptools wheel
+        pip install mkdocs mkdocs-material pymdown-extensions mkdocstrings[python]
+
+    - name: Validate Markdown
+      run: |
+        echo "🔍 Validating documentation structure..."
+        # Check if mkdocs.yml exists
+        if [ ! -f mkdocs.yml ]; then
+          echo "❌ mkdocs.yml not found!"
+          exit 1
+        fi
+        echo "✅ mkdocs.yml found"
+        
+        # Check if docs directory exists
+        if [ ! -d docs ]; then
+          echo "❌ docs directory not found!"
+          exit 1
+        fi
+        echo "✅ docs directory found"
 
     - name: Build documentation
       run: |
-        mkdocs build
+        echo "🔨 Building documentation..."
+        mkdocs build --strict
+        echo "✅ Documentation built successfully"
 
-    - name: Deploy to GitHub Pages
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-      uses: peaceiris/actions-gh-pages@v3
+    - name: Check build output
+      run: |
+        echo "📊 Build output statistics:"
+        if [ -d site ]; then
+          echo "✅ site directory created"
+          echo "📁 Total files: $(find site -type f | wc -l)"
+          echo "📄 HTML files: $(find site -name '*.html' | wc -l)"
+          echo "🎨 CSS files: $(find site -name '*.css' | wc -l)"
+          echo "📜 JS files: $(find site -name '*.js' | wc -l)"
+        else
+          echo "❌ site directory not found!"
+          exit 1
+        fi
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v2
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./site
+        path: 'site'
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    name: Deploy to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2
+
+    - name: Create deployment notification
+      if: success()
+      run: |
+        echo "✅ Documentation deployed successfully!"
+        echo "📍 URL: ${{ steps.deployment.outputs.page_url }}"
+
+  notify:
+    needs: [ build, deploy ]
+    if: always()
+    runs-on: ubuntu-latest
+    name: Send Notifications
+
+    steps:
+    - name: Check build status
+      run: |
+        if [ "${{ needs.build.result }}" == "success" ]; then
+          echo "✅ Build: SUCCESS"
+        else
+          echo "❌ Build: FAILED"
+          exit 1
+        fi
+
+    - name: Notify on failure
+      if: failure()
+      run: |
+        echo "⚠️ Documentation deployment failed!"
+        echo "Please check the build logs for details."
