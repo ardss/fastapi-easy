@@ -82,5 +82,5 @@ uvicorn main:app --reload
 
 ## 4. 下一步
 
-- **[用户指南](user-guide/)** - 深入学习各项功能
+- **[用户指南](user-guide/index.md)** - 深入学习各项功能
 - **[API 参考](reference/api.md)** - 查看完整的 API 文档
