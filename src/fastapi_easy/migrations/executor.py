@@ -14,10 +14,10 @@ class MigrationExecutor:
     """Executes migrations with transaction safety"""
     
     def __init__(self, engine: Engine):
-        """初始化迁移执行器
+        """Initialize migration executor
 
         Args:
-            engine: SQLAlchemy 引擎
+            engine: SQLAlchemy engine
         """
         self.engine = engine
         self.dialect = engine.dialect.name
@@ -38,9 +38,9 @@ class MigrationExecutor:
             Tuple of (updated plan, list of successfully executed migrations)
         """
         if mode == ExecutionMode.DRY_RUN:
-            logger.info("干运行模式: 不执行任何迁移")
+            logger.info("Dry-run mode: No migrations will be executed")
             for migration in plan.migrations:
-                logger.info(f"将执行: {migration.description}")
+                logger.info(f"Would execute: {migration.description}")
                 logger.debug(f"SQL: {migration.upgrade_sql}")
             return plan, []
 
@@ -55,42 +55,42 @@ class MigrationExecutor:
         if mode in [ExecutionMode.SAFE, ExecutionMode.AUTO, ExecutionMode.AGGRESSIVE]:
             # Always execute safe migrations
             if safe_migrations:
-                logger.info(f"执行 {len(safe_migrations)} 个低风险迁移")
+                logger.info(f"Executing {len(safe_migrations)} safe migrations")
                 for migration in safe_migrations:
                     try:
                         if await self._execute_migration(migration):
                             executed.append(migration)
                     except Exception as e:
-                        logger.error(f"迁移失败，停止执行: {e}")
+                        logger.error(f"Migration failed, stopping execution: {e}")
                         raise  # Re-raise to stop execution on failure
 
         if mode in [ExecutionMode.AUTO, ExecutionMode.AGGRESSIVE]:
             # Execute medium risk migrations
             if medium_migrations:
-                logger.info(f"执行 {len(medium_migrations)} 个中等风险迁移")
+                logger.info(f"Executing {len(medium_migrations)} medium-risk migrations")
                 for migration in medium_migrations:
                     try:
                         if await self._execute_migration(migration):
                             executed.append(migration)
                     except Exception as e:
-                        logger.error(f"迁移失败，停止执行: {e}")
+                        logger.error(f"Migration failed, stopping execution: {e}")
                         raise
 
         if mode == ExecutionMode.AGGRESSIVE:
             # Execute high risk migrations
             if risky_migrations:
-                logger.warning(f"执行 {len(risky_migrations)} 个高风险迁移")
+                logger.warning(f"Executing {len(risky_migrations)} high-risk migrations")
                 for migration in risky_migrations:
                     try:
                         if await self._execute_migration(migration):
                             executed.append(migration)
                     except Exception as e:
-                        logger.error(f"迁移失败，停止执行: {e}")
+                        logger.error(f"Migration failed, stopping execution: {e}")
                         raise
         else:
             # Warn about unexecuted risky migrations
             if risky_migrations:
-                logger.warning(f"{len(risky_migrations)} 个高风险迁移需要手动审查")
+                logger.warning(f"{len(risky_migrations)} high-risk migrations require manual review")
                 for migration in risky_migrations:
                     logger.warning(f"- {migration.description}")
         

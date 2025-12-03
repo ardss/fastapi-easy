@@ -74,13 +74,13 @@ class FileSchemaCacheProvider(SchemaCacheProvider):
                 logger.debug(f"Cache miss: {key}")
                 return None
         except (IOError, OSError) as e:
-            logger.error(f"文件读取失败: {e}")
+            logger.error(f"File read failed: {e}")
             return None
         except json.JSONDecodeError as e:
-            logger.error(f"JSON 解析失败: {e}")
+            logger.error(f"JSON parsing failed: {e}")
             return None
         except Exception as e:
-            logger.error(f"缓存读取失败: {e}")
+            logger.error(f"Cache read failed: {e}")
             return None
 
     async def set(self, key: str, value: Dict[str, Any]) -> bool:

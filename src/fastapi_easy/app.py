@@ -93,10 +93,10 @@ class FastAPIEasy(FastAPI):
         self._metadata: Optional[MetaData] = None
         
         logger.info(
-            f"FastAPIEasy 应用初始化: "
-            f"数据库={database_url}, "
-            f"模式={migration_mode}, "
-            f"自动迁移={auto_migrate}"
+            f"FastAPIEasy application initialized: "
+            f"database={database_url}, "
+            f"mode={migration_mode}, "
+            f"auto_migrate={auto_migrate}"
         )
     
     def _create_lifespan(self, user_lifespan):
@@ -106,9 +106,9 @@ class FastAPIEasy(FastAPI):
             # 启动事件
             try:
                 await self._startup()
-                logger.info("FastAPIEasy 应用启动完成")
+                logger.info("FastAPIEasy application startup completed")
             except Exception as e:
-                logger.error(f"应用启动失败: {e}", exc_info=True)
+                logger.error(f"Application startup failed: {e}", exc_info=True)
                 raise
             
             # 用户的启动逻辑
@@ -121,9 +121,9 @@ class FastAPIEasy(FastAPI):
             # 关闭事件
             try:
                 await self._shutdown()
-                logger.info("FastAPIEasy 应用关闭完成")
+                logger.info("FastAPIEasy application shutdown completed")
             except Exception as e:
-                logger.error(f"应用关闭失败: {e}", exc_info=True)
+                logger.error(f"Application shutdown failed: {e}", exc_info=True)
         
         return lifespan
     
@@ -188,45 +188,45 @@ class FastAPIEasy(FastAPI):
             raise
     
     async def _shutdown(self):
-        """应用关闭时的清理"""
-        # 释放资源
+        """Application shutdown cleanup"""
+        # Release resources
         if self._migration_engine:
             try:
-                # 释放锁
+                # Release lock
                 if hasattr(self._migration_engine, "_lock_provider"):
                     lock_provider = self._migration_engine._lock_provider
                     if lock_provider and hasattr(lock_provider, "release"):
                         await lock_provider.release()
             except Exception as e:
-                logger.warning(f"释放锁失败: {e}")
+                logger.warning(f"Failed to release lock: {e}")
     
     async def _run_auto_migration(self):
-        """自动执行迁移"""
+        """Automatically run migrations"""
         if not self._migration_engine:
             return
         
         try:
-            logger.info(f"开始自动迁移 (模式: {self.migration_mode})...")
+            logger.info(f"Starting auto migration (mode: {self.migration_mode})...")
             
-            # 执行迁移
+            # Execute migration
             result = await self._migration_engine.auto_migrate()
             
             if result and hasattr(result, "migrations"):
                 migration_count = len(result.migrations)
                 if migration_count > 0:
-                    logger.info(f"✅ 成功应用 {migration_count} 个迁移")
+                    logger.info(f"Successfully applied {migration_count} migrations")
                 else:
-                    logger.info("✅ Schema 已是最新，无需迁移")
+                    logger.info("Schema is up to date, no migrations needed")
             else:
-                logger.info("✅ 迁移完成")
+                logger.info("Migration completed")
         
         except MigrationError as e:
-            logger.error(f"❌ 迁移失败: {e.message}")
+            logger.error(f"Migration failed: {e.message}")
             if e.suggestion:
-                logger.error(f"💡 建议: {e.suggestion}")
+                logger.error(f"Suggestion: {e.suggestion}")
             raise
         except Exception as e:
-            logger.error(f"❌ 迁移过程出错: {e}", exc_info=True)
+            logger.error(f"Migration process error: {e}", exc_info=True)
             raise
     
     @property
@@ -236,54 +236,54 @@ class FastAPIEasy(FastAPI):
     
     def get_migration_history(self, limit: int = 10) -> List[dict]:
         """
-        获取迁移历史
+        Get migration history
         
         Args:
-            limit: 返回的最大记录数
+            limit: Maximum number of records to return
         
         Returns:
-            迁移历史列表
+            List of migration history records
         """
         if not self._migration_engine:
-            logger.warning("迁移引擎未初始化")
+            logger.warning("Migration engine not initialized")
             return []
         
         try:
             return self._migration_engine.storage.get_migration_history(limit=limit)
         except Exception as e:
-            logger.error(f"获取迁移历史失败: {e}")
+            logger.error(f"Failed to get migration history: {e}")
             return []
     
     async def run_migration(self, mode: Optional[str] = None) -> bool:
         """
-        手动运行迁移
+        Manually run migration
         
         Args:
-            mode: 迁移模式，如果不指定则使用应用配置的模式
+            mode: Migration mode, uses app config if not specified
         
         Returns:
-            是否成功
+            Whether the migration was successful
         """
         if not self._migration_engine:
-            logger.error("迁移引擎未初始化")
+            logger.error("Migration engine not initialized")
             return False
         
         try:
             original_mode = self._migration_engine.mode
             
-            # 如果指定了模式，临时切换
+            # Temporarily switch mode if specified
             if mode:
                 self._migration_engine.mode = mode
             
-            logger.info(f"手动运行迁移 (模式: {self._migration_engine.mode})...")
+            logger.info(f"Running manual migration (mode: {self._migration_engine.mode})...")
             result = await self._migration_engine.auto_migrate()
             
-            # 恢复原始模式
+            # Restore original mode
             if mode:
                 self._migration_engine.mode = original_mode
             
             return result is not None
         
         except Exception as e:
-            logger.error(f"手动迁移失败: {e}", exc_info=True)
+            logger.error(f"Manual migration failed: {e}", exc_info=True)
             return False
