@@ -13,7 +13,7 @@
 
 ## 📚 文档
 
-👉 **[阅读完整文档](docs/README.md)** | [快速开始](docs/tutorial/01-quick-start.md) | [API 参考](docs/reference/api.md)
+👉 **[在线文档](https://ardss.github.io/fastapi-easy/)** | [本地文档](docs/README.md) | [快速开始](docs/tutorial/01-quick-start.md) | [API 参考](docs/reference/api.md)
 
 ### 文档导航
 
@@ -22,6 +22,8 @@
 - **[API 参考](docs/reference/api.md)** - 完整的 API 文档
 - **[安全指南](docs/security/)** - 认证、权限、速率限制
 - **[ORM 适配器](docs/adapters/)** - SQLAlchemy、Tortoise、MongoDB、SQLModel
+
+> 📖 **在线文档** 由 GitHub Actions 自动构建和部署，每次 push 到 master 分支时更新
 
 ---
 
