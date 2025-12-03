@@ -95,4 +95,4 @@ middleware.register_handler(ValidationError, handle_validation_error)
 
 ---
 
-**下一步**: [软删除](soft-delete.md) →
+**下一步**: [软删除](../../tutorials/03-advanced/soft-delete.md) →

@@ -43,4 +43,4 @@ pytest --cov=app tests/
 
 ---
 
-**下一步**: [最佳实践](../guides/best-practices.md) →
+**下一步**: [最佳实践](../best-practices/index.md) →

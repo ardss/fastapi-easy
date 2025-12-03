@@ -407,11 +407,10 @@ main.py               ~120 行
 
 ## 11. 下一步
 
-- 添加权限控制
-- 添加审计日志
-- 添加业务逻辑钩子
-- 添加关系处理
-- 添加批量操作
+- [添加权限控制](../../security/permissions.md)
+- [添加审计日志](../../tutorials/03-advanced/audit-logging.md)
+- [添加业务逻辑钩子](../../tutorials/03-advanced/hooks.md)
+- [添加批量操作](../../tutorials/02-core-features/bulk-operations.md)
 
 ---
 

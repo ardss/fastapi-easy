@@ -107,15 +107,15 @@ INFO:     Application startup complete
 
 ### 初级 (推荐顺序)
 
-1. **[与数据库集成](02-database-integration.md)** - 深入了解数据库配置
-2. **[查询指南](../guides/querying.md)** - 学习搜索、过滤、排序
+1. **[与数据库集成](database-integration.md)** - 深入了解数据库配置
+2. **[查询指南](../../tutorials/02-core-features/querying.md)** - 学习搜索、过滤、排序
 
 ### 中级
 
-3. **[完整项目](03-complete-example.md)** - 查看完整的电商 API
-4. **[基础权限](../guides/permissions-basic.md)** - 添加权限控制
+3. **[完整项目](complete-example.md)** - 查看完整的电商 API
+4. **[基础权限](../../security/permissions.md)** - 添加权限控制
 
 ### 高级
 
-5. **[架构设计](../reference/architecture.md)** - 深入理解内部架构
-6. **[适配器概览](../adapters/index.md)** - 了解支持的其他数据库
+5. **[架构设计](../../architecture/index.md)** - 深入理解内部架构
+6. **[适配器概览](../../reference/adapters/index.md)** - 了解支持的其他数据库

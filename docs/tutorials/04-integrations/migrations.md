@@ -348,8 +348,8 @@ async def after_migrate(context):
 
 ## 相关文档
 
-- [错误处理](./error-handling.md)
-- [最佳实践](./best-practices.md)
+- [错误处理](../../tutorials/02-core-features/error-handling.md)
+- [最佳实践](../../best-practices/index.md)
 - [完整文档](https://fastapi-easy.readthedocs.io)
 
 ## 获取帮助

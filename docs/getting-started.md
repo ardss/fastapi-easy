@@ -196,11 +196,11 @@ curl "http://localhost:8000/items?name=Apple&sort=-price&skip=0&limit=10"
 
 ## 📚 下一步
 
-- **[用户指南](guides/index.md)** - 深入学习各项功能
-- **[数据库集成](tutorial/02-database-integration.md)** - 学习如何集成不同的数据库
-- **[查询和过滤](guides/querying.md)** - 学习高级查询功能
+- **[教程](tutorials/index.md)** - 深入学习各项功能
+- **[数据库集成](tutorials/01-basics/database-integration.md)** - 学习如何集成不同的数据库
+- **[查询和过滤](tutorials/02-core-features/querying.md)** - 学习高级查询功能
 - **[API 参考](reference/api.md)** - 查看完整的 API 文档
-- **[完整示例](tutorial/03-complete-example.md)** - 查看完整的项目示例
+- **[完整示例](tutorials/01-basics/complete-example.md)** - 查看完整的项目示例
 
 ---
 
@@ -212,15 +212,15 @@ curl "http://localhost:8000/items?name=Apple&sort=-price&skip=0&limit=10"
 
 ### Q: 支持哪些数据库？
 
-**A**: SQLAlchemy、Tortoise ORM、MongoDB、SQLModel。详见[数据库适配器](adapters/index.md)。
+**A**: SQLAlchemy、Tortoise ORM、MongoDB、SQLModel。详见[数据库适配器](reference/adapters/index.md)。
 
 ### Q: 如何添加自定义验证？
 
-**A**: 使用 Pydantic 的验证器。详见[错误处理](guides/error-handling.md)。
+**A**: 使用 Pydantic 的验证器。详见[错误处理](tutorials/02-core-features/error-handling.md)。
 
 ### Q: 如何添加权限控制？
 
-**A**: 使用 `enable_permissions=True` 和权限检查函数。详见[权限控制](guides/permissions-basic.md)。
+**A**: 使用 `enable_permissions=True` 和权限检查函数。详见[权限控制](security/permissions.md)。
 
 ---
 
