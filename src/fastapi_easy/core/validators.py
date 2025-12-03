@@ -1,7 +1,7 @@
 """Input validation utilities for security"""
 
-from typing import Any, List, Optional
 import re
+from typing import Any, List, Optional, Tuple
 
 
 class ValidationError(ValueError):
@@ -132,7 +132,7 @@ class InputValidator:
         skip: Optional[int] = None,
         limit: Optional[int] = None,
         max_limit: int = 1000,
-    ) -> tuple[int, int]:
+    ) -> Tuple[int, int]:
         """Validate pagination parameters
 
         Args:

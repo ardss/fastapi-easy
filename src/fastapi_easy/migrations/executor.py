@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import List
+from typing import List, Tuple
 
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
@@ -24,7 +24,7 @@ class MigrationExecutor:
 
     async def execute_plan(
         self, plan: MigrationPlan, mode: ExecutionMode = ExecutionMode.SAFE
-    ) -> tuple[MigrationPlan, List[Migration]]:
+    ) -> Tuple[MigrationPlan, List[Migration]]:
         """
         Execute a migration plan based on mode.
 

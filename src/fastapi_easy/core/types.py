@@ -1,6 +1,17 @@
 """Type definitions and protocols for FastAPI-Easy"""
 
-from typing import Any, Callable, Dict, List, Optional, Protocol, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Protocol,
+    Tuple,
+    TypeVar,
+    Union,
+)
+
 from typing_extensions import TypeAlias
 
 # Generic type variables
@@ -27,7 +38,7 @@ DeleteResult: TypeAlias = Dict[str, Any]
 # Filter and query types
 FilterValue: TypeAlias = Union[str, int, float, bool, List[Any], None]
 SortValue: TypeAlias = str  # "field" or "-field"
-SkipLimit: TypeAlias = tuple[int, int]  # (skip, limit)
+SkipLimit: TypeAlias = Tuple[int, int]  # (skip, limit)
 
 
 class ORM(Protocol):
