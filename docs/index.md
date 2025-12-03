@@ -144,12 +144,12 @@ Pydantic 数据模型，定义 API 的请求和响应格式。
 
 ## 📖 完整文档导航
 
-- **[教程](tutorial/)** - 手把手教学（3 个教程）
-- **[指南](guides/)** - 特定功能的详细说明（13 个指南）
-- **[数据库适配器](adapters/)** - 选择和配置数据库
-- **[参考手册](reference/)** - API 文档、配置、架构
-- **[安全模块](security/)** - 认证、权限、审计
-- **[开发指南](development/)** - 贡献、测试
+- **[教程](tutorial/01-quick-start.md)** - 手把手教学（3 个教程）
+- **[指南](guides/querying.md)** - 特定功能的详细说明（13 个指南）
+- **[数据库适配器](adapters/index.md)** - 选择和配置数据库
+- **[参考手册](reference/api.md)** - API 文档、配置、架构
+- **[安全模块](security/index.md)** - 认证、权限、审计
+- **[开发指南](development/contributing.md)** - 贡献、测试
 
 ---
 
