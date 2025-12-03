@@ -4,14 +4,14 @@ import asyncio
 import logging
 import time
 from typing import Any, Dict, List, Optional
-from .multilayer_cache import MultiLayerCache
-from .async_batch import AsyncBatchProcessor
-from .query_projection import QueryProjection
-from .lock_manager import LockManager
-from .cache_key_generator import generate_cache_key
-from .cache_invalidation import get_invalidation_manager
-from .reentrant_lock import get_lock_manager
 
+from .async_batch import AsyncBatchProcessor
+from .cache_invalidation import get_invalidation_manager
+from .cache_key_generator import generate_cache_key
+from .lock_manager import LockManager
+from .multilayer_cache import MultiLayerCache
+from .query_projection import QueryProjection
+from .reentrant_lock import get_lock_manager
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +154,7 @@ class OptimizedSQLAlchemyAdapter:
             )
         except asyncio.TimeoutError:
             logger.error("Query timeout, not caching empty result")
-            # 不缓存超时结果，直接返回空列表
+            # Don't cache timeout results, return empty list directly
             return []
         
         # Cache result only if successful
@@ -397,7 +397,7 @@ class OptimizedSQLAlchemyAdapter:
             return {"status": "skipped", "message": "Cache is not enabled"}
         
         try:
-            # 记录操作
+            # Log operation
             logger.info(
                 "Cache clear operation started",
                 extra={
@@ -504,7 +504,7 @@ class OptimizedSQLAlchemyAdapter:
                         except Exception as e:
                             logger.warning(f"Failed to cache item: {str(e)}")
                 
-                # 并发缓存所有项
+                # Cache all items concurrently
                 await asyncio.gather(*[cache_item(item) for item in items], return_exceptions=True)
                 
                 logger.info(
