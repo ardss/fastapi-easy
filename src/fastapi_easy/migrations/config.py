@@ -3,8 +3,10 @@
 
 提供集中的配置类和验证
 """
+from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any, Dict
 
 
 @dataclass
@@ -115,7 +117,7 @@ class MigrationConfig:
         if self.strict_mode and self.continue_on_error:
             raise ValueError("strict_mode and continue_on_error are mutually exclusive")
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> Dict[str, Any]:
         """转换为字典
 
         Returns:
@@ -139,7 +141,7 @@ class MigrationConfig:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> "MigrationConfig":
+    def from_dict(cls, data: Dict[str, Any]) -> MigrationConfig:
         """从字典创建配置
 
         Args:
@@ -156,7 +158,7 @@ class MigrationConfig:
         return f"MigrationConfig({items})"
 
     @classmethod
-    def from_file(cls, filepath: str) -> "MigrationConfig":
+    def from_file(cls, filepath: str) -> MigrationConfig:
         """从配置文件加载配置
 
         Args:
@@ -177,13 +179,13 @@ class MigrationConfig:
 
         # 根据文件扩展名选择解析方式
         if filepath.endswith(".json"):
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 data = json.load(f)
         elif filepath.endswith((".yaml", ".yml")):
             try:
                 import yaml
 
-                with open(filepath, "r", encoding="utf-8") as f:
+                with open(filepath, encoding="utf-8") as f:
                     data = yaml.safe_load(f)
             except ImportError:
                 raise ValueError("YAML 支持需要安装 PyYAML: pip install pyyaml")
@@ -222,7 +224,7 @@ class MigrationConfig:
         else:
             raise ValueError(f"不支持的文件格式: {filepath}. " f"支持的格式: .json, .yaml, .yml")
 
-    def merge(self, other: "MigrationConfig") -> "MigrationConfig":
+    def merge(self, other: MigrationConfig) -> MigrationConfig:
         """合并两个配置
 
         Args:

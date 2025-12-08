@@ -5,11 +5,12 @@
 遵循SOLID原则，实现单一职责和开闭原则。
 """
 
-from enum import Enum
-from typing import Dict, Any, Optional, Type, Union, Callable
-from dataclasses import dataclass
-import traceback
+from __future__ import annotations
+
 import logging
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Callable, Dict, Optional, Type
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +100,7 @@ class BaseException(Exception):
             }
         }
 
-    def with_context(self, **kwargs) -> "BaseException":
+    def with_context(self, **kwargs) -> BaseException:
         """添加上下文信息"""
         for key, value in kwargs.items():
             if hasattr(self.context, key):
@@ -319,7 +320,7 @@ def register_default_handlers():
 
     def handle_general_exception(exc: Exception) -> Dict[str, Any]:
         """处理通用异常"""
-        logger.error(f"Unhandled exception: {type(exc).__name__} - {str(exc)}", exc_info=True)
+        logger.error(f"Unhandled exception: {type(exc).__name__} - {exc!s}", exc_info=True)
         return InternalError(message="An unexpected error occurred", cause=exc).to_dict()
 
     exception_registry.register(BaseException, handle_base_exception)

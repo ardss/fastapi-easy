@@ -1,11 +1,12 @@
 """CSRF protection middleware for FastAPI-Easy"""
 
+from __future__ import annotations
+
 import logging
 import secrets
 from typing import Optional, Set
 
-from fastapi import FastAPI, Request, HTTPException, Response
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = logging.getLogger(__name__)

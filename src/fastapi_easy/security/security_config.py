@@ -1,5 +1,7 @@
 """Unified security configuration"""
 
+from __future__ import annotations
+
 import logging
 from typing import Optional
 
@@ -63,7 +65,7 @@ class SecurityConfig:
         permission_loader: Optional[PermissionLoader] = None,
         resource_checker: Optional[ResourcePermissionChecker] = None,
         audit_logger: Optional[AuditLogger] = None,
-    ) -> "SecurityConfig":
+    ) -> SecurityConfig:
         """Create security configuration from environment variables
 
         Args:

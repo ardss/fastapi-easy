@@ -1,0 +1,32 @@
+{
+  "fastapi_easy": {
+    "import_time": 3.5254204333565817,
+    "memory_usage": 18746705.333333332,
+    "min_time": 0.003996799991000444,
+    "max_time": 10.56722060003085
+  },
+  "fastapi_easy.core": {
+    "import_time": 0.0024762333293134966,
+    "memory_usage": 11209.333333333334,
+    "min_time": 0.0020894999615848064,
+    "max_time": 0.003150200005620718
+  },
+  "fastapi_easy.backends.sqlalchemy": {
+    "import_time": 0.0027787333237938583,
+    "memory_usage": 51747.666666666664,
+    "min_time": 0.002431900007650256,
+    "max_time": 0.002986599982250482
+  },
+  "fastapi_easy.security": {
+    "import_time": 0.0022686666537386677,
+    "memory_usage": 13897.666666666666,
+    "min_time": 0.0021915999823249876,
+    "max_time": 0.0023603999870829284
+  },
+  "fastapi_easy.app": {
+    "import_time": 0.002987000004698833,
+    "memory_usage": 39724.333333333336,
+    "min_time": 0.002289299969561398,
+    "max_time": 0.0036474000080488622
+  }
+}

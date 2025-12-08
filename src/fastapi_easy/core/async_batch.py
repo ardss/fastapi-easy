@@ -1,5 +1,7 @@
 """Async batch processing optimization for concurrent operations"""
 
+from __future__ import annotations
+
 import asyncio
 import logging
 from typing import Any, Awaitable, Callable, List, Optional
@@ -128,7 +130,7 @@ class AsyncPipeline:
         """Initialize async pipeline"""
         self.stages: List[Callable] = []
 
-    def add_stage(self, processor: Callable) -> "AsyncPipeline":
+    def add_stage(self, processor: Callable) -> AsyncPipeline:
         """Add processing stage
 
         Args:

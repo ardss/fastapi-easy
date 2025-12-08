@@ -3,6 +3,8 @@
 Ensures all configuration values are valid before use.
 """
 
+from __future__ import annotations
+
 import logging
 from typing import Any, Dict
 
@@ -53,10 +55,10 @@ class ConfigValidator:
 
             return True
         except (ValueError, TypeError, KeyError) as e:
-            logger.error(f"Cache config validation error: {str(e)}")
+            logger.error(f"Cache config validation error: {e!s}")
             return False
         except Exception as e:
-            logger.error(f"Cache config validation failed: {str(e)}")
+            logger.error(f"Cache config validation failed: {e!s}")
             return False
 
     @staticmethod
@@ -84,7 +86,7 @@ class ConfigValidator:
 
             return True
         except Exception as e:
-            logger.error(f"Async config validation failed: {str(e)}")
+            logger.error(f"Async config validation failed: {e!s}")
             return False
 
     @staticmethod
@@ -107,7 +109,7 @@ class ConfigValidator:
 
             return True
         except Exception as e:
-            logger.error(f"Timeout validation failed: {str(e)}")
+            logger.error(f"Timeout validation failed: {e!s}")
             return False
 
     @staticmethod
@@ -149,5 +151,5 @@ class ConfigValidator:
 
             return True
         except Exception as e:
-            logger.error(f"Optimization config validation failed: {str(e)}")
+            logger.error(f"Optimization config validation failed: {e!s}")
             return False

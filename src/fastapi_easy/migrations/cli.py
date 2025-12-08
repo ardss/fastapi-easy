@@ -9,6 +9,7 @@
 - 迁移状态检查 (status 命令)
 - 系统初始化 (init 命令)
 """
+from __future__ import annotations
 
 import asyncio
 import logging

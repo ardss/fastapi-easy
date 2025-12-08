@@ -1,13 +1,14 @@
 """Connection pool manager for preventing async interface freezing and socket leaks"""
 
+from __future__ import annotations
+
 import asyncio
 import logging
 import time
-from typing import Any, Dict, Optional, AsyncGenerator, Callable, Awaitable
 from contextlib import asynccontextmanager
-from functools import wraps
-import weakref
 from dataclasses import dataclass, field
+from functools import wraps
+from typing import Any, AsyncGenerator, Awaitable, Callable, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -351,11 +352,11 @@ if __name__ == "__main__":
             # Use managed connection
             async with managed_connection("example") as conn:
                 result = await conn.fetch("SELECT 1")
-                print(result)
+                logger.debug(f"Query result: {result}")
 
             # Get stats
             stats = await manager.get_stats()
-            print(f"Connection stats: {stats}")
+            logger.info(f"Connection stats: {stats}")
 
         finally:
             await manager.shutdown()

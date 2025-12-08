@@ -1,7 +1,9 @@
 """Input validation utilities for security"""
 
+from __future__ import annotations
+
 import re
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class ValidationError(ValueError):
@@ -200,7 +202,7 @@ class FilterValidator:
         """
         self.allowed_fields = allowed_fields or []
 
-    def validate_filters(self, filters: dict) -> dict:
+    def validate_filters(self, filters: Dict[str, Any]) -> Dict[str, Any]:
         """Validate filters dictionary
 
         Args:

@@ -5,15 +5,14 @@
 支持单例、瞬态、作用域生命周期管理。
 """
 
+from __future__ import annotations
+
 import inspect
-from typing import Any, Dict, Type, TypeVar, Callable, Optional, Union, get_type_hints
-from enum import Enum
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-import threading
-import time
-from contextlib import contextmanager
 import logging
+import threading
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, get_type_hints
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +46,7 @@ class ServiceDescriptor:
 class ServiceScope:
     """服务作用域"""
 
-    def __init__(self, container: "DIContainer"):
+    def __init__(self, container: DIContainer):
         self.container = container
         self._scoped_instances: Dict[Type, Any] = {}
         self._disposed = False
@@ -105,7 +104,7 @@ class DIContainer:
         implementation_type: Optional[Type[T]] = None,
         factory: Optional[Callable[[], T]] = None,
         instance: Optional[T] = None,
-    ) -> "DIContainer":
+    ) -> DIContainer:
         """注册单例服务"""
         return self._register_service(
             service_type, implementation_type, factory, instance, LifetimeScope.SINGLETON
@@ -116,7 +115,7 @@ class DIContainer:
         service_type: Type[T],
         implementation_type: Optional[Type[T]] = None,
         factory: Optional[Callable[[], T]] = None,
-    ) -> "DIContainer":
+    ) -> DIContainer:
         """注册瞬态服务"""
         return self._register_service(
             service_type, implementation_type, factory, None, LifetimeScope.TRANSIENT
@@ -127,7 +126,7 @@ class DIContainer:
         service_type: Type[T],
         implementation_type: Optional[Type[T]] = None,
         factory: Optional[Callable[[], T]] = None,
-    ) -> "DIContainer":
+    ) -> DIContainer:
         """注册作用域服务"""
         return self._register_service(
             service_type, implementation_type, factory, None, LifetimeScope.SCOPED
@@ -140,13 +139,13 @@ class DIContainer:
         factory: Optional[Callable[[], T]],
         instance: Optional[T],
         lifetime: LifetimeScope,
-    ) -> "DIContainer":
+    ) -> DIContainer:
         """注册服务"""
         with self._lock:
             # 参数验证
             if sum(x is not None for x in [implementation_type, factory, instance]) != 1:
                 raise ValueError(
-                    f"Exactly one of implementation_type, factory, or instance must be provided"
+                    "Exactly one of implementation_type, factory, or instance must be provided"
                 )
 
             # 如果提供了实例，检查类型兼容性

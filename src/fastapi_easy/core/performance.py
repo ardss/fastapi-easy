@@ -1,12 +1,14 @@
 """Performance monitoring and metrics for FastAPI-Easy"""
 
+from __future__ import annotations
+
+import asyncio
 import logging
 import time
+from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
-from collections import defaultdict, deque
-import asyncio
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +63,7 @@ class PerformanceMonitor:
 
         try:
             yield
-        except Exception as e:
+        except Exception:
             # Record error
             async with self._lock:
                 self.stats[request_key].error_count += 1

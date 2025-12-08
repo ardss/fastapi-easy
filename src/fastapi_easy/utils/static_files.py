@@ -1,17 +1,16 @@
 """Enhanced static file serving with proper MIME type detection and caching"""
 
-import os
+from __future__ import annotations
+
 import mimetypes
-import asyncio
+import os
 from pathlib import Path
-from typing import Optional, Dict, Any
-from fastapi import Request, Response, HTTPException
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, StreamingResponse
-from starlette.responses import JSONResponse
+from typing import Any, Dict, Optional
+
 import aiofiles
-import hashlib
-import time
+from fastapi import HTTPException, Request, Response
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 
 class EnhancedStaticFiles(StaticFiles):

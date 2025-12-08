@@ -5,16 +5,18 @@
 支持配置继承、默认值设置和配置验证。
 """
 
-import os
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union, get_type_hints
-from dataclasses import dataclass, field, fields
-from pathlib import Path
-from enum import Enum
-import json
-import yaml
-from abc import ABC, abstractmethod
+from __future__ import annotations
 
+import json
 import logging
+import os
+from abc import ABC
+from dataclasses import dataclass, field
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union, get_type_hints
+
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +36,8 @@ class ConfigSource(Enum):
 class ConfigField:
     """配置字段定义"""
 
-    name: str
-    type: Type
+    name: Optional[str] = None  # Will be set automatically when used in dataclasses
+    type: Optional[Type] = None  # Will be inferred from type hint
     default: Any = None
     required: bool = True
     description: str = ""
@@ -93,7 +95,7 @@ class BaseSettings(ABC):
             return
 
         try:
-            with open(config_path, "r", encoding="utf-8") as f:
+            with open(config_path, encoding="utf-8") as f:
                 if config_path.suffix.lower() in [".yaml", ".yml"]:
                     data = yaml.safe_load(f)
                 elif config_path.suffix.lower() == ".json":
@@ -515,7 +517,7 @@ class AppSettings(BaseSettings):
             self.debug = True
 
     @classmethod
-    def create(cls, **kwargs) -> "AppSettings":
+    def create(cls, **kwargs) -> AppSettings:
         """创建应用配置"""
         return cls(**kwargs)
 

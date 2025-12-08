@@ -1,9 +1,11 @@
 """Hook system for FastAPI-Easy"""
 
+from __future__ import annotations
+
 import asyncio
 import logging
-from typing import Callable, Dict, List, Any, Optional
 from dataclasses import dataclass, field
+from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -106,13 +108,13 @@ class HookRegistry:
             except TypeError as e:
                 # Invalid callback signature
                 logger.error(
-                    f"Invalid callback signature for {callback.__name__} in event {event}: {str(e)}",
+                    f"Invalid callback signature for {callback.__name__} in event {event}: {e!s}",
                     exc_info=True,
                 )
             except Exception as e:
                 # Log error but don't stop other hooks
                 logger.error(
-                    f"Error in hook {callback.__name__} for event {event}: {str(e)}", exc_info=True
+                    f"Error in hook {callback.__name__} for event {event}: {e!s}", exc_info=True
                 )
 
     def get_hooks(self, event: str) -> List[Callable]:

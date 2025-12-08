@@ -1,5 +1,7 @@
 """Multi-tenant support for security module"""
 
+from __future__ import annotations
+
 import logging
 from typing import List, Optional
 

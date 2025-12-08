@@ -1,8 +1,9 @@
 """JWT authentication for FastAPI-Easy"""
 
+from __future__ import annotations
+
 import logging
 import os
-import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
@@ -164,19 +165,19 @@ class JWTAuth:
             raise TokenExpiredError("Token has expired")
         except jwt.InvalidSignatureError as e:
             logger.warning(f"Invalid token signature: {e}")
-            raise InvalidTokenError(f"Invalid token signature: {str(e)}")
+            raise InvalidTokenError(f"Invalid token signature: {e!s}")
         except jwt.DecodeError as e:
             logger.warning(f"Token decode error: {e}")
-            raise InvalidTokenError(f"Token decode error: {str(e)}")
+            raise InvalidTokenError(f"Token decode error: {e!s}")
         except jwt.InvalidTokenError as e:
             logger.warning(f"Invalid token: {e}")
-            raise InvalidTokenError(f"Invalid token: {str(e)}")
+            raise InvalidTokenError(f"Invalid token: {e!s}")
         except (ValueError, TypeError) as e:
             logger.error(f"Token payload validation failed: {e}")
-            raise InvalidTokenError(f"Token payload validation failed: {str(e)}")
+            raise InvalidTokenError(f"Token payload validation failed: {e!s}")
         except Exception as e:
             logger.error(f"Token verification failed: {e}")
-            raise InvalidTokenError(f"Token verification failed: {str(e)}")
+            raise InvalidTokenError(f"Token verification failed: {e!s}")
 
     def decode_token(self, token: str) -> Dict:
         """Decode token without verification (for debugging only)
@@ -194,7 +195,7 @@ class JWTAuth:
             )
             return payload
         except Exception as e:
-            raise InvalidTokenError(f"Failed to decode token: {str(e)}")
+            raise InvalidTokenError(f"Failed to decode token: {e!s}")
 
     def refresh_access_token(
         self,

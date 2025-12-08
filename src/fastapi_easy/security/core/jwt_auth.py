@@ -1,5 +1,7 @@
 """JWT authentication for FastAPI-Easy"""
 
+from __future__ import annotations
+
 import logging
 import os
 from datetime import datetime, timedelta, timezone
@@ -159,11 +161,11 @@ class JWTAuth:
             logger.warning("Expired token attempted")
             raise TokenExpiredError("Token has expired")
         except jwt.InvalidTokenError as e:
-            logger.warning(f"Invalid token: {str(e)}")
-            raise InvalidTokenError(f"Invalid token: {str(e)}")
+            logger.warning(f"Invalid token: {e!s}")
+            raise InvalidTokenError(f"Invalid token: {e!s}")
         except Exception as e:
-            logger.error(f"Token verification failed: {str(e)}")
-            raise InvalidTokenError(f"Token verification failed: {str(e)}")
+            logger.error(f"Token verification failed: {e!s}")
+            raise InvalidTokenError(f"Token verification failed: {e!s}")
 
     def decode_token(self, token: str) -> Dict:
         """Decode token without verification (for debugging only)
@@ -181,7 +183,7 @@ class JWTAuth:
             )
             return payload
         except Exception as e:
-            raise InvalidTokenError(f"Failed to decode token: {str(e)}")
+            raise InvalidTokenError(f"Failed to decode token: {e!s}")
 
     def refresh_access_token(
         self,

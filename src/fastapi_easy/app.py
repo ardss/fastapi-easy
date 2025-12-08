@@ -4,6 +4,8 @@ FastAPIEasy 应用类 - 集成迁移引擎的 FastAPI 应用
 提供零配置的 Schema 迁移功能
 """
 
+from __future__ import annotations
+
 import logging
 from contextlib import asynccontextmanager
 from typing import List, Optional, Type
@@ -162,7 +164,7 @@ class FastAPIEasy(FastAPI):
             try:
                 self._migration_engine.storage.initialize()
                 logger.info("✅ Migration storage initialized")
-            except (OSError, IOError) as e:
+            except OSError as e:
                 logger.error(f"Storage initialization failed (I/O error): {e}")
                 raise
             except Exception as e:

@@ -1,10 +1,12 @@
 """Audit logging for security events in FastAPI-Easy"""
 
+from __future__ import annotations
+
 import threading
 from collections import defaultdict, deque
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Deque, Dict, List, Optional
 
 
 class AuditEventType(str, Enum):
@@ -97,7 +99,7 @@ class AuditLogger:
         self.max_logs = max_logs
         self._lock = threading.RLock()
         # Use deque for automatic old log removal
-        self.logs: deque = deque(maxlen=max_logs)
+        self.logs: Deque[AuditLog] = deque(maxlen=max_logs)
         # Indexes for fast queries
         self.user_index: Dict[str, List[int]] = defaultdict(list)
         self.username_index: Dict[str, List[int]] = defaultdict(list)

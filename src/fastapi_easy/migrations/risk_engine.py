@@ -7,6 +7,7 @@
 - 自定义风险规则
 - 风险缓存和监控
 """
+from __future__ import annotations
 
 import logging
 from dataclasses import dataclass

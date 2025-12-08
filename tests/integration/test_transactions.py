@@ -23,7 +23,6 @@ class Base(DeclarativeBase):
     """SQLAlchemy base class"""
 
 
-
 class TransactionItem(Base):
     """Test item model for transaction tests"""
 

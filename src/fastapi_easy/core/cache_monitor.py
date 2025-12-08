@@ -1,13 +1,15 @@
 """Cache monitoring and metrics collection"""
 
-from typing import Dict, Any
+from __future__ import annotations
+
 from datetime import datetime
+from typing import Any, Dict, List
 
 
 class CacheMetrics:
     """Collects and tracks cache performance metrics"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize cache metrics"""
         self.hits = 0
         self.misses = 0
@@ -82,7 +84,7 @@ class CacheMonitor:
         """
         self.metrics = CacheMetrics()
         self.hit_rate_threshold = hit_rate_threshold
-        self.alerts: list = []
+        self.alerts: List[str] = []
 
     def record_hit(self) -> None:
         """Record cache hit"""

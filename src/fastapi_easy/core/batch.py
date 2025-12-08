@@ -1,7 +1,9 @@
 """Batch operations optimization for better performance"""
 
-from typing import Any, List, Dict, Callable, Awaitable
+from __future__ import annotations
+
 import asyncio
+from typing import Any, Awaitable, Callable, Dict, List
 
 
 class BatchProcessor:

@@ -5,21 +5,24 @@
 遵循开闭原则，支持功能的热插拔。
 """
 
-import os
-import sys
+from __future__ import annotations
+
+import asyncio
 import importlib
 import importlib.util
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, Callable
+import json
+import logging
+import os
+import sys
 from dataclasses import dataclass, field
 from enum import Enum
-import asyncio
-import logging
-import json
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Type
+
 import yaml
 
-from .interfaces import IPlugin, IPluginManager, BaseException
-from .container import DIContainer, LifetimeScope
+from .container import DIContainer
+from .interfaces import BaseException, IPlugin, IPluginManager
 from .settings import AppSettings
 
 logger = logging.getLogger(__name__)
@@ -54,12 +57,12 @@ class PluginMetadata:
     config_schema: Optional[Dict[str, Any]] = None
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "PluginMetadata":
+    def from_dict(cls, data: Dict[str, Any]) -> PluginMetadata:
         """从字典创建元数据"""
         return cls(**data)
 
     @classmethod
-    def from_file(cls, file_path: str) -> "PluginMetadata":
+    def from_file(cls, file_path: str) -> PluginMetadata:
         """从文件加载元数据"""
         path = Path(file_path)
 
@@ -67,7 +70,7 @@ class PluginMetadata:
             raise FileNotFoundError(f"Plugin metadata file not found: {file_path}")
 
         try:
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 if path.suffix.lower() == ".json":
                     data = json.load(f)
                 elif path.suffix.lower() in [".yaml", ".yml"]:
@@ -183,9 +186,7 @@ class PluginManager(IPluginManager):
             logger.error(f"Failed to load plugin from {plugin_path}: {e}")
             if isinstance(e, PluginError):
                 raise
-            raise PluginError(
-                os.path.basename(plugin_path), f"Load failed: {str(e)}", cause=e
-            ) from e
+            raise PluginError(os.path.basename(plugin_path), f"Load failed: {e!s}", cause=e) from e
 
     def _load_metadata(self, plugin_path: str) -> PluginMetadata:
         """加载插件元数据"""
@@ -294,7 +295,7 @@ class PluginManager(IPluginManager):
             plugin_info.state = PluginState.ERROR
             plugin_info.error = e
             raise PluginError(
-                plugin_info.metadata.name, f"Initialization failed: {str(e)}", cause=e
+                plugin_info.metadata.name, f"Initialization failed: {e!s}", cause=e
             ) from e
 
     async def _register_plugin_services(self, plugin_info: PluginInfo):
@@ -348,7 +349,7 @@ class PluginManager(IPluginManager):
         except Exception as e:
             plugin_info.state = PluginState.ERROR
             plugin_info.error = e
-            raise PluginError(plugin_name, f"Unload failed: {str(e)}", cause=e) from e
+            raise PluginError(plugin_name, f"Unload failed: {e!s}", cause=e) from e
 
     def _get_plugin_dependents(self, plugin_name: str) -> List[str]:
         """获取依赖指定插件的其他插件"""

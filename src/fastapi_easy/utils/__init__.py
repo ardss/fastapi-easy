@@ -1,23 +1,25 @@
 """Utility modules for FastAPI-Easy"""
 
-from .pagination import PaginationParams, paginate
-from .filters import FilterParser
-from .sorters import SortParser
-from .query_params import QueryParams, as_query_params
-from .static_files import EnhancedStaticFiles, setup_static_files
+from __future__ import annotations
+
 from .connection_manager import (
-    ConnectionManager,
     ConnectionConfig,
+    ConnectionManager,
+    get_connection_manager,
     managed_connection,
     with_connection_manager,
-    get_connection_manager,
 )
+from .filters import FilterParser
 from .hot_reload_state import (
     StateManager,
     TokenStore,
     get_state_manager,
     persistent_state,
 )
+from .pagination import PaginationParams, paginate
+from .query_params import QueryParams, as_query_params
+from .sorters import SortParser
+from .static_files import EnhancedStaticFiles, setup_static_files
 
 __all__ = [
     # Existing utilities

@@ -4,6 +4,8 @@ This module provides reentrant locks that allow the same task
 to acquire the same lock multiple times without deadlock.
 """
 
+from __future__ import annotations
+
 import asyncio
 import logging
 from typing import Any, Dict, Optional
@@ -61,10 +63,10 @@ class ReentrantAsyncLock:
             logger.warning("Lock acquisition timeout")
             return False
         except RuntimeError as e:
-            logger.error(f"Runtime error acquiring lock: {str(e)}")
+            logger.error(f"Runtime error acquiring lock: {e!s}")
             return False
         except Exception as e:
-            logger.error(f"Error acquiring lock: {str(e)}")
+            logger.error(f"Error acquiring lock: {e!s}")
             return False
 
     def release(self) -> bool:
@@ -91,12 +93,12 @@ class ReentrantAsyncLock:
 
             return True
         except Exception as e:
-            logger.error(f"Error releasing lock: {str(e)}")
+            logger.error(f"Error releasing lock: {e!s}")
             return False
 
     async def __aenter__(
         self,
-    ) -> "ReentrantAsyncLock":
+    ) -> ReentrantAsyncLock:
         """Async context manager entry"""
         await self.acquire()
         return self

@@ -1,6 +1,8 @@
 """Sort parsing utilities for FastAPI-Easy"""
 
-from typing import Dict, Any, List, Tuple
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class SortParser:
@@ -15,8 +17,8 @@ class SortParser:
     @classmethod
     def parse(
         cls,
-        sort_param: str = None,
-        allowed_fields: List[str] = None,
+        sort_param: Optional[str] = None,
+        allowed_fields: Optional[List[str]] = None,
     ) -> Dict[str, str]:
         """Parse sort query parameter
 
@@ -59,7 +61,7 @@ class SortParser:
     def parse_from_dict(
         cls,
         query_params: Dict[str, Any],
-        allowed_fields: List[str] = None,
+        allowed_fields: Optional[List[str]] = None,
     ) -> Dict[str, str]:
         """Parse sort from query parameters dictionary
 

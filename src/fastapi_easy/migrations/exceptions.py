@@ -3,8 +3,10 @@
 
 统一的异常类型，便于错误处理和诊断
 """
+from __future__ import annotations
 
 import re
+from typing import Any, Dict, Optional
 
 
 def _sanitize_error_message(error: str) -> str:
@@ -30,7 +32,7 @@ def _sanitize_error_message(error: str) -> str:
 class MigrationError(Exception):
     """迁移系统基础异常"""
 
-    def __init__(self, message: str, suggestion: str = None):
+    def __init__(self, message: str, suggestion: Optional[str] = None):
         self.message = message
         self.suggestion = suggestion
         super().__init__(message)
@@ -52,7 +54,7 @@ class DatabaseConnectionError(MigrationError):
             "  1. 检查数据库连接字符串\n"
             "  2. 确保数据库服务正在运行\n"
             "  3. 检查网络连接\n"
-            f"  4. 原始错误: {str(original_error)}"
+            f"  4. 原始错误: {original_error!s}"
         )
         super().__init__(message, suggestion)
 
@@ -60,7 +62,7 @@ class DatabaseConnectionError(MigrationError):
 class SchemaDetectionError(MigrationError):
     """Schema 检测错误"""
 
-    def __init__(self, reason: str, timeout: int = None):
+    def __init__(self, reason: str, timeout: Optional[int] = None):
         if timeout:
             message = f"Schema 检测超时 (超过 {timeout}s)"
             suggestion = (
@@ -125,7 +127,7 @@ class MigrationExecutionError(MigrationError):
 class LockAcquisitionError(MigrationError):
     """锁获取错误"""
 
-    def __init__(self, lock_type: str, lock_info: dict = None):
+    def __init__(self, lock_type: str, lock_info: Optional[Dict[str, Any]] = None):
         message = f"无法获取迁移锁 ({lock_type})"
         suggestion = (
             "原因: 另一个实例正在执行迁移\n\n"
@@ -135,12 +137,12 @@ class LockAcquisitionError(MigrationError):
         )
 
         if lock_type == "file":
-            suggestion += f"     rm {lock_info.get('file', '.fastapi_easy_migration.lock')}\n"
+            suggestion += f"     rm {lock_info.get('file', '.fastapi_easy_migration.lock') if lock_info else '.fastapi_easy_migration.lock'}\n"
         elif lock_type == "postgresql":
-            suggestion += f"     SELECT pg_advisory_unlock({lock_info.get('id', 1)})\n"
+            suggestion += f"     SELECT pg_advisory_unlock({lock_info.get('id', 1) if lock_info else 1})\n"
         elif lock_type == "mysql":
             suggestion += (
-                f"     SELECT RELEASE_LOCK('{lock_info.get('name', 'fastapi_easy_migration')}')\n"
+                f"     SELECT RELEASE_LOCK('{lock_info.get('name', 'fastapi_easy_migration') if lock_info else 'fastapi_easy_migration'}')\n"
             )
 
         suggestion += "  3. 重新运行迁移"

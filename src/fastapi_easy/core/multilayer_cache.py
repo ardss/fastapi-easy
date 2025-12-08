@@ -1,11 +1,13 @@
 """Multi-layer cache implementation for advanced performance optimization"""
 
+from __future__ import annotations
+
 import logging
 from typing import Any, Optional
-from .cache import QueryCache
-from .reentrant_lock import ReentrantAsyncLock
-from .cache_eviction import CacheEvictionManager
 
+from .cache import QueryCache
+from .cache_eviction import CacheEvictionManager
+from .reentrant_lock import ReentrantAsyncLock
 
 logger = logging.getLogger(__name__)
 
@@ -159,7 +161,7 @@ class MultiLayerCache:
                 l2_keys = list(self.l2_cache._cache.keys())
                 return l1_keys + l2_keys
         except Exception as e:
-            logger.error(f"Failed to get all keys: {str(e)}")
+            logger.error(f"Failed to get all keys: {e!s}")
             return []
 
     async def cleanup_expired(self) -> int:

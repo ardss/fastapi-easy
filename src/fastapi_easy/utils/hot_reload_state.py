@@ -1,21 +1,27 @@
 """State persistence for FastAPI applications to handle hot reload scenarios"""
 
-import os
-import json
+from __future__ import annotations
+
 import hashlib
+import json
 import logging
-from typing import Any, Dict, Optional, Union, Callable
-from pathlib import Path
+import os
+import threading
 from datetime import datetime, timedelta
 from functools import wraps
-import threading
-import sys
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
 # Platform-specific imports
 if os.name == "posix":
     import fcntl
+
+    FCNTL_MODULE = fcntl
 else:
+    # Windows compatibility - fcntl not available
     fcntl = None
+    FCNTL_MODULE = None
+
 
 logger = logging.getLogger(__name__)
 
@@ -49,12 +55,12 @@ class StateManager:
         self._memory_cache: Dict[str, Any] = {}
         self._cache_timestamps: Dict[str, datetime] = {}
 
-    def _get_lock(self):
+    def _get_lock(self) -> Optional[int]:
         """Get file lock for thread-safe operations"""
         try:
-            if fcntl:  # Unix-like systems
+            if FCNTL_MODULE:  # Unix-like systems
                 lock_fd = os.open(str(self._lock_file), os.O_CREAT | os.O_WRONLY)
-                fcntl.flock(lock_fd, fcntl.LOCK_EX)
+                FCNTL_MODULE.flock(lock_fd, FCNTL_MODULE.LOCK_EX)
                 return lock_fd
             else:
                 # Windows fallback - use thread lock
@@ -66,11 +72,11 @@ class StateManager:
             logger.warning(f"Could not acquire lock: {e}")
             return None
 
-    def _release_lock(self, lock_fd):
+    def _release_lock(self, lock_fd: Optional[int]) -> None:
         """Release file lock"""
         try:
-            if lock_fd is not None and fcntl:
-                fcntl.flock(lock_fd, fcntl.LOCK_UN)
+            if lock_fd is not None and FCNTL_MODULE:
+                FCNTL_MODULE.flock(lock_fd, FCNTL_MODULE.LOCK_UN)
                 os.close(lock_fd)
             elif hasattr(self, "_thread_lock"):
                 self._thread_lock.release()
@@ -241,7 +247,7 @@ class StateManager:
 
             for state_file in self.state_dir.glob("*.json"):
                 try:
-                    with open(state_file, "r") as f:
+                    with open(state_file) as f:
                         data = json.load(f)
                     expires_at = data.get("expires_at")
                     if expires_at:
@@ -261,7 +267,7 @@ class StateManager:
         finally:
             self._release_lock(lock_fd)
 
-    def get_all_keys(self) -> list:
+    def get_all_keys(self) -> List[str]:
         """Get all non-expired state keys"""
         keys = []
         try:
@@ -270,7 +276,7 @@ class StateManager:
 
             for state_file in self.state_dir.glob("*.json"):
                 try:
-                    with open(state_file, "r") as f:
+                    with open(state_file) as f:
                         data = json.load(f)
                     expires_at = data.get("expires_at")
                     if not expires_at or datetime.fromisoformat(expires_at) > current_time:
@@ -291,7 +297,7 @@ class StateManager:
 _global_state_manager: Optional[StateManager] = None
 
 
-def get_state_manager(**kwargs) -> StateManager:
+def get_state_manager(**kwargs: Any) -> StateManager:
     """Get or create the global state manager"""
     global _global_state_manager
     if _global_state_manager is None:
@@ -309,9 +315,9 @@ def persistent_state(key: str, ttl: Optional[int] = None, manager: Optional[Stat
             return [...]
     """
 
-    def decorator(func: Callable):
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             state_mgr = manager or get_state_manager()
 
             # Try to get from state first
@@ -350,7 +356,7 @@ class TokenStore:
         self.state_manager = state_manager or get_state_manager()
         self.token_key = "fastapi_tokens"
 
-    def add_token(self, user_id: str, token: str, expires_in: int = 3600):
+    def add_token(self, user_id: str, token: str, expires_in: int = 3600) -> None:
         """Add a token for a user"""
         tokens = self.state_manager.get(self.token_key, {})
         tokens[user_id] = {
@@ -379,13 +385,13 @@ class TokenStore:
 
         return True
 
-    def remove_token(self, user_id: str):
+    def remove_token(self, user_id: str) -> None:
         """Remove a token"""
         tokens = self.state_manager.get(self.token_key, {})
         tokens.pop(user_id, None)
         self.state_manager.set(self.token_key, tokens)
 
-    def clear_expired_tokens(self):
+    def clear_expired_tokens(self) -> None:
         """Clear all expired tokens"""
         tokens = self.state_manager.get(self.token_key, {})
         current_time = datetime.now()
@@ -413,22 +419,22 @@ if __name__ == "__main__":
 
     # Test basic functionality
     state.set("test_key", {"data": "test_value"}, ttl=5)
-    print(f"Retrieved: {state.get('test_key')}")
+    logger.info(f"Retrieved: {state.get('test_key')}")
 
     # Test token store
     token_store = TokenStore(state)
     token_store.add_token("user1", "token123", expires_in=10)
-    print(f"Token valid: {token_store.is_valid('user1', 'token123')}")
+    logger.info(f"Token valid: {token_store.is_valid('user1', 'token123')}")
 
     # Test persistence decorator
     @persistent_state("api_response", ttl=30)
     def expensive_api_call():
-        print("Making expensive API call...")
+        logger.debug("Making expensive API call...")
         return {"data": "expensive_result"}
 
-    print(f"API call result: {expensive_api_call()}")
-    print(f"Cached API call result: {expensive_api_call()}")
+    logger.info(f"API call result: {expensive_api_call()}")
+    logger.info(f"Cached API call result: {expensive_api_call()}")
 
     # Cleanup
     time.sleep(6)
-    print(f"After TTL - Retrieved: {state.get('test_key', 'expired')}")
+    logger.info(f"After TTL - Retrieved: {state.get('test_key', 'expired')}")

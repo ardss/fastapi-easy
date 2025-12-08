@@ -1,5 +1,7 @@
 """Audit and monitoring modules"""
 
+from __future__ import annotations
+
 from .audit_log import AuditEventType, AuditLog, AuditLogger
 from .audit_storage import (
     AuditStorage,
@@ -9,12 +11,12 @@ from .audit_storage import (
 from .monitoring import MonitoredPermissionEngine, PermissionCheckMetrics
 
 __all__ = [
+    "AuditEventType",
     "AuditLog",
     "AuditLogger",
-    "AuditEventType",
     "AuditStorage",
-    "MemoryAuditStorage",
     "DatabaseAuditStorage",
+    "MemoryAuditStorage",
     "MonitoredPermissionEngine",
     "PermissionCheckMetrics",
 ]

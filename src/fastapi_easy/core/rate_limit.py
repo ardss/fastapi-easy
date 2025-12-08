@@ -1,10 +1,12 @@
 """Rate limiting support for FastAPI-Easy"""
 
+from __future__ import annotations
+
 import asyncio
-from typing import Dict, Optional
-from abc import ABC, abstractmethod
 import time
+from abc import ABC, abstractmethod
 from collections import deque
+from typing import Dict, Optional
 
 
 class RateLimitEntry:

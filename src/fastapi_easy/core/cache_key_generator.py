@@ -4,11 +4,13 @@ This module provides secure cache key generation using JSON serialization
 and MD5 hashing to prevent key collisions.
 """
 
+from __future__ import annotations
+
 import hashlib
 import json
 import logging
-from typing import Any
 from functools import lru_cache
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -48,11 +50,11 @@ class CacheKeyGenerator:
             params_json = json.dumps(kwargs, sort_keys=True, default=str)
         except (TypeError, ValueError) as e:
             # Use fallback serialization for non-serializable objects
-            logger.warning(f"Failed to serialize params: {str(e)}, using fallback")
+            logger.warning(f"Failed to serialize params: {e!s}, using fallback")
             try:
                 params_json = json.dumps({"params": str(kwargs)}, sort_keys=True)
             except Exception as fallback_error:
-                logger.error(f"Fallback serialization failed: {str(fallback_error)}")
+                logger.error(f"Fallback serialization failed: {fallback_error!s}")
                 # Last resort: use string representation
                 params_json = json.dumps({"params": repr(kwargs)}, sort_keys=True)
 

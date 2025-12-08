@@ -1,9 +1,11 @@
 """Optimization configuration management"""
 
-import os
+from __future__ import annotations
+
 import json
-from typing import Dict, Any
+import os
 from pathlib import Path
+from typing import Any, Dict
 
 
 class OptimizationConfig:
@@ -45,7 +47,7 @@ class OptimizationConfig:
         self.hit_rate_threshold = hit_rate_threshold
 
     @classmethod
-    def from_env(cls) -> "OptimizationConfig":
+    def from_env(cls) -> OptimizationConfig:
         """Load configuration from environment variables
 
         Supported variables:
@@ -83,7 +85,7 @@ class OptimizationConfig:
         )
 
     @classmethod
-    def from_file(cls, path: str) -> "OptimizationConfig":
+    def from_file(cls, path: str) -> OptimizationConfig:
         """Load configuration from JSON file
 
         Args:

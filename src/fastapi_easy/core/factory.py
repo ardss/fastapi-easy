@@ -5,19 +5,21 @@
 遵循开闭原则，便于新增组件类型。
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union, Callable
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar
 
 from fastapi import APIRouter, FastAPI
 from pydantic import BaseModel
 
-from .settings import AppSettings
-from .container import DIContainer, LifetimeScope
-from .exceptions import BaseException
 from .adapters import ORMAdapter
+from .container import DIContainer
 from .crud_router import CRUDRouter
+from .exceptions import BaseException
+from .settings import AppSettings
 
 T = TypeVar("T")
 
@@ -276,7 +278,6 @@ class ApplicationFactory:
 
     def _configure_exception_handlers(self, app: FastAPI):
         """配置异常处理器"""
-        from .exceptions import BaseException
 
         @app.exception_handler(BaseException)
         async def handle_base_exception(request, exc: BaseException):
@@ -291,7 +292,7 @@ class ApplicationFactory:
         adapter: Optional[ORMAdapter] = None,
         adapter_config: Optional[Dict[str, Any]] = None,
         **router_kwargs,
-    ) -> "ApplicationFactory":
+    ) -> ApplicationFactory:
         """注册CRUD路由组件"""
         config = {
             "schema": schema,
@@ -313,7 +314,7 @@ class ApplicationFactory:
         singleton: bool = True,
         dependencies: Optional[List[str]] = None,
         **config,
-    ) -> "ApplicationFactory":
+    ) -> ApplicationFactory:
         """注册服务组件"""
         spec = ComponentSpec(
             component_type=ComponentType.SERVICE,
@@ -328,7 +329,7 @@ class ApplicationFactory:
         self.component_registry.register_component(spec)
         return self
 
-    def register_middleware(self, name: str, **config) -> "ApplicationFactory":
+    def register_middleware(self, name: str, **config) -> ApplicationFactory:
         """注册中间件组件"""
         spec = ComponentSpec(component_type=ComponentType.MIDDLEWARE, name=name, config=config)
 

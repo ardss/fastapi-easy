@@ -1,5 +1,7 @@
 """Tortoise ORM adapter"""
 
+from __future__ import annotations
+
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 from tortoise import Model
@@ -136,11 +138,11 @@ class TortoiseAdapter(BaseORMAdapter):
             raise AppError(
                 code=ErrorCode.INTERNAL_ERROR,
                 status_code=500,
-                message=f"Database error (validation): {str(e)}",
+                message=f"Database error (validation): {e!s}",
             )
         except Exception as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def get_one(self, id: Any) -> Optional[Any]:
@@ -157,7 +159,7 @@ class TortoiseAdapter(BaseORMAdapter):
             return await self.model.get_or_none(**{pk_field: id})
         except Exception as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def create(self, data: Dict[str, Any]) -> Any:
@@ -177,10 +179,10 @@ class TortoiseAdapter(BaseORMAdapter):
             item = await self.model.create(**data)
             return item
         except IntegrityError as e:
-            raise ConflictError(f"Item already exists: {str(e)}")
+            raise ConflictError(f"Item already exists: {e!s}")
         except Exception as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def update(self, id: Any, data: Dict[str, Any]) -> Any:
@@ -208,10 +210,10 @@ class TortoiseAdapter(BaseORMAdapter):
             await item.save()
             return item
         except IntegrityError as e:
-            raise ConflictError(f"Update conflict: {str(e)}")
+            raise ConflictError(f"Update conflict: {e!s}")
         except Exception as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def delete_one(self, id: Any) -> Any:
@@ -237,7 +239,7 @@ class TortoiseAdapter(BaseORMAdapter):
             return item
         except Exception as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def delete_all(self) -> List[Any]:
@@ -259,7 +261,7 @@ class TortoiseAdapter(BaseORMAdapter):
             return items
         except Exception as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def count(self, filters: Dict[str, Any]) -> int:
@@ -282,5 +284,5 @@ class TortoiseAdapter(BaseORMAdapter):
             return await query.count()
         except Exception as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )

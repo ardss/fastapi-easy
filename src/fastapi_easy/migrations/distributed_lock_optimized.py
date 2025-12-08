@@ -1,48 +1,98 @@
-"""Optimized distributed lock mechanism with improved performance"""
+"""
+Optimized Distributed Lock Mechanism with Performance Improvements
+
+Key optimizations:
+- Exponential backoff with jitter for lock contention
+- Connection pooling and reuse
+- Health checks and timeout management
+- Configurable backoff parameters
+- Performance metrics collection
+"""
+from __future__ import annotations
 
 import asyncio
 import logging
 import os
+import random
+import sys
 import time
 import weakref
-from abc import ABC, abstractmethod
 from contextlib import asynccontextmanager
-from typing import Optional, Dict, Any
 from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
-from sqlalchemy.pool import QueuePool
 
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class LockConfig:
-    """Configuration for lock performance optimization"""
-
-    max_retries: int = 10
-    base_retry_delay: float = 0.01  # Start with 10ms
-    max_retry_delay: float = 1.0
-    connection_timeout: float = 5.0
-    lock_timeout: int = 30
-    cleanup_interval: int = 60  # seconds
-
-    def get_retry_delay(self, attempt: int) -> float:
-        """Calculate exponential backoff with jitter"""
-        delay = min(self.base_retry_delay * (2**attempt), self.max_retry_delay)
-        # Add jitter to prevent thundering herd
-        jitter = delay * 0.1 * (0.5 - (hash(attempt) % 100) / 100)
-        return delay + jitter
-
-
 def is_test_environment() -> bool:
-    """Optimized test environment detection"""
+    """检测是否在测试环境中运行"""
     return (
         "pytest" in os.environ.get("PYTEST_CURRENT_TEST", "")
+        or "PYTEST_CURRENT_TEST" in os.environ
         or os.environ.get("TESTING") == "true"
+        or os.environ.get("ENV") == "test"
         or "pytest" in sys.modules
+        or any("pytest" in arg for arg in sys.argv)
+        or "unittest" in sys.modules
     )
+
+
+@dataclass
+class BackoffConfig:
+    """Configuration for exponential backoff"""
+    base_delay: float = 0.01  # Base delay in seconds (10ms)
+    max_delay: float = 5.0  # Maximum delay in seconds
+    multiplier: float = 2.0  # Backoff multiplier
+    jitter: bool = True  # Add random jitter
+    jitter_factor: float = 0.1  # Jitter factor (0-1)
+    max_retries: int = 20  # Maximum retry attempts
+
+    def get_delay(self, attempt: int) -> float:
+        """Calculate delay with exponential backoff and jitter"""
+        if attempt >= self.max_retries:
+            return self.max_delay
+
+        # Calculate exponential backoff
+        delay = self.base_delay * (self.multiplier ** attempt)
+        delay = min(delay, self.max_delay)
+
+        # Add jitter if enabled to prevent thundering herd
+        if self.jitter:
+            jitter_range = delay * self.jitter_factor
+            jitter = random.uniform(-jitter_range, jitter_range)
+            delay = max(0.001, delay + jitter)  # Ensure minimum delay
+
+        return delay
+
+
+@dataclass
+class ConnectionPoolConfig:
+    """Configuration for connection pooling"""
+    pool_size: int = 5
+    max_overflow: int = 10
+    pool_timeout: int = 30
+    pool_recycle: int = 3600
+    pool_pre_ping: bool = True
+    health_check_interval: float = 30.0
+    connection_max_age: float = 300.0  # 5 minutes
+
+
+@dataclass
+class LockMetrics:
+    """Performance metrics for lock operations"""
+    acquire_attempts: int = 0
+    acquire_successes: int = 0
+    acquire_failures: int = 0
+    total_acquire_time: float = 0.0
+    avg_acquire_time: float = 0.0
+    contention_count: int = 0
+    connection_reuse_count: int = 0
+    connection_creation_count: int = 0
+    lock_holds: int = 0
+    peak_wait_time: float = 0.0
 
 
 class OptimizedConnectionManager:
@@ -233,8 +283,8 @@ class OptimizedFileLockProvider:
 
         # Try memory-mapped lock first (faster)
         try:
-            import mmap
             import fcntl
+            import mmap
 
             fd = os.open(self.lock_file, os.O_CREAT | os.O_RDWR, 0o644)
 

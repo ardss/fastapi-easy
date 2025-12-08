@@ -1,4 +1,5 @@
 """磁盘空间检查模块"""
+from __future__ import annotations
 
 import logging
 import os
@@ -39,7 +40,7 @@ class DiskSpaceChecker:
 
                 return resolved_path.stat().st_size
             return 0
-        except (IOError, OSError) as e:
+        except OSError as e:
             logger.error(f"❌ 获取数据库大小失败: {e}")
             return 0
 
@@ -72,7 +73,7 @@ class DiskSpaceChecker:
                 stat = shutil.disk_usage(db_dir)
                 return stat.free
             return 0
-        except (IOError, OSError) as e:
+        except OSError as e:
             logger.error(f"❌ 获取可用空间失败: {e}")
             return 0
 

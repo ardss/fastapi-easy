@@ -4,6 +4,8 @@ This module provides fine-grained cache invalidation strategies
 to ensure data consistency while minimizing cache clearing.
 """
 
+from __future__ import annotations
+
 import logging
 from enum import Enum
 from typing import Any, Dict
@@ -83,7 +85,7 @@ class CacheInvalidationManager:
 
             return deleted_count
         except Exception as e:
-            logger.error(f"Failed to invalidate item cache: {str(e)}")
+            logger.error(f"Failed to invalidate item cache: {e!s}")
             return 0
 
     async def invalidate_by_filter(self, cache, filter_key: str) -> int:
@@ -119,7 +121,7 @@ class CacheInvalidationManager:
             self._log_invalidation("filter", filter_key, deleted_count)
             return deleted_count
         except Exception as e:
-            logger.error(f"Failed to invalidate by filter: {str(e)}")
+            logger.error(f"Failed to invalidate by filter: {e!s}")
             return 0
 
     async def _invalidate_full(self, cache) -> int:
@@ -144,7 +146,7 @@ class CacheInvalidationManager:
             self._log_invalidation("full", "all", count)
             return count
         except Exception as e:
-            logger.error(f"Failed to perform full invalidation: {str(e)}")
+            logger.error(f"Failed to perform full invalidation: {e!s}")
             return 0
 
     async def _invalidate_by_pattern(self, cache, operation: str) -> int:
@@ -181,7 +183,7 @@ class CacheInvalidationManager:
             self._log_invalidation("pattern", operation, deleted_count)
             return deleted_count
         except Exception as e:
-            logger.error(f"Failed to perform pattern invalidation: {str(e)}")
+            logger.error(f"Failed to perform pattern invalidation: {e!s}")
             return 0
 
     async def _invalidate_selective(self, cache, operation: str) -> int:
@@ -216,7 +218,7 @@ class CacheInvalidationManager:
             self._log_invalidation("selective", operation, deleted_count)
             return deleted_count
         except Exception as e:
-            logger.error(f"Failed to perform selective invalidation: {str(e)}")
+            logger.error(f"Failed to perform selective invalidation: {e!s}")
             return 0
 
     def _log_invalidation(self, inv_type: str, target: str, count: int) -> None:

@@ -6,6 +6,7 @@
 - MySQL: GET_LOCK
 - SQLite: 文件锁
 """
+from __future__ import annotations
 
 import asyncio
 import logging
@@ -395,7 +396,7 @@ class FileLockProvider(LockProvider):
         """在测试环境中清理陈旧的锁文件"""
         try:
             if os.path.exists(self.lock_file):
-                with open(self.lock_file, "r") as f:
+                with open(self.lock_file) as f:
                     content = f.read()
                     if ":" in content:
                         pid, timestamp = content.split(":")
@@ -445,7 +446,7 @@ class FileLockProvider(LockProvider):
             except FileExistsError:
                 # 检查锁是否过期
                 try:
-                    with open(self.lock_file, "r") as f:
+                    with open(self.lock_file) as f:
                         content = f.read()
                         if ":" in content:
                             pid, timestamp = content.split(":")
@@ -497,7 +498,7 @@ class FileLockProvider(LockProvider):
             if os.path.exists(self.lock_file):
                 # 验证是否是我们的锁
                 try:
-                    with open(self.lock_file, "r") as f:
+                    with open(self.lock_file) as f:
                         content = f.read()
                         if ":" in content:
                             pid = int(content.split(":")[0])

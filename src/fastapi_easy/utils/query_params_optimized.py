@@ -1,14 +1,14 @@
 """Optimized query parameter handling with caching and performance improvements"""
 
-import json
-import hashlib
-import time
-import functools
-from typing import Any, Type, get_type_hints, Callable, get_origin, get_args, Dict
-from functools import lru_cache
-from dataclasses import dataclass
+from __future__ import annotations
 
-from fastapi import Query, Depends
+import functools
+import json
+import time
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, Type, get_args, get_origin, get_type_hints
+
+from fastapi import Depends, Query
 from pydantic import BaseModel, ValidationError
 
 
@@ -128,15 +128,12 @@ def _parse_complex_type_cached(value: Any, field_type_key: str) -> Any:
 
     # Parse the field type from the key (simple reconstruction)
     # In practice, you'd want to store more type information
-    if "list" in field_type_key or field_type_key == "list":
-        try:
-            parser = _json_pool.get_parser()
-            result = parser.decode(value)
-            _json_pool.return_parser(parser)
-            return result
-        except (json.JSONDecodeError, ValueError, AttributeError):
-            return value
-    elif "dict" in field_type_key or field_type_key == "dict":
+    if (
+        "list" in field_type_key
+        or field_type_key == "list"
+        or "dict" in field_type_key
+        or field_type_key == "dict"
+    ):
         try:
             parser = _json_pool.get_parser()
             result = parser.decode(value)
@@ -275,7 +272,7 @@ class OptimizedQueryParamProcessor:
                         try:
                             result = await coro
                             parsed_params[field_name] = result
-                        except Exception as e:
+                        except Exception:
                             self._stats["parse_errors"] += 1
                             parsed_params[field_name] = query_params[field_name]
 
@@ -385,9 +382,9 @@ def clear_query_param_cache():
 
 # Example usage with performance monitoring
 if __name__ == "__main__":
-    import asyncio
-    from fastapi import FastAPI
+
     import uvicorn
+    from fastapi import FastAPI
 
     app = FastAPI()
 

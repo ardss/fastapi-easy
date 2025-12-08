@@ -3,6 +3,7 @@
 
 提供一致的日志格式和语言
 """
+from __future__ import annotations
 
 import logging
 

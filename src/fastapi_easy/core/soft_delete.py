@@ -1,8 +1,11 @@
 """Soft delete support for FastAPI-Easy"""
 
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Any, Type
-from sqlalchemy import Boolean, DateTime, Column
+
+from sqlalchemy import Boolean, Column, DateTime
 from sqlalchemy.orm import DeclarativeBase
 
 

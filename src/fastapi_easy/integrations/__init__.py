@@ -1,5 +1,7 @@
 """FastAPI-Easy integrations"""
 
+from __future__ import annotations
+
 from .fastapi_optimization import (
     FastAPIOptimization,
     OptimizationConfig,

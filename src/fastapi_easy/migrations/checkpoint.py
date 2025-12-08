@@ -1,4 +1,5 @@
 """Checkpoint 机制 - 支持迁移断点续传"""
+from __future__ import annotations
 
 import json
 import logging
@@ -99,7 +100,7 @@ class CheckpointManager:
                 json.dump(record.to_dict(), f, indent=2)
             logger.info(f"保存检查点: {record.migration_id} ({record.status})")
             return True
-        except (IOError, OSError) as e:
+        except OSError as e:
             logger.error(f"文件操作失败: {e}")
             return False
         except (TypeError, ValueError) as e:
@@ -116,11 +117,11 @@ class CheckpointManager:
             if not os.path.exists(checkpoint_file):
                 return None
 
-            with open(checkpoint_file, "r") as f:
+            with open(checkpoint_file) as f:
                 data = json.load(f)
 
             return CheckpointRecord(**data)
-        except (IOError, OSError) as e:
+        except OSError as e:
             logger.error(f"文件读取失败: {e}")
             return None
         except json.JSONDecodeError as e:

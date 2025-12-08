@@ -1,8 +1,10 @@
 """Distributed lock manager for cache consistency and avalanche prevention"""
 
+from __future__ import annotations
+
 import asyncio
-from typing import Dict, Optional
 from datetime import datetime
+from typing import Dict, Optional
 
 
 class AsyncLock:

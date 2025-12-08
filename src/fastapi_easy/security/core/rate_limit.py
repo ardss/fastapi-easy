@@ -1,9 +1,11 @@
 """Rate limiting and brute force protection for FastAPI-Easy"""
 
+from __future__ import annotations
+
 import threading
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 
 class LoginAttemptTracker:
@@ -30,7 +32,7 @@ class LoginAttemptTracker:
         self._lock = threading.RLock()
 
         # Track attempts per username
-        self.attempts: Dict[str, list] = defaultdict(list)
+        self.attempts: Dict[str, List[datetime]] = defaultdict(list)
         # Track lockout status
         self.lockouts: Dict[str, datetime] = {}
 

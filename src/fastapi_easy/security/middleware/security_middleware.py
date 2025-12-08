@@ -1,20 +1,21 @@
 """Security middleware for FastAPI-Easy"""
 
+from __future__ import annotations
+
 import logging
 import time
 from typing import Dict, List, Optional, Set
-from fastapi import Request, Response, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+from fastapi import HTTPException, Request, Response, status
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from ..core.jwt_auth import JWTAuth
-from ..validation.input_validator import SecurityValidator, InputValidationError
 from ..exceptions import (
     AuthenticationError,
     AuthorizationError,
-    RateLimitExceededError,
 )
+from ..validation.input_validator import InputValidationError, SecurityValidator
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +126,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             return response
 
         except Exception as e:
-            logger.error(f"Security middleware error: {str(e)}", exc_info=True)
+            logger.error(f"Security middleware error: {e!s}", exc_info=True)
             return self._create_error_response(
                 "Internal security error", status.HTTP_500_INTERNAL_SERVER_ERROR, "SECURITY_ERROR"
             )
@@ -221,7 +222,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             if isinstance(e, InputValidationError):
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid input: {str(e)}"
+                    status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid input: {e!s}"
                 )
             # Non-JSON requests are skipped
             pass

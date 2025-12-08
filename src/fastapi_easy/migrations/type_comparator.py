@@ -1,4 +1,5 @@
 """类型比较器 - 支持复杂类型的 Schema 变更检测"""
+from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod

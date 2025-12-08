@@ -10,6 +10,8 @@ This module provides authentication and authorization features:
 - Audit logging for security events
 """
 
+from __future__ import annotations
+
 from .audit_log import AuditEventType, AuditLog, AuditLogger
 from .audit_storage import (
     AuditStorage,

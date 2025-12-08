@@ -1,6 +1,9 @@
 """CRUDRouter optimization integration"""
 
-from typing import Optional, Dict, Any, Type
+from __future__ import annotations
+
+from typing import Any, Dict, Optional, Type
+
 from .core.crud_router import CRUDRouter
 from .core.optimized_adapter import OptimizedSQLAlchemyAdapter, create_optimized_adapter
 

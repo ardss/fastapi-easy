@@ -7,6 +7,7 @@
 - 异步和同步回调
 - 错误隔离
 """
+from __future__ import annotations
 
 import asyncio
 import logging

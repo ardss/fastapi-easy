@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import logging
 
@@ -94,7 +96,7 @@ class MigrationEngine:
             logger.info(f"迁移完成: {plan.status}")
             return plan
 
-        except (OSError, IOError) as e:
+        except OSError as e:
             logger.error(f"迁移失败 (I/O error): {e}", exc_info=True)
             raise
         except Exception as e:
@@ -177,7 +179,7 @@ class MigrationEngine:
             return result
 
         # 获取锁
-        logger.info(f"🔒 获取迁移锁...")
+        logger.info("🔒 获取迁移锁...")
         if not await self.lock.acquire():
             logger.warning("⏳ 无法获取锁，假设另一个实例正在迁移")
             result.add_error("无法获取迁移锁")
@@ -213,28 +215,28 @@ class MigrationEngine:
                         result.data = {"rolled_back": 0, "failed": 0}
                     result.data["rolled_back"] += 1
 
-                except (OSError, IOError) as e:
+                except OSError as e:
                     logger.error(f"  ❌ 回滚 {version} 失败 (I/O error): {e}")
                     if result.data is None:
                         result.data = {"rolled_back": 0, "failed": 0}
                     result.data["failed"] += 1
-                    result.add_error(f"{version}: {str(e)}")
+                    result.add_error(f"{version}: {e!s}")
 
                     if not continue_on_error:
                         raise
                     else:
-                        logger.warning(f"继续回滚下一个迁移...")
+                        logger.warning("继续回滚下一个迁移...")
                 except Exception as e:
                     logger.error(f"  ❌ 回滚 {version} 失败: {e}")
                     if result.data is None:
                         result.data = {"rolled_back": 0, "failed": 0}
                     result.data["failed"] += 1
-                    result.add_error(f"{version}: {str(e)}")
+                    result.add_error(f"{version}: {e!s}")
 
                     if not continue_on_error:
                         raise
                     else:
-                        logger.warning(f"继续回滚下一个迁移...")
+                        logger.warning("继续回滚下一个迁移...")
 
             if result.data is None:
                 result.data = {"rolled_back": 0, "failed": 0}

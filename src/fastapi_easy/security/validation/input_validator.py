@@ -1,12 +1,12 @@
 """Enhanced input validation and sanitization for FastAPI-Easy"""
 
-import re
+from __future__ import annotations
+
 import html
 import logging
-from typing import Any, Dict, List, Optional, Union
+import re
+from typing import Any, Dict, List, Optional
 from urllib.parse import unquote
-
-from pydantic import validator
 
 logger = logging.getLogger(__name__)
 

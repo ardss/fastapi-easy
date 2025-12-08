@@ -1,5 +1,7 @@
 """FastAPI-Easy backends"""
 
+from __future__ import annotations
+
 from .base import BaseORMAdapter
 from .sqlalchemy import SQLAlchemyAdapter
 

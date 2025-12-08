@@ -1,4 +1,5 @@
 """SQLite 外键处理模块"""
+from __future__ import annotations
 
 import logging
 import re

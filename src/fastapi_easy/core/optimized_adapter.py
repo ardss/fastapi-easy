@@ -1,5 +1,7 @@
 """Optimized adapter that integrates all performance optimizations"""
 
+from __future__ import annotations
+
 import asyncio
 import logging
 import time
@@ -354,9 +356,9 @@ class OptimizedSQLAlchemyAdapter:
             await self.cache.clear()
             logger.debug("Cleared all caches after data modification")
         except (ConnectionError, TimeoutError) as e:
-            logger.error(f"Cache connection error during invalidation: {str(e)}")
+            logger.error(f"Cache connection error during invalidation: {e!s}")
         except Exception as e:
-            logger.error(f"Unexpected cache invalidation error: {str(e)}")
+            logger.error(f"Unexpected cache invalidation error: {e!s}")
 
     def get_cache_stats(self) -> Optional[Dict[str, Any]]:
         """Get cache statistics with error handling
@@ -375,10 +377,10 @@ class OptimizedSQLAlchemyAdapter:
                 return None
             return stats
         except (ConnectionError, TimeoutError) as e:
-            logger.error(f"Cache connection error getting stats: {str(e)}")
+            logger.error(f"Cache connection error getting stats: {e!s}")
         except Exception as e:
             logger.error(
-                f"Unexpected error getting cache stats: {str(e)}",
+                f"Unexpected error getting cache stats: {e!s}",
                 exc_info=True,
                 extra={
                     "action": "get_cache_stats",
@@ -428,7 +430,7 @@ class OptimizedSQLAlchemyAdapter:
             }
         except Exception as e:
             logger.error(
-                f"Failed to clear cache: {str(e)}",
+                f"Failed to clear cache: {e!s}",
                 exc_info=True,
                 extra={
                     "action": "cache_clear",
@@ -440,7 +442,7 @@ class OptimizedSQLAlchemyAdapter:
 
             return {
                 "status": "error",
-                "message": f"Failed to clear cache: {str(e)}",
+                "message": f"Failed to clear cache: {e!s}",
                 "timestamp": time.time(),
             }
 
@@ -508,13 +510,13 @@ class OptimizedSQLAlchemyAdapter:
                                 await self.cache.set(cache_key, item)
                                 count += 1
                         except Exception as e:
-                            logger.warning(f"Failed to cache item: {str(e)}")
+                            logger.warning(f"Failed to cache item: {e!s}")
 
                 # Cache all items concurrently
                 await asyncio.gather(*[cache_item(item) for item in items], return_exceptions=True)
 
                 logger.info(
-                    f"Cache warmup completed successfully",
+                    "Cache warmup completed successfully",
                     extra={
                         "action": "cache_warmup",
                         "items_warmed": count,
@@ -527,14 +529,14 @@ class OptimizedSQLAlchemyAdapter:
                 last_error = e
                 if attempt < max_retries - 1:
                     logger.warning(
-                        f"Cache warmup attempt {attempt + 1} failed: {str(e)}. "
+                        f"Cache warmup attempt {attempt + 1} failed: {e!s}. "
                         f"Retrying in {retry_delay}s...",
                         exc_info=True,
                     )
                     await asyncio.sleep(retry_delay)
                 else:
                     logger.error(
-                        f"Cache warmup failed after {max_retries} attempts: {str(e)}",
+                        f"Cache warmup failed after {max_retries} attempts: {e!s}",
                         exc_info=True,
                         extra={
                             "action": "cache_warmup_failed",

@@ -1,11 +1,14 @@
 """Dependency security checker for FastAPI-Easy"""
 
+from __future__ import annotations
+
 import json
 import logging
 import subprocess
 import sys
-from typing import Dict, List, Optional, Tuple
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
 from packaging import version
 
 logger = logging.getLogger(__name__)
@@ -230,7 +233,7 @@ class DependencyChecker:
             errors.append(f"Requirements file not found: {self.requirements_path}")
             return warnings, errors
 
-        with open(requirements_path, "r") as f:
+        with open(requirements_path) as f:
             lines = f.readlines()
 
         for line_num, line in enumerate(lines, 1):

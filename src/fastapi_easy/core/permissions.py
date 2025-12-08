@@ -1,7 +1,9 @@
 """Permission control support for FastAPI-Easy"""
 
-from typing import Any, Callable, List, Optional, Set
+from __future__ import annotations
+
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Set
 
 from .errors import AppError, ErrorCode
 
@@ -39,9 +41,9 @@ class PermissionDeniedError(AppError):
 class RoleBasedAccessControl:
     """Role-based access control (RBAC)"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize RBAC"""
-        self.role_permissions: dict[str, Set[str]] = {
+        self.role_permissions: Dict[str, Set[str]] = {
             Role.ADMIN: {
                 Permission.CREATE,
                 Permission.READ,
@@ -113,11 +115,11 @@ class RoleBasedAccessControl:
 class AttributeBasedAccessControl:
     """Attribute-based access control (ABAC)"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize ABAC"""
-        self.policies: List[Callable] = []
+        self.policies: List[Callable[[Dict[str, Any]], bool]] = []
 
-    def add_policy(self, policy: Callable) -> None:
+    def add_policy(self, policy: Callable[[Dict[str, Any]], bool]) -> None:
         """Add a policy
 
         Args:
@@ -125,7 +127,7 @@ class AttributeBasedAccessControl:
         """
         self.policies.append(policy)
 
-    async def evaluate(self, context: dict[str, Any]) -> bool:
+    async def evaluate(self, context: Dict[str, Any]) -> bool:
         """Evaluate all policies
 
         Args:

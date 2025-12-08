@@ -1,6 +1,9 @@
 """SQLModel async ORM adapter"""
 
-from typing import Type, Any
+from __future__ import annotations
+
+from typing import Any, Type
+
 from .sqlalchemy import SQLAlchemyAdapter
 
 try:

@@ -1,5 +1,7 @@
 """Permission management modules"""
 
+from __future__ import annotations
+
 from .cache import LRUCache
 from .permission_engine import PermissionEngine
 from .permission_loader import (
@@ -17,15 +19,15 @@ from .resource_checker import (
 )
 
 __all__ = [
-    "PermissionLoader",
-    "StaticPermissionLoader",
-    "DatabasePermissionLoader",
     "CachedPermissionLoader",
-    "LRUCachedPermissionLoader",
-    "ResourcePermissionChecker",
-    "StaticResourceChecker",
-    "DatabaseResourceChecker",
     "CachedResourceChecker",
-    "PermissionEngine",
+    "DatabasePermissionLoader",
+    "DatabaseResourceChecker",
     "LRUCache",
+    "LRUCachedPermissionLoader",
+    "PermissionEngine",
+    "PermissionLoader",
+    "ResourcePermissionChecker",
+    "StaticPermissionLoader",
+    "StaticResourceChecker",
 ]

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 from typing import Any, List, Tuple
@@ -167,7 +169,7 @@ class MigrationGenerator:
 
         # Downgrade is hard for copy-swap (data loss potential), marking as manual
         downgrade_sql = (
-            f"-- Automatic downgrade for Copy-Swap is not supported. Please restore from backup."
+            "-- Automatic downgrade for Copy-Swap is not supported. Please restore from backup."
         )
 
         return upgrade_sql, downgrade_sql

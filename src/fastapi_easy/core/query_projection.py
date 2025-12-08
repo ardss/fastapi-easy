@@ -1,7 +1,9 @@
 """Query projection optimization for reducing network transfer"""
 
+from __future__ import annotations
+
 import logging
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +27,7 @@ class QueryProjection:
         """
         return self.fields
 
-    def add_field(self, field: str) -> "QueryProjection":
+    def add_field(self, field: str) -> QueryProjection:
         """Add a field to projection
 
         Args:
@@ -38,7 +40,7 @@ class QueryProjection:
             self.fields.append(field)
         return self
 
-    def remove_field(self, field: str) -> "QueryProjection":
+    def remove_field(self, field: str) -> QueryProjection:
         """Remove a field from projection
 
         Args:
@@ -85,7 +87,7 @@ class QueryProjection:
         try:
             return {k: v for k, v in data.items() if k in self.fields}
         except Exception as e:
-            logger.error(f"Failed to apply projection: {str(e)}")
+            logger.error(f"Failed to apply projection: {e!s}")
             raise
 
     def apply_to_list(self, data_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -151,7 +153,7 @@ class ProjectionBuilder:
         """Initialize projection builder"""
         self.fields: List[str] = []
 
-    def add(self, field: str) -> "ProjectionBuilder":
+    def add(self, field: str) -> ProjectionBuilder:
         """Add a field
 
         Args:
@@ -164,7 +166,7 @@ class ProjectionBuilder:
             self.fields.append(field)
         return self
 
-    def add_multiple(self, fields: List[str]) -> "ProjectionBuilder":
+    def add_multiple(self, fields: List[str]) -> ProjectionBuilder:
         """Add multiple fields
 
         Args:
@@ -177,7 +179,7 @@ class ProjectionBuilder:
             self.add(field)
         return self
 
-    def exclude(self, field: str) -> "ProjectionBuilder":
+    def exclude(self, field: str) -> ProjectionBuilder:
         """Exclude a field
 
         Args:

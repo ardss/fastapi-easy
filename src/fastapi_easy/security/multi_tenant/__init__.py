@@ -1,5 +1,7 @@
 """Multi-tenant support modules"""
 
+from __future__ import annotations
+
 from .multi_tenant import (
     MultiTenantPermissionLoader,
     MultiTenantResourceChecker,
@@ -8,8 +10,8 @@ from .multi_tenant import (
 )
 
 __all__ = [
-    "TenantContext",
     "MultiTenantPermissionLoader",
     "MultiTenantResourceChecker",
+    "TenantContext",
     "TenantIsolationMiddleware",
 ]

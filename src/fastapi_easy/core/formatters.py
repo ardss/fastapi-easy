@@ -1,7 +1,9 @@
 """Response formatters for FastAPI-Easy"""
 
-from typing import Any, Dict, List, Optional
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Optional
 
 
 class BaseFormatter(ABC):
@@ -266,7 +268,7 @@ class EnvelopeFormatter(BaseFormatter):
 class FormatterRegistry:
     """Registry for response formatters"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize formatter registry"""
         self.formatters: Dict[str, BaseFormatter] = {
             "json": JSONFormatter(),

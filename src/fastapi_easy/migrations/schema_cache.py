@@ -7,6 +7,7 @@ Schema 哈希缓存系统
 - 缓存失效检测
 - 缓存监控
 """
+from __future__ import annotations
 
 import asyncio
 import hashlib
@@ -62,14 +63,14 @@ class FileSchemaCacheProvider(SchemaCacheProvider):
         try:
             cache_file = self._get_cache_file(key)
             if cache_file.exists():
-                with open(cache_file, "r") as f:
+                with open(cache_file) as f:
                     data = json.load(f)
                 logger.debug(f"Cache hit: {key}")
                 return data
             else:
                 logger.debug(f"Cache miss: {key}")
                 return None
-        except (IOError, OSError) as e:
+        except OSError as e:
             logger.error(f"File read failed: {e}")
             return None
         except json.JSONDecodeError as e:
@@ -87,7 +88,7 @@ class FileSchemaCacheProvider(SchemaCacheProvider):
                 json.dump(value, f, indent=2)
             logger.debug(f"Cache set: {key}")
             return True
-        except (IOError, OSError) as e:
+        except OSError as e:
             logger.error(f"文件写入失败: {e}")
             return False
         except (TypeError, ValueError) as e:
@@ -105,7 +106,7 @@ class FileSchemaCacheProvider(SchemaCacheProvider):
                 cache_file.unlink()
                 logger.debug(f"Cache deleted: {key}")
             return True
-        except (IOError, OSError) as e:
+        except OSError as e:
             logger.error(f"文件删除失败: {e}")
             return False
         except Exception as e:

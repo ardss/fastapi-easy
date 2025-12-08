@@ -1,9 +1,11 @@
 """SQLAlchemy async ORM adapter with enhanced security"""
 
+from __future__ import annotations
+
 import logging
 from typing import Any, Callable, Dict, List, Optional, Type
 
-from sqlalchemy import delete, func, select, text, and_, or_
+from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase
 
@@ -64,7 +66,7 @@ class SQLAlchemyAdapter(BaseORMAdapter):
             # Security: Validate field name to prevent injection
             try:
                 field_name = SecurityValidator.validate_field_name(field_name)
-            except Exception as e:
+            except Exception:
                 logger.warning(f"Invalid field name in filter: {field_name}")
                 raise ValueError(f"Invalid field name: {field_name}")
 
@@ -160,11 +162,11 @@ class SQLAlchemyAdapter(BaseORMAdapter):
             raise AppError(
                 code=ErrorCode.INTERNAL_ERROR,
                 status_code=500,
-                message=f"Database error (validation): {str(e)}",
+                message=f"Database error (validation): {e!s}",
             )
         except SQLAlchemyError as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def get_one(self, id: Any) -> Optional[Any]:
@@ -186,7 +188,7 @@ class SQLAlchemyAdapter(BaseORMAdapter):
                 raise AppError(
                     code=ErrorCode.INTERNAL_ERROR,
                     status_code=500,
-                    message=f"Database error: {str(e)}",
+                    message=f"Database error: {e!s}",
                 )
 
     async def create(self, data: Dict[str, Any]) -> Any:
@@ -211,13 +213,13 @@ class SQLAlchemyAdapter(BaseORMAdapter):
                 return item
             except IntegrityError as e:
                 await session.rollback()
-                raise ConflictError(f"Item already exists: {str(e)}")
+                raise ConflictError(f"Item already exists: {e!s}")
             except SQLAlchemyError as e:
                 await session.rollback()
                 raise AppError(
                     code=ErrorCode.INTERNAL_ERROR,
                     status_code=500,
-                    message=f"Database error: {str(e)}",
+                    message=f"Database error: {e!s}",
                 )
 
     async def update(self, id: Any, data: Dict[str, Any]) -> Any:
@@ -252,13 +254,13 @@ class SQLAlchemyAdapter(BaseORMAdapter):
                 return item
             except IntegrityError as e:
                 await session.rollback()
-                raise ConflictError(f"Update conflict: {str(e)}")
+                raise ConflictError(f"Update conflict: {e!s}")
             except SQLAlchemyError as e:
                 await session.rollback()
                 raise AppError(
                     code=ErrorCode.INTERNAL_ERROR,
                     status_code=500,
-                    message=f"Database error: {str(e)}",
+                    message=f"Database error: {e!s}",
                 )
 
     async def delete_one(self, id: Any) -> Any:
@@ -291,7 +293,7 @@ class SQLAlchemyAdapter(BaseORMAdapter):
                 raise AppError(
                     code=ErrorCode.INTERNAL_ERROR,
                     status_code=500,
-                    message=f"Database error: {str(e)}",
+                    message=f"Database error: {e!s}",
                 )
 
     async def delete_all(self) -> List[Any]:
@@ -321,7 +323,7 @@ class SQLAlchemyAdapter(BaseORMAdapter):
                 raise AppError(
                     code=ErrorCode.INTERNAL_ERROR,
                     status_code=500,
-                    message=f"Database error: {str(e)}",
+                    message=f"Database error: {e!s}",
                 )
 
     async def count(self, filters: Dict[str, Any]) -> int:
@@ -344,9 +346,9 @@ class SQLAlchemyAdapter(BaseORMAdapter):
                 return result.scalar()
         except ValueError as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
         except SQLAlchemyError as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )

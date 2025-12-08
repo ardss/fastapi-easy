@@ -1,14 +1,14 @@
 """Enhanced security logging for FastAPI-Easy"""
 
+from __future__ import annotations
+
 import json
 import logging
 import logging.handlers
-import os
-import time
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from fastapi import Request, Response
 
@@ -318,7 +318,7 @@ class SecurityLogger:
         severity = "info" if granted else "warning"
 
         if not granted:
-            message += f" - DENIED"
+            message += " - DENIED"
             if reason:
                 message += f" ({reason})"
             severity = "warning"

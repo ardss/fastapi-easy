@@ -5,13 +5,12 @@
 遵循依赖倒置原则，高层模块不依赖低层模块的具体实现。
 """
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union, AsyncIterator
 from dataclasses import dataclass
 from enum import Enum
-import asyncio
-
-from .exceptions import BaseException
+from typing import Any, Dict, List, Optional, Type, TypeVar
 
 T = TypeVar("T")
 ID = TypeVar("ID")
@@ -333,7 +332,7 @@ class IUnitOfWork(ABC):
     """工作单元接口"""
 
     @abstractmethod
-    async def __aenter__(self) -> "IUnitOfWork":
+    async def __aenter__(self) -> IUnitOfWork:
         """进入工作单元"""
         pass
 

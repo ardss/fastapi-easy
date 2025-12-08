@@ -1,5 +1,7 @@
 """Bulk operations support for FastAPI-Easy"""
 
+from __future__ import annotations
+
 from typing import Any, Dict, List, Optional, Type
 
 
@@ -36,7 +38,7 @@ class BulkOperationResult:
 class BulkOperationAdapter:
     """Adapter for bulk operations"""
 
-    def __init__(self, model: Type, session_factory):
+    def __init__(self, model: Type[Any], session_factory: Any):
         """Initialize bulk operation adapter
 
         Args:
@@ -80,7 +82,7 @@ class BulkOperationAdapter:
                 result.failure_count += failed_items
                 result.errors.append(
                     {
-                        "error": f"Commit failed: {str(e)}",
+                        "error": f"Commit failed: {e!s}",
                         "type": "transaction_error",
                         "failed_count": failed_items,
                     }
@@ -141,7 +143,7 @@ class BulkOperationAdapter:
                 result.success_count = 0
                 result.errors.append(
                     {
-                        "error": f"Commit failed: {str(e)}",
+                        "error": f"Commit failed: {e!s}",
                     }
                 )
                 await session.rollback()
@@ -189,7 +191,7 @@ class BulkOperationAdapter:
                 result.success_count = 0
                 result.errors.append(
                     {
-                        "error": f"Commit failed: {str(e)}",
+                        "error": f"Commit failed: {e!s}",
                     }
                 )
                 await session.rollback()

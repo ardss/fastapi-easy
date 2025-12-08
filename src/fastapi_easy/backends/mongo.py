@@ -1,5 +1,7 @@
 """MongoDB (Motor) adapter"""
 
+from __future__ import annotations
+
 from typing import Any, Dict, List, Optional, Union
 
 from ..core.errors import AppError, ConflictError, ErrorCode
@@ -131,11 +133,11 @@ class MongoAdapter(BaseORMAdapter):
             raise AppError(
                 code=ErrorCode.INTERNAL_ERROR,
                 status_code=500,
-                message=f"Database error (validation): {str(e)}",
+                message=f"Database error (validation): {e!s}",
             )
         except Exception as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def get_one(self, id: Any) -> Optional[Any]:
@@ -146,7 +148,7 @@ class MongoAdapter(BaseORMAdapter):
             return await self.collection.find_one({self.pk_field: id})
         except Exception as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def create(self, data: Dict[str, Any]) -> Any:
@@ -157,10 +159,10 @@ class MongoAdapter(BaseORMAdapter):
             created_item = await self.collection.find_one({"_id": result.inserted_id})
             return created_item
         except DuplicateKeyError as e:
-            raise ConflictError(f"Item already exists: {str(e)}")
+            raise ConflictError(f"Item already exists: {e!s}")
         except Exception as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def update(self, id: Any, data: Dict[str, Any]) -> Any:
@@ -177,10 +179,10 @@ class MongoAdapter(BaseORMAdapter):
 
             return await self.collection.find_one({self.pk_field: id})
         except DuplicateKeyError as e:
-            raise ConflictError(f"Update conflict: {str(e)}")
+            raise ConflictError(f"Update conflict: {e!s}")
         except Exception as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def delete_one(self, id: Any) -> Any:
@@ -194,7 +196,7 @@ class MongoAdapter(BaseORMAdapter):
             return item
         except Exception as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def delete_all(self) -> List[Any]:
@@ -216,7 +218,7 @@ class MongoAdapter(BaseORMAdapter):
             return items
         except Exception as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def count(self, filters: Dict[str, Any]) -> int:
@@ -226,5 +228,5 @@ class MongoAdapter(BaseORMAdapter):
             return await self.collection.count_documents(query)
         except Exception as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )

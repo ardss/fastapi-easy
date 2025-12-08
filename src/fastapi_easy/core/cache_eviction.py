@@ -4,10 +4,11 @@ This module provides cache eviction mechanisms to prevent unbounded
 memory growth while maintaining optimal hit rates.
 """
 
+from __future__ import annotations
+
+import logging
 import time
 from typing import Any, Dict
-import logging
-
 
 logger = logging.getLogger(__name__)
 

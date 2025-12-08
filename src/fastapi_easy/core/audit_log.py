@@ -1,8 +1,10 @@
 """Audit logging support for FastAPI-Easy"""
 
-from typing import Any, Dict, List, Optional
+from __future__ import annotations
+
 from datetime import datetime
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
 
 class AuditAction(str, Enum):
@@ -67,7 +69,7 @@ class AuditLog:
 class AuditLogger:
     """Audit logger for tracking operations"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize audit logger"""
         self.logs: List[AuditLog] = []
 
@@ -246,7 +248,7 @@ class AuditLogDecorator:
         self,
         entity_type: str,
         action: str,
-    ):
+    ) -> Callable[[Any], Any]:
         """Decorator to track operations
 
         Args:
@@ -254,8 +256,8 @@ class AuditLogDecorator:
             action: Action being performed
         """
 
-        def decorator(func):
-            async def wrapper(*args, **kwargs):
+        def decorator(func: Any) -> Any:
+            async def wrapper(*args: Any, **kwargs: Any) -> Any:
                 result = await func(*args, **kwargs)
 
                 # Skip READ operations if not configured to log them

@@ -1,10 +1,12 @@
 """Simple in-memory cache for query results"""
 
+from __future__ import annotations
+
 import asyncio
 import hashlib
 import json
-from typing import Any, Dict, Optional
 from datetime import datetime, timedelta
+from typing import Any, Dict, Optional
 
 
 class CacheEntry:

@@ -1,7 +1,9 @@
 """Error handling system for FastAPI-Easy"""
 
+from __future__ import annotations
+
 from enum import Enum
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 
 class ErrorCode(str, Enum):

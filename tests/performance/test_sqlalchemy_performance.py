@@ -13,7 +13,6 @@ class Base(DeclarativeBase):
     """SQLAlchemy base class"""
 
 
-
 class Item(Base):
     """Test item model"""
 

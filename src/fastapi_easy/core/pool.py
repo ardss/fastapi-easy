@@ -1,7 +1,9 @@
 """Database connection pool configuration and management"""
 
-from typing import Dict, Any
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import Any, Dict
 
 
 @dataclass
@@ -66,11 +68,11 @@ class PoolConfig:
 class PoolConfigBuilder:
     """Builder for creating pool configurations"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize builder with default config"""
         self.config = PoolConfig()
 
-    def with_pool_size(self, size: int) -> "PoolConfigBuilder":
+    def with_pool_size(self, size: int) -> PoolConfigBuilder:
         """Set pool size
 
         Args:
@@ -82,7 +84,7 @@ class PoolConfigBuilder:
         self.config.pool_size = size
         return self
 
-    def with_max_overflow(self, overflow: int) -> "PoolConfigBuilder":
+    def with_max_overflow(self, overflow: int) -> PoolConfigBuilder:
         """Set max overflow
 
         Args:
@@ -94,7 +96,7 @@ class PoolConfigBuilder:
         self.config.max_overflow = overflow
         return self
 
-    def with_pool_timeout(self, timeout: int) -> "PoolConfigBuilder":
+    def with_pool_timeout(self, timeout: int) -> PoolConfigBuilder:
         """Set pool timeout
 
         Args:
@@ -106,7 +108,7 @@ class PoolConfigBuilder:
         self.config.pool_timeout = timeout
         return self
 
-    def with_connect_timeout(self, timeout: int) -> "PoolConfigBuilder":
+    def with_connect_timeout(self, timeout: int) -> PoolConfigBuilder:
         """Set connect timeout
 
         Args:
@@ -118,7 +120,7 @@ class PoolConfigBuilder:
         self.config.connect_timeout = timeout
         return self
 
-    def with_pool_recycle(self, seconds: int) -> "PoolConfigBuilder":
+    def with_pool_recycle(self, seconds: int) -> PoolConfigBuilder:
         """Set pool recycle time
 
         Args:
@@ -130,7 +132,7 @@ class PoolConfigBuilder:
         self.config.pool_recycle = seconds
         return self
 
-    def with_pool_pre_ping(self, enabled: bool) -> "PoolConfigBuilder":
+    def with_pool_pre_ping(self, enabled: bool) -> PoolConfigBuilder:
         """Enable/disable pool pre-ping
 
         Args:
@@ -142,7 +144,7 @@ class PoolConfigBuilder:
         self.config.pool_pre_ping = enabled
         return self
 
-    def with_echo(self, enabled: bool) -> "PoolConfigBuilder":
+    def with_echo(self, enabled: bool) -> PoolConfigBuilder:
         """Enable/disable SQL echo
 
         Args:
@@ -154,7 +156,7 @@ class PoolConfigBuilder:
         self.config.echo = enabled
         return self
 
-    def with_echo_pool(self, enabled: bool) -> "PoolConfigBuilder":
+    def with_echo_pool(self, enabled: bool) -> PoolConfigBuilder:
         """Enable/disable pool echo
 
         Args:

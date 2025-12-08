@@ -1,5 +1,7 @@
 """Type definitions and protocols for FastAPI-Easy"""
 
+from __future__ import annotations
+
 from typing import (
     Any,
     Callable,

@@ -5,18 +5,25 @@
 支持错误日志记录、监控和错误上下文管理。
 """
 
+from __future__ import annotations
+
+import logging
 import time
-import uuid
 import traceback
-from typing import Callable, Dict, Any, Optional
-from fastapi import Request, Response, HTTPException
+import uuid
+from typing import Callable, Optional
+
+from fastapi import HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-import logging
-
-from ..core.exceptions import BaseException, exception_registry, ErrorContext, ErrorSeverity
+from ..core.exceptions import (
+    BaseException,
+    ErrorContext,
+    ErrorSeverity,
+    exception_registry,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -174,9 +181,7 @@ class ExceptionHandlingMiddleware(BaseHTTPMiddleware):
 
         # 确定状态码
         status_code = 500
-        if isinstance(exception, BaseException):
-            status_code = exception.status_code
-        elif isinstance(exception, HTTPException):
+        if isinstance(exception, BaseException) or isinstance(exception, HTTPException):
             status_code = exception.status_code
 
         return JSONResponse(status_code=status_code, content=error_data)
@@ -234,7 +239,7 @@ class ExceptionHandlingMiddleware(BaseHTTPMiddleware):
         else:
             # 未知异常
             logger.error(
-                f"Unhandled exception: {type(exception).__name__} - {str(exception)}",
+                f"Unhandled exception: {type(exception).__name__} - {exception!s}",
                 extra={
                     "request_id": context.request_id,
                     "user_id": context.user_id,

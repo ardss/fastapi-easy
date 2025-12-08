@@ -6,6 +6,7 @@ CLI 辅助模块
 - 用户提示和确认
 - 迁移信息格式化
 """
+from __future__ import annotations
 
 import sys
 from typing import List
@@ -26,9 +27,9 @@ class CLIErrorHandler:
             click.echo(f"❌ {error.get_full_message()}", err=True)
         else:
             if context:
-                message = f"❌ {context}: {str(error)}"
+                message = f"❌ {context}: {error!s}"
             else:
-                message = f"❌ {str(error)}"
+                message = f"❌ {error!s}"
             click.echo(message, err=True)
 
     @staticmethod

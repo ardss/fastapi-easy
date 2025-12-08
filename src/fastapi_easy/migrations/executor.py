@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import logging
 from typing import List, Tuple
@@ -118,7 +120,7 @@ class MigrationExecutor:
             await asyncio.to_thread(self._execute_sql_sync, migration.upgrade_sql)
             logger.info(f"成功: {migration.description}")
             return True
-        except (OSError, IOError) as e:
+        except OSError as e:
             logger.error(f"迁移失败 (I/O error): {migration.description} - {e}")
             # 尝试执行回滚 SQL
             if migration.downgrade_sql:
@@ -141,7 +143,7 @@ class MigrationExecutor:
             logger.info(f"尝试回滚: {migration.description}")
             await asyncio.to_thread(self._execute_sql_sync, migration.downgrade_sql)
             logger.info(f"回滚成功: {migration.description}")
-        except (OSError, IOError) as e:
+        except OSError as e:
             logger.error(f"回滚失败 (I/O error): {migration.description} - {e}")
         except Exception as e:
             logger.error(f"回滚失败: {migration.description} - {e}")

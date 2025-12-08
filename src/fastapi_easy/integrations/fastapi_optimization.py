@@ -1,5 +1,7 @@
 """FastAPI integration for performance optimization"""
 
+from __future__ import annotations
+
 from typing import Any, Dict, Optional
 
 from fastapi import FastAPI

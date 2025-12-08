@@ -1,7 +1,9 @@
 """Pagination utilities for FastAPI-Easy"""
 
-from typing import Dict, Any, TypeVar, List
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import Any, Dict, List, TypeVar
 
 T = TypeVar("T")
 

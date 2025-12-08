@@ -1,21 +1,23 @@
 """Optimized SQLAlchemy adapter with connection pooling and performance improvements"""
 
+from __future__ import annotations
+
 import asyncio
 import logging
 import time
 import weakref
-from typing import Any, Callable, Dict, List, Optional, Type
-from dataclasses import dataclass
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Type
 
-from sqlalchemy import delete, func, select, text, and_, or_
+from sqlalchemy import and_, func, select, text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.pool import QueuePool
 
-from ..core.errors import AppError, ConflictError, ErrorCode
 from ..core.cache import QueryCache
+from ..core.errors import AppError, ConflictError, ErrorCode
 from ..core.optimization_config import OptimizationConfig
 
 logger = logging.getLogger(__name__)
@@ -273,7 +275,7 @@ class OptimizedSQLAlchemyAdapter:
             raise AppError(code=ErrorCode.TIMEOUT, status_code=504, message="Query timeout")
         except SQLAlchemyError as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def get_one(self, id: Any, use_cache: bool = True) -> Optional[Any]:
@@ -313,7 +315,7 @@ class OptimizedSQLAlchemyAdapter:
             raise AppError(code=ErrorCode.TIMEOUT, status_code=504, message="Query timeout")
         except SQLAlchemyError as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def create(self, data: Dict[str, Any]) -> Any:
@@ -348,14 +350,14 @@ class OptimizedSQLAlchemyAdapter:
 
         except IntegrityError as e:
             await session.rollback()
-            raise ConflictError(f"Item already exists: {str(e)}")
+            raise ConflictError(f"Item already exists: {e!s}")
         except asyncio.TimeoutError:
             await session.rollback()
             raise AppError(code=ErrorCode.TIMEOUT, status_code=504, message="Create timeout")
         except SQLAlchemyError as e:
             await session.rollback()
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def create_batch(self, items: List[Dict[str, Any]]) -> List[Any]:
@@ -394,11 +396,11 @@ class OptimizedSQLAlchemyAdapter:
 
         except IntegrityError as e:
             await session.rollback()
-            raise ConflictError(f"Batch create conflict: {str(e)}")
+            raise ConflictError(f"Batch create conflict: {e!s}")
         except SQLAlchemyError as e:
             await session.rollback()
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def update(self, id: Any, data: Dict[str, Any]) -> Optional[Any]:
@@ -446,7 +448,7 @@ class OptimizedSQLAlchemyAdapter:
         except SQLAlchemyError as e:
             await session.rollback()
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def delete_one(self, id: Any) -> bool:
@@ -488,7 +490,7 @@ class OptimizedSQLAlchemyAdapter:
         except SQLAlchemyError as e:
             await session.rollback()
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def count(self, filters: Dict[str, Any] = None) -> int:
@@ -528,7 +530,7 @@ class OptimizedSQLAlchemyAdapter:
 
         except SQLAlchemyError as e:
             raise AppError(
-                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {str(e)}"
+                code=ErrorCode.INTERNAL_ERROR, status_code=500, message=f"Database error: {e!s}"
             )
 
     async def _invalidate_caches(self, operation: str):

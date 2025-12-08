@@ -1,7 +1,9 @@
 """Query warmup mechanism for preloading hot data into cache"""
 
+from __future__ import annotations
+
 import asyncio
-from typing import Any, Callable, Awaitable, List, Dict
+from typing import Any, Awaitable, Callable, Dict, List
 
 
 class QueryWarmupStrategy:
@@ -77,7 +79,7 @@ class QueryWarmupExecutor:
         self.strategies: List[QueryWarmupStrategy] = []
         self.results: Dict[str, int] = {}
 
-    def add_strategy(self, strategy: QueryWarmupStrategy) -> "QueryWarmupExecutor":
+    def add_strategy(self, strategy: QueryWarmupStrategy) -> QueryWarmupExecutor:
         """Add warmup strategy
 
         Args:

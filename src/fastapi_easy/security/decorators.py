@@ -1,5 +1,7 @@
 """Security decorators for FastAPI-Easy"""
 
+from __future__ import annotations
+
 import logging
 from contextvars import ContextVar
 from typing import Optional

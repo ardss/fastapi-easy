@@ -1,6 +1,9 @@
 """Base ORM adapter implementation"""
 
+from __future__ import annotations
+
 from typing import Any, Dict, List, Optional
+
 from ..core.adapters import ORMAdapter
 
 

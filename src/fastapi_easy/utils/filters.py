@@ -1,6 +1,8 @@
 """Filter parsing utilities for FastAPI-Easy"""
 
-from typing import Dict, Any, List
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional
 
 
 class FilterParser:
@@ -33,7 +35,7 @@ class FilterParser:
     def parse(
         cls,
         query_params: Dict[str, Any],
-        allowed_fields: List[str] = None,
+        allowed_fields: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """Parse filter query parameters
 

@@ -1,5 +1,7 @@
 """GraphQL support for FastAPI-Easy"""
 
+from __future__ import annotations
+
 from typing import Any, Dict, List, Optional, Type
 
 
@@ -167,7 +169,7 @@ class GraphQLMutation:
 class GraphQLSchema:
     """GraphQL schema builder"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize GraphQL schema"""
         self.types: Dict[str, GraphQLType] = {}
         self.queries: List[GraphQLQuery] = []

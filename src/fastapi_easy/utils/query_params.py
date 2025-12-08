@@ -1,8 +1,11 @@
 """Utility for handling Pydantic models as query parameters in GET requests."""
 
+from __future__ import annotations
+
 import json
-from typing import Any, Type, get_type_hints, Callable, get_origin, get_args
-from fastapi import Query, Depends
+from typing import Any, Callable, Type, get_origin, get_type_hints
+
+from fastapi import Depends, Query
 from pydantic import BaseModel, ValidationError
 
 
@@ -24,14 +27,7 @@ def _parse_complex_type(value: Any, field_type: Type) -> Any:
     # Check if this is a complex type that needs JSON parsing
     origin = get_origin(field_type)
 
-    if origin is list or field_type is list:
-        try:
-            return json.loads(value)
-        except (json.JSONDecodeError, ValueError):
-            # If JSON parsing fails, return original string
-            # Pydantic will handle the validation error
-            return value
-    elif origin is dict or field_type is dict:
+    if origin is list or field_type is list or origin is dict or field_type is dict:
         try:
             return json.loads(value)
         except (json.JSONDecodeError, ValueError):
@@ -189,8 +185,8 @@ def as_query_params(schema: Type[BaseModel]) -> Callable:
 
 # Example usage and test
 if __name__ == "__main__":
-    from fastapi import FastAPI
     import uvicorn
+    from fastapi import FastAPI
 
     app = FastAPI()
 
