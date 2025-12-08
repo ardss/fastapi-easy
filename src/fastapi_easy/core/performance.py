@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class MetricData:
     """Metric data point"""
+
     name: str
     value: float
     timestamp: float
@@ -23,10 +24,11 @@ class MetricData:
 @dataclass
 class PerformanceStats:
     """Performance statistics"""
+
     total_requests: int = 0
     total_duration: float = 0.0
     avg_duration: float = 0.0
-    min_duration: float = float('inf')
+    min_duration: float = float("inf")
     max_duration: float = 0.0
     error_count: int = 0
     last_requests: deque = field(default_factory=lambda: deque(maxlen=100))
@@ -69,9 +71,7 @@ class PerformanceMonitor:
 
             # Record metric
             await self.record_metric(
-                name="request_duration",
-                value=duration,
-                tags={"path": path, "method": method}
+                name="request_duration", value=duration, tags={"path": path, "method": method}
             )
 
             # Update statistics
@@ -82,18 +82,11 @@ class PerformanceMonitor:
                 stats.avg_duration = stats.total_duration / stats.total_requests
                 stats.min_duration = min(stats.min_duration, duration)
                 stats.max_duration = max(stats.max_duration, duration)
-                stats.last_requests.append({
-                    'timestamp': start_time,
-                    'duration': duration,
-                    'status': 'success'
-                })
+                stats.last_requests.append(
+                    {"timestamp": start_time, "duration": duration, "status": "success"}
+                )
 
-    async def record_metric(
-        self,
-        name: str,
-        value: float,
-        tags: Optional[Dict[str, str]] = None
-    ):
+    async def record_metric(self, name: str, value: float, tags: Optional[Dict[str, str]] = None):
         """Record a metric
 
         Args:
@@ -101,19 +94,14 @@ class PerformanceMonitor:
             value: Metric value
             tags: Optional tags for categorization
         """
-        metric = MetricData(
-            name=name,
-            value=value,
-            timestamp=time.time(),
-            tags=tags or {}
-        )
+        metric = MetricData(name=name, value=value, timestamp=time.time(), tags=tags or {})
 
         async with self._lock:
             self.metrics.append(metric)
 
             # Maintain max history
             if len(self.metrics) > self.max_history:
-                self.metrics = self.metrics[-self.max_history:]
+                self.metrics = self.metrics[-self.max_history :]
 
         logger.debug(f"Recorded metric: {name}={value}")
 
@@ -121,7 +109,7 @@ class PerformanceMonitor:
         self,
         name: Optional[str] = None,
         tags: Optional[Dict[str, str]] = None,
-        since: Optional[float] = None
+        since: Optional[float] = None,
     ) -> List[MetricData]:
         """Get metrics with optional filtering
 
@@ -141,10 +129,7 @@ class PerformanceMonitor:
             filtered = [m for m in filtered if m.name == name]
 
         if tags:
-            filtered = [
-                m for m in filtered
-                if all(m.tags.get(k) == v for k, v in tags.items())
-            ]
+            filtered = [m for m in filtered if all(m.tags.get(k) == v for k, v in tags.items())]
 
         if since:
             filtered = [m for m in filtered if m.timestamp >= since]
@@ -167,24 +152,24 @@ class PerformanceMonitor:
                     return {}
 
                 return {
-                    'total_requests': stats.total_requests,
-                    'avg_duration': stats.avg_duration,
-                    'min_duration': stats.min_duration,
-                    'max_duration': stats.max_duration,
-                    'error_count': stats.error_count,
-                    'error_rate': stats.error_count / max(stats.total_requests, 1),
-                    'recent_requests': list(stats.last_requests)
+                    "total_requests": stats.total_requests,
+                    "avg_duration": stats.avg_duration,
+                    "min_duration": stats.min_duration,
+                    "max_duration": stats.max_duration,
+                    "error_count": stats.error_count,
+                    "error_rate": stats.error_count / max(stats.total_requests, 1),
+                    "recent_requests": list(stats.last_requests),
                 }
 
             # Return all stats
             return {
                 key: {
-                    'total_requests': stats.total_requests,
-                    'avg_duration': stats.avg_duration,
-                    'min_duration': stats.min_duration,
-                    'max_duration': stats.max_duration,
-                    'error_count': stats.error_count,
-                    'error_rate': stats.error_count / max(stats.total_requests, 1),
+                    "total_requests": stats.total_requests,
+                    "avg_duration": stats.avg_duration,
+                    "min_duration": stats.min_duration,
+                    "max_duration": stats.max_duration,
+                    "error_count": stats.error_count,
+                    "error_rate": stats.error_count / max(stats.total_requests, 1),
                 }
                 for key, stats in self.stats.items()
             }
@@ -203,13 +188,13 @@ class PerformanceMonitor:
             Health metrics dictionary
         """
         return {
-            'total_metrics': len(self.metrics),
-            'total_request_types': len(self.stats),
-            'memory_usage': {
-                'metrics_size': len(self.metrics),
-                'stats_size': len(self.stats),
-                'max_history': self.max_history
-            }
+            "total_metrics": len(self.metrics),
+            "total_request_types": len(self.stats),
+            "memory_usage": {
+                "metrics_size": len(self.metrics),
+                "stats_size": len(self.stats),
+                "max_history": self.max_history,
+            },
         }
 
 

@@ -82,7 +82,9 @@ class SQLAlchemyAdapter(BaseORMAdapter):
             try:
                 value = SecurityValidator.validate_sql_value(value)
             except Exception as e:
-                logger.warning(f"Suspicious filter value detected for field {field_name}: {str(e)[:100]}")
+                logger.warning(
+                    f"Suspicious filter value detected for field {field_name}: {str(e)[:100]}"
+                )
                 raise ValueError(f"Invalid filter value for field: {field_name}")
 
             # Get model field (safe as field_name is validated)

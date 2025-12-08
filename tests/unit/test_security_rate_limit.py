@@ -1,6 +1,5 @@
 """Unit tests for rate limiting"""
 
-
 import pytest
 
 from fastapi_easy.security import LoginAttemptTracker

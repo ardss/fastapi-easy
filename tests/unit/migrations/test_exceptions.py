@@ -4,7 +4,6 @@
 测试所有自定义异常类的初始化、消息格式化和继承关系
 """
 
-
 from fastapi_easy.migrations.exceptions import (
     CacheError,
     DatabaseConnectionError,

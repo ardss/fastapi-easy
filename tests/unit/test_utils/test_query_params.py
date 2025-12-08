@@ -11,6 +11,7 @@ from fastapi_easy.utils.query_params import QueryParams, as_query_params
 
 class UserQuery(BaseModel):
     """Test query model"""
+
     name: str
     age: int = None
     city: str = "New York"
@@ -72,6 +73,7 @@ def test_as_query_params_validation_error():
 
 def test_query_params_with_optional_fields():
     """Test QueryParams with optional fields"""
+
     class OptionalQuery(BaseModel):
         required: str
         optional_field: str = None
@@ -88,6 +90,7 @@ def test_query_params_with_optional_fields():
 
 def test_query_params_with_complex_types():
     """Test QueryParams with complex field types"""
+
     class ComplexQuery(BaseModel):
         items: list = []
         metadata: dict = {}
@@ -132,9 +135,9 @@ def test_query_preserves_annotations():
     dependency = QueryParams(UserQuery)
 
     # Check that annotations are preserved
-    assert hasattr(dependency, '__annotations__')
-    assert 'return' in dependency.__annotations__
-    assert dependency.__annotations__['return'] == UserQuery
+    assert hasattr(dependency, "__annotations__")
+    assert "return" in dependency.__annotations__
+    assert dependency.__annotations__["return"] == UserQuery
 
 
 def test_as_query_params_preserves_annotations():
@@ -142,23 +145,21 @@ def test_as_query_params_preserves_annotations():
     dependency = as_query_params(UserQuery)
 
     # Check that annotations are preserved
-    assert hasattr(dependency, '__annotations__')
-    assert 'return' in dependency.__annotations__
-    assert dependency.__annotations__['return'] == UserQuery
+    assert hasattr(dependency, "__annotations__")
+    assert "return" in dependency.__annotations__
+    assert dependency.__annotations__["return"] == UserQuery
 
 
 def test_query_params_with_model_description():
     """Test QueryParams with model field descriptions"""
+
     class DescribedQuery(BaseModel):
         """Query model with field descriptions"""
+
         name: str
         age: int = None
 
-        model_config = {
-            "json_schema_extra": {
-                "example": {"name": "John", "age": 30}
-            }
-        }
+        model_config = {"json_schema_extra": {"example": {"name": "John", "age": 30}}}
 
     dependency = QueryParams(DescribedQuery)
     result = dependency(name="John", age=30)
@@ -179,6 +180,7 @@ def test_query_params_error_handling():
 
 def test_query_params_empty_model():
     """Test QueryParams with empty model"""
+
     class EmptyQuery(BaseModel):
         pass
 

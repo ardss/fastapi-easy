@@ -80,10 +80,7 @@ python src/main.py
 """
         )
 
-        click.secho(
-            f"✅ Project '{name}' created successfully at {project_path}",
-            fg="green"
-        )
+        click.secho(f"✅ Project '{name}' created successfully at {project_path}", fg="green")
 
     except Exception as e:
         click.secho(f"❌ Error creating project: {e}", fg="red")

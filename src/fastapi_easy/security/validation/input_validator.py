@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class InputValidationError(Exception):
     """Input validation error"""
+
     pass
 
 
@@ -158,7 +159,9 @@ class SecurityValidator:
         return value
 
     @classmethod
-    def validate_and_sanitize_input(cls, data: Dict[str, Any], allowed_fields: Optional[List[str]] = None) -> Dict[str, Any]:
+    def validate_and_sanitize_input(
+        cls, data: Dict[str, Any], allowed_fields: Optional[List[str]] = None
+    ) -> Dict[str, Any]:
         """Validate and sanitize input data
 
         Args:
@@ -228,7 +231,9 @@ class SecurityValidator:
         return skip, limit
 
     @classmethod
-    def validate_sort_params(cls, sort_fields: Dict[str, str], allowed_fields: List[str]) -> Dict[str, str]:
+    def validate_sort_params(
+        cls, sort_fields: Dict[str, str], allowed_fields: List[str]
+    ) -> Dict[str, str]:
         """Validate sort parameters
 
         Args:
@@ -364,24 +369,29 @@ class SecurityValidator:
 # Pydantic validators for easy integration
 def sanitize_string_validator(max_length: int = 1000):
     """Pydantic validator for string sanitization"""
+
     def validator_func(v):
         if not isinstance(v, str):
             raise ValueError("Must be a string")
         return SecurityValidator.sanitize_string(v, max_length)
+
     return validator_func
 
 
 def validate_field_name_validator():
     """Pydantic validator for field names"""
+
     def validator_func(v):
         if not isinstance(v, str):
             raise ValueError("Must be a string")
         return SecurityValidator.validate_field_name(v)
+
     return validator_func
 
 
 def validate_email_validator():
     """Enhanced email validator"""
+
     def validator_func(v):
         if not isinstance(v, str):
             raise ValueError("Must be a string")
@@ -396,11 +406,13 @@ def validate_email_validator():
             raise ValueError("Suspicious email detected")
 
         return v.lower().strip()
+
     return validator_func
 
 
 def validate_password_validator():
     """Enhanced password validator"""
+
     def validator_func(v):
         if not isinstance(v, str):
             raise ValueError("Must be a string")
@@ -421,6 +433,7 @@ def validate_password_validator():
             raise ValueError("Password must contain both letters and numbers")
 
         return v
+
     return validator_func
 
 

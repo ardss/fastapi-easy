@@ -1,7 +1,6 @@
 """Tests for backends/__init__.py module"""
 
 
-
 class TestBackendsInit:
     """Test backends module initialization"""
 

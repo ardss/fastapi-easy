@@ -18,11 +18,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T', bound='BaseSettings')
+T = TypeVar("T", bound="BaseSettings")
 
 
 class ConfigSource(Enum):
     """配置来源"""
+
     DEFAULT = "default"
     ENV = "environment"
     FILE = "file"
@@ -32,6 +33,7 @@ class ConfigSource(Enum):
 @dataclass
 class ConfigField:
     """配置字段定义"""
+
     name: str
     type: Type
     default: Any = None
@@ -81,7 +83,7 @@ class BaseSettings(ABC):
 
     def _load_from_file(self):
         """从配置文件加载"""
-        config_file = os.environ.get('FASTAPI_EASY_CONFIG_FILE')
+        config_file = os.environ.get("FASTAPI_EASY_CONFIG_FILE")
         if not config_file:
             return
 
@@ -91,10 +93,10 @@ class BaseSettings(ABC):
             return
 
         try:
-            with open(config_path, 'r', encoding='utf-8') as f:
-                if config_path.suffix.lower() in ['.yaml', '.yml']:
+            with open(config_path, "r", encoding="utf-8") as f:
+                if config_path.suffix.lower() in [".yaml", ".yml"]:
                     data = yaml.safe_load(f)
-                elif config_path.suffix.lower() == '.json':
+                elif config_path.suffix.lower() == ".json":
                     data = json.load(f)
                 else:
                     logger.warning(f"Unsupported config file format: {config_path.suffix}")
@@ -123,13 +125,13 @@ class BaseSettings(ABC):
     def _convert_value(self, value: str, target_type: Type) -> Any:
         """类型转换"""
         if target_type == bool:
-            return value.lower() in ('true', '1', 'yes', 'on')
+            return value.lower() in ("true", "1", "yes", "on")
         elif target_type == int:
             return int(value)
         elif target_type == float:
             return float(value)
         elif target_type == list:
-            return value.split(',')
+            return value.split(",")
         else:
             return value
 
@@ -182,7 +184,7 @@ class BaseSettings(ABC):
     @classmethod
     def _get_config_fields(cls) -> List[ConfigField]:
         """获取配置字段定义"""
-        if not hasattr(cls, '_config_fields'):
+        if not hasattr(cls, "_config_fields"):
             cls._config_fields = cls._build_config_fields()
         return cls._config_fields
 
@@ -218,7 +220,7 @@ class BaseSettings(ABC):
     @classmethod
     def from_file(cls: Type[T], config_file: str) -> T:
         """从文件创建配置"""
-        os.environ['FASTAPI_EASY_CONFIG_FILE'] = config_file
+        os.environ["FASTAPI_EASY_CONFIG_FILE"] = config_file
         return cls()
 
     @classmethod
@@ -232,10 +234,7 @@ class DatabaseConfig(BaseSettings):
     """数据库配置"""
 
     host: str = ConfigField(
-        type=str,
-        default="localhost",
-        description="Database host",
-        env_var="FASTAPI_EASY_DB_HOST"
+        type=str, default="localhost", description="Database host", env_var="FASTAPI_EASY_DB_HOST"
     )
 
     port: int = ConfigField(
@@ -244,7 +243,7 @@ class DatabaseConfig(BaseSettings):
         description="Database port",
         env_var="FASTAPI_EASY_DB_PORT",
         min_value=1,
-        max_value=65535
+        max_value=65535,
     )
 
     database: str = ConfigField(
@@ -252,14 +251,14 @@ class DatabaseConfig(BaseSettings):
         default="fastapi_easy",
         description="Database name",
         env_var="FASTAPI_EASY_DB_NAME",
-        required=True
+        required=True,
     )
 
     username: str = ConfigField(
         type=str,
         default="postgres",
         description="Database username",
-        env_var="FASTAPI_EASY_DB_USER"
+        env_var="FASTAPI_EASY_DB_USER",
     )
 
     password: str = ConfigField(
@@ -267,7 +266,7 @@ class DatabaseConfig(BaseSettings):
         default="",
         description="Database password",
         env_var="FASTAPI_EASY_DB_PASSWORD",
-        required=False
+        required=False,
     )
 
     driver: str = ConfigField(
@@ -275,7 +274,7 @@ class DatabaseConfig(BaseSettings):
         default="postgresql+asyncpg",
         description="Database driver",
         env_var="FASTAPI_EASY_DB_DRIVER",
-        choices=["postgresql+asyncpg", "mysql+aiomysql", "sqlite+aiosqlite"]
+        choices=["postgresql+asyncpg", "mysql+aiomysql", "sqlite+aiosqlite"],
     )
 
     pool_size: int = ConfigField(
@@ -284,7 +283,7 @@ class DatabaseConfig(BaseSettings):
         description="Connection pool size",
         env_var="FASTAPI_EASY_DB_POOL_SIZE",
         min_value=1,
-        max_value=100
+        max_value=100,
     )
 
     max_overflow: int = ConfigField(
@@ -292,14 +291,11 @@ class DatabaseConfig(BaseSettings):
         default=20,
         description="Max overflow connections",
         env_var="FASTAPI_EASY_DB_MAX_OVERFLOW",
-        min_value=0
+        min_value=0,
     )
 
     echo: bool = ConfigField(
-        type=bool,
-        default=False,
-        description="Enable SQL echo",
-        env_var="FASTAPI_EASY_DB_ECHO"
+        type=bool, default=False, description="Enable SQL echo", env_var="FASTAPI_EASY_DB_ECHO"
     )
 
     @property
@@ -324,7 +320,7 @@ class SecurityConfig(BaseSettings):
         default="your-secret-key-change-in-production",
         description="JWT secret key",
         env_var="FASTAPI_EASY_SECRET_KEY",
-        required=True
+        required=True,
     )
 
     algorithm: str = ConfigField(
@@ -332,7 +328,7 @@ class SecurityConfig(BaseSettings):
         default="HS256",
         description="JWT algorithm",
         env_var="FASTAPI_EASY_JWT_ALGORITHM",
-        choices=["HS256", "HS384", "HS512", "RS256", "RS384", "RS512"]
+        choices=["HS256", "HS384", "HS512", "RS256", "RS384", "RS512"],
     )
 
     access_token_expire_minutes: int = ConfigField(
@@ -340,7 +336,7 @@ class SecurityConfig(BaseSettings):
         default=30,
         description="Access token expiration in minutes",
         env_var="FASTAPI_EASY_ACCESS_TOKEN_EXPIRE",
-        min_value=1
+        min_value=1,
     )
 
     refresh_token_expire_days: int = ConfigField(
@@ -348,7 +344,7 @@ class SecurityConfig(BaseSettings):
         default=7,
         description="Refresh token expiration in days",
         env_var="FASTAPI_EASY_REFRESH_TOKEN_EXPIRE",
-        min_value=1
+        min_value=1,
     )
 
     password_min_length: int = ConfigField(
@@ -356,7 +352,7 @@ class SecurityConfig(BaseSettings):
         default=8,
         description="Minimum password length",
         env_var="FASTAPI_EASY_PASSWORD_MIN_LENGTH",
-        min_value=4
+        min_value=4,
     )
 
     max_login_attempts: int = ConfigField(
@@ -364,7 +360,7 @@ class SecurityConfig(BaseSettings):
         default=5,
         description="Maximum login attempts before lockout",
         env_var="FASTAPI_EASY_MAX_LOGIN_ATTEMPTS",
-        min_value=1
+        min_value=1,
     )
 
     lockout_duration_minutes: int = ConfigField(
@@ -372,14 +368,14 @@ class SecurityConfig(BaseSettings):
         default=15,
         description="Account lockout duration in minutes",
         env_var="FASTAPI_EASY_LOCKOUT_DURATION",
-        min_value=1
+        min_value=1,
     )
 
     cors_origins: List[str] = ConfigField(
         type=list,
         default=["*"],
         description="CORS allowed origins",
-        env_var="FASTAPI_EASY_CORS_ORIGINS"
+        env_var="FASTAPI_EASY_CORS_ORIGINS",
     )
 
 
@@ -391,7 +387,7 @@ class CacheConfig(BaseSettings):
         type=str,
         default="redis://localhost:6379/0",
         description="Redis connection URL",
-        env_var="FASTAPI_EASY_REDIS_URL"
+        env_var="FASTAPI_EASY_REDIS_URL",
     )
 
     default_ttl: int = ConfigField(
@@ -399,7 +395,7 @@ class CacheConfig(BaseSettings):
         default=3600,
         description="Default cache TTL in seconds",
         env_var="FASTAPI_EASY_CACHE_TTL",
-        min_value=1
+        min_value=1,
     )
 
     max_keys: int = ConfigField(
@@ -407,14 +403,14 @@ class CacheConfig(BaseSettings):
         default=10000,
         description="Maximum cache keys",
         env_var="FASTAPI_EASY_CACHE_MAX_KEYS",
-        min_value=1
+        min_value=1,
     )
 
     enable_metrics: bool = ConfigField(
         type=bool,
         default=True,
         description="Enable cache metrics",
-        env_var="FASTAPI_EASY_CACHE_METRICS"
+        env_var="FASTAPI_EASY_CACHE_METRICS",
     )
 
 
@@ -427,21 +423,18 @@ class LoggingConfig(BaseSettings):
         default="INFO",
         description="Log level",
         env_var="FASTAPI_EASY_LOG_LEVEL",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
     )
 
     format: str = ConfigField(
         type=str,
         default="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         description="Log format",
-        env_var="FASTAPI_EASY_LOG_FORMAT"
+        env_var="FASTAPI_EASY_LOG_FORMAT",
     )
 
     file_path: Optional[str] = ConfigField(
-        type=str,
-        default=None,
-        description="Log file path",
-        env_var="FASTAPI_EASY_LOG_FILE"
+        type=str, default=None, description="Log file path", env_var="FASTAPI_EASY_LOG_FILE"
     )
 
     max_file_size: int = ConfigField(
@@ -449,7 +442,7 @@ class LoggingConfig(BaseSettings):
         default=10485760,  # 10MB
         description="Max log file size in bytes",
         env_var="FASTAPI_EASY_LOG_MAX_SIZE",
-        min_value=1024
+        min_value=1024,
     )
 
     backup_count: int = ConfigField(
@@ -457,7 +450,7 @@ class LoggingConfig(BaseSettings):
         default=5,
         description="Number of log file backups",
         env_var="FASTAPI_EASY_LOG_BACKUP_COUNT",
-        min_value=1
+        min_value=1,
     )
 
 
@@ -470,21 +463,18 @@ class AppSettings(BaseSettings):
         type=str,
         default="FastAPI-Easy",
         description="Application name",
-        env_var="FASTAPI_EASY_APP_NAME"
+        env_var="FASTAPI_EASY_APP_NAME",
     )
 
     version: str = ConfigField(
         type=str,
         default="1.0.0",
         description="Application version",
-        env_var="FASTAPI_EASY_APP_VERSION"
+        env_var="FASTAPI_EASY_APP_VERSION",
     )
 
     debug: bool = ConfigField(
-        type=bool,
-        default=False,
-        description="Debug mode",
-        env_var="FASTAPI_EASY_DEBUG"
+        type=bool, default=False, description="Debug mode", env_var="FASTAPI_EASY_DEBUG"
     )
 
     environment: str = ConfigField(
@@ -492,29 +482,20 @@ class AppSettings(BaseSettings):
         default="development",
         description="Environment name",
         env_var="FASTAPI_EASY_ENVIRONMENT",
-        choices=["development", "testing", "staging", "production"]
+        choices=["development", "testing", "staging", "production"],
     )
 
     # API配置
     api_prefix: str = ConfigField(
-        type=str,
-        default="/api/v1",
-        description="API prefix",
-        env_var="FASTAPI_EASY_API_PREFIX"
+        type=str, default="/api/v1", description="API prefix", env_var="FASTAPI_EASY_API_PREFIX"
     )
 
     docs_url: Optional[str] = ConfigField(
-        type=str,
-        default="/docs",
-        description="API docs URL",
-        env_var="FASTAPI_EASY_DOCS_URL"
+        type=str, default="/docs", description="API docs URL", env_var="FASTAPI_EASY_DOCS_URL"
     )
 
     redoc_url: Optional[str] = ConfigField(
-        type=str,
-        default="/redoc",
-        description="ReDoc URL",
-        env_var="FASTAPI_EASY_REDOC_URL"
+        type=str, default="/redoc", description="ReDoc URL", env_var="FASTAPI_EASY_REDOC_URL"
     )
 
     # 子配置
@@ -534,7 +515,7 @@ class AppSettings(BaseSettings):
             self.debug = True
 
     @classmethod
-    def create(cls, **kwargs) -> 'AppSettings':
+    def create(cls, **kwargs) -> "AppSettings":
         """创建应用配置"""
         return cls(**kwargs)
 

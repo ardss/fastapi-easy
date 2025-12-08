@@ -12,9 +12,11 @@ from pathlib import Path
 
 from fastapi import Request, Response
 
+
 # Security event types
 class SecurityEventType(str, Enum):
     """Security event types"""
+
     # Authentication events
     LOGIN_SUCCESS = "login_success"
     LOGIN_FAILURE = "login_failure"
@@ -88,8 +90,16 @@ class SecurityLogger:
         self.log_level = log_level
         self.enable_json_format = enable_json_format
         self.sensitive_fields = sensitive_fields or [
-            "password", "token", "secret", "key", "authorization",
-            "cookie", "session", "credit_card", "ssn", "social_security",
+            "password",
+            "token",
+            "secret",
+            "key",
+            "authorization",
+            "cookie",
+            "session",
+            "credit_card",
+            "ssn",
+            "social_security",
         ]
 
         # Create logs directory if it doesn't exist
@@ -105,10 +115,7 @@ class SecurityLogger:
 
         # File handler with rotation
         file_handler = logging.handlers.RotatingFileHandler(
-            self.log_file,
-            maxBytes=max_bytes,
-            backupCount=backup_count,
-            encoding="utf-8"
+            self.log_file, maxBytes=max_bytes, backupCount=backup_count, encoding="utf-8"
         )
         file_handler.setLevel(log_level)
 
@@ -133,6 +140,7 @@ class SecurityLogger:
 
     def _get_json_formatter(self) -> logging.Formatter:
         """Get JSON formatter for structured logging"""
+
         class JsonFormatter(logging.Formatter):
             def format(self, record):
                 # Create log entry
@@ -156,9 +164,7 @@ class SecurityLogger:
 
     def _get_text_formatter(self) -> logging.Formatter:
         """Get text formatter for human-readable logging"""
-        return logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+        return logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
     def _redact_sensitive_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Redact sensitive data from log entry
@@ -241,10 +247,7 @@ class SecurityLogger:
 
         # Log with appropriate level
         log_method = getattr(self.logger, severity.lower(), self.logger.info)
-        log_method(
-            message,
-            extra={"security_event": security_event}
-        )
+        log_method(message, extra={"security_event": security_event})
 
     def log_authentication_event(
         self,
@@ -417,7 +420,11 @@ class SecurityLogger:
             details["suspicious_indicators"] = suspicious["details"]
 
         self.log_security_event(
-            event_type=SecurityEventType.SUSPICIOUS_REQUEST if suspicious["is_suspicious"] else SecurityEventType.LOGIN_SUCCESS,
+            event_type=(
+                SecurityEventType.SUSPICIOUS_REQUEST
+                if suspicious["is_suspicious"]
+                else SecurityEventType.LOGIN_SUCCESS
+            ),
             message=message,
             severity=severity,
             user_id=user_id,
@@ -474,7 +481,11 @@ class SecurityLogger:
         if record_count:
             details["record_count"] = record_count
 
-        event_type = SecurityEventType.SENSITIVE_DATA_ACCESS if is_sensitive else SecurityEventType.LOGIN_SUCCESS
+        event_type = (
+            SecurityEventType.SENSITIVE_DATA_ACCESS
+            if is_sensitive
+            else SecurityEventType.LOGIN_SUCCESS
+        )
         if record_count and record_count > 100:
             event_type = SecurityEventType.DATA_BULK_ACCESS
 
@@ -644,9 +655,7 @@ def configure_security_logging(
     """
     global _security_logger
     _security_logger = SecurityLogger(
-        log_file=log_file,
-        log_level=log_level,
-        enable_json_format=enable_json_format
+        log_file=log_file, log_level=log_level, enable_json_format=enable_json_format
     )
 
 
@@ -661,6 +670,8 @@ def log_auth_event(event_type: SecurityEventType, user_id: str, ip_address: str,
     get_security_logger().log_authentication_event(event_type, user_id, ip_address, **kwargs)
 
 
-def log_security_violation(violation_type: SecurityEventType, description: str, ip_address: str, **kwargs) -> None:
+def log_security_violation(
+    violation_type: SecurityEventType, description: str, ip_address: str, **kwargs
+) -> None:
     """Log a security violation using the global logger"""
     get_security_logger().log_security_violation(violation_type, description, ip_address, **kwargs)

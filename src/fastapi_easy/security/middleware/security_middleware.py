@@ -63,7 +63,9 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
         # Path configurations
         self.require_auth_paths = set(require_auth_paths or [])
-        self.skip_auth_paths = set(skip_auth_paths or ["/health", "/metrics", "/docs", "/redoc", "/openapi.json"])
+        self.skip_auth_paths = set(
+            skip_auth_paths or ["/health", "/metrics", "/docs", "/redoc", "/openapi.json"]
+        )
 
         # CORS configuration
         self.allowed_origins = allowed_origins or ["*"]
@@ -89,18 +91,14 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             if client_ip in _blacklisted_ips:
                 logger.warning(f"Blacklisted IP attempted access: {client_ip}")
                 return self._create_error_response(
-                    "Access denied",
-                    status.HTTP_403_FORBIDDEN,
-                    "IP_BLACKLISTED"
+                    "Access denied", status.HTTP_403_FORBIDDEN, "IP_BLACKLISTED"
                 )
 
             # Check rate limiting
             if not await self._check_rate_limit(client_ip):
                 logger.warning(f"Rate limit exceeded for IP: {client_ip}")
                 return self._create_error_response(
-                    "Rate limit exceeded",
-                    status.HTTP_429_TOO_MANY_REQUESTS,
-                    "RATE_LIMIT_EXCEEDED"
+                    "Rate limit exceeded", status.HTTP_429_TOO_MANY_REQUESTS, "RATE_LIMIT_EXCEEDED"
                 )
 
             # Check request size
@@ -110,7 +108,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                 return self._create_error_response(
                     "Request too large",
                     status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                    "REQUEST_TOO_LARGE"
+                    "REQUEST_TOO_LARGE",
                 )
 
             # Add security headers
@@ -129,9 +127,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             logger.error(f"Security middleware error: {str(e)}", exc_info=True)
             return self._create_error_response(
-                "Internal security error",
-                status.HTTP_500_INTERNAL_SERVER_ERROR,
-                "SECURITY_ERROR"
+                "Internal security error", status.HTTP_500_INTERNAL_SERVER_ERROR, "SECURITY_ERROR"
             )
 
     async def _process_request(self, request: Request, call_next) -> Response:
@@ -178,14 +174,14 @@ class SecurityMiddleware(BaseHTTPMiddleware):
 
         # Clean old entries
         _rate_limit_store[client_ip] = [
-            timestamp for timestamp in _rate_limit_store[client_ip]
+            timestamp
+            for timestamp in _rate_limit_store[client_ip]
             if now - timestamp < 3600  # Keep last hour
         ]
 
         # Check minute limit
         minute_requests = [
-            timestamp for timestamp in _rate_limit_store[client_ip]
-            if now - timestamp < 60
+            timestamp for timestamp in _rate_limit_store[client_ip] if now - timestamp < 60
         ]
         if len(minute_requests) >= self.rate_limit_per_minute:
             return False
@@ -225,8 +221,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             if isinstance(e, InputValidationError):
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid input: {str(e)}"
+                    status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid input: {str(e)}"
                 )
             # Non-JSON requests are skipped
             pass
@@ -259,7 +254,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=str(e),
-                headers={"WWW-Authenticate": "Bearer"}
+                headers={"WWW-Authenticate": "Bearer"},
             )
 
     def _add_cors_headers(self, request: Request, response: Response) -> None:
@@ -271,18 +266,17 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             response.headers["Access-Control-Allow-Origin"] = origin
 
         # Add other CORS headers
-        response.headers.update({
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "Authorization, Content-Type, X-Requested-With",
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Max-Age": "86400",  # 24 hours
-        })
+        response.headers.update(
+            {
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+                "Access-Control-Allow-Headers": "Authorization, Content-Type, X-Requested-With",
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Max-Age": "86400",  # 24 hours
+            }
+        )
 
     def _create_error_response(
-        self,
-        message: str,
-        status_code: int,
-        error_code: str
+        self, message: str, status_code: int, error_code: str
     ) -> JSONResponse:
         """Create standardized error response"""
         return JSONResponse(
@@ -291,8 +285,8 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                 "error": message,
                 "error_code": error_code,
                 "status_code": status_code,
-                "timestamp": time.time()
-            }
+                "timestamp": time.time(),
+            },
         )
 
 
@@ -305,11 +299,7 @@ class RateLimiter:
         self.storage = storage or _rate_limit_store
 
     async def is_allowed(
-        self,
-        key: str,
-        limit: int,
-        window: int,
-        strategy: str = "sliding_window"
+        self, key: str, limit: int, window: int, strategy: str = "sliding_window"
     ) -> bool:
         """Check if request is allowed
 
@@ -329,8 +319,7 @@ class RateLimiter:
 
         # Clean old entries
         self.storage[key] = [
-            timestamp for timestamp in self.storage[key]
-            if now - timestamp < window
+            timestamp for timestamp in self.storage[key] if now - timestamp < window
         ]
 
         # Check limit
@@ -377,9 +366,7 @@ class IPBlacklist:
 
 # Security headers utility
 def get_security_headers(
-    include_csp: bool = True,
-    include_hsts: bool = True,
-    csp_policy: Optional[str] = None
+    include_csp: bool = True, include_hsts: bool = True, csp_policy: Optional[str] = None
 ) -> Dict[str, str]:
     """Get security headers for responses
 
@@ -401,13 +388,11 @@ def get_security_headers(
 
     if include_csp:
         headers["Content-Security-Policy"] = (
-            csp_policy or
-            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+            csp_policy
+            or "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
         )
 
     if include_hsts:
-        headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains; preload"
-        )
+        headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
 
     return headers

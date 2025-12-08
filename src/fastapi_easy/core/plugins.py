@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 class PluginState(Enum):
     """插件状态"""
+
     UNLOADED = "unloaded"
     LOADING = "loading"
     LOADED = "loaded"
@@ -39,6 +40,7 @@ class PluginState(Enum):
 @dataclass
 class PluginMetadata:
     """插件元数据"""
+
     name: str
     version: str
     description: str = ""
@@ -52,12 +54,12 @@ class PluginMetadata:
     config_schema: Optional[Dict[str, Any]] = None
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'PluginMetadata':
+    def from_dict(cls, data: Dict[str, Any]) -> "PluginMetadata":
         """从字典创建元数据"""
         return cls(**data)
 
     @classmethod
-    def from_file(cls, file_path: str) -> 'PluginMetadata':
+    def from_file(cls, file_path: str) -> "PluginMetadata":
         """从文件加载元数据"""
         path = Path(file_path)
 
@@ -65,10 +67,10 @@ class PluginMetadata:
             raise FileNotFoundError(f"Plugin metadata file not found: {file_path}")
 
         try:
-            with open(path, 'r', encoding='utf-8') as f:
-                if path.suffix.lower() == '.json':
+            with open(path, "r", encoding="utf-8") as f:
+                if path.suffix.lower() == ".json":
                     data = json.load(f)
-                elif path.suffix.lower() in ['.yaml', '.yml']:
+                elif path.suffix.lower() in [".yaml", ".yml"]:
                     data = yaml.safe_load(f)
                 else:
                     raise ValueError(f"Unsupported metadata file format: {path.suffix}")
@@ -81,6 +83,7 @@ class PluginMetadata:
 @dataclass
 class PluginInfo:
     """插件信息"""
+
     plugin: IPlugin
     metadata: PluginMetadata
     path: str
@@ -96,9 +99,7 @@ class PluginError(BaseException):
 
     def __init__(self, plugin_name: str, message: str, **kwargs):
         super().__init__(
-            message=f"Plugin '{plugin_name}': {message}",
-            code="PLUGIN_ERROR",
-            **kwargs
+            message=f"Plugin '{plugin_name}': {message}", code="PLUGIN_ERROR", **kwargs
         )
         self.plugin_name = plugin_name
 
@@ -116,10 +117,7 @@ class PluginManager(IPluginManager):
     """
 
     def __init__(
-        self,
-        container: DIContainer,
-        settings: AppSettings,
-        plugin_dirs: Optional[List[str]] = None
+        self, container: DIContainer, settings: AppSettings, plugin_dirs: Optional[List[str]] = None
     ):
         self.container = container
         self.settings = settings
@@ -161,8 +159,7 @@ class PluginManager(IPluginManager):
             # 7. 验证插件接口
             if not isinstance(plugin_instance, IPlugin):
                 raise PluginError(
-                    metadata.name,
-                    "Plugin class does not implement IPlugin interface"
+                    metadata.name, "Plugin class does not implement IPlugin interface"
                 )
 
             # 8. 创建插件信息
@@ -170,7 +167,7 @@ class PluginManager(IPluginManager):
                 plugin=plugin_instance,
                 metadata=metadata,
                 path=plugin_path,
-                state=PluginState.LOADED
+                state=PluginState.LOADED,
             )
 
             # 9. 注册到管理器
@@ -187,9 +184,7 @@ class PluginManager(IPluginManager):
             if isinstance(e, PluginError):
                 raise
             raise PluginError(
-                os.path.basename(plugin_path),
-                f"Load failed: {str(e)}",
-                cause=e
+                os.path.basename(plugin_path), f"Load failed: {str(e)}", cause=e
             ) from e
 
     def _load_metadata(self, plugin_path: str) -> PluginMetadata:
@@ -201,7 +196,7 @@ class PluginManager(IPluginManager):
             "plugin.yml",
             "metadata.json",
             "metadata.yaml",
-            "metadata.yml"
+            "metadata.yml",
         ]
 
         for metadata_file in metadata_files:
@@ -217,9 +212,7 @@ class PluginManager(IPluginManager):
         # 简化实现，实际应该解析Python文件
         plugin_name = os.path.basename(plugin_path)
         return PluginMetadata(
-            name=plugin_name,
-            version="1.0.0",
-            description=f"Plugin loaded from {plugin_path}"
+            name=plugin_name, version="1.0.0", description=f"Plugin loaded from {plugin_path}"
         )
 
     async def _validate_dependencies(self, metadata: PluginMetadata):
@@ -237,10 +230,7 @@ class PluginManager(IPluginManager):
         # 检查插件依赖
         for dependency in metadata.dependencies:
             if dependency not in self._plugins:
-                raise PluginError(
-                    metadata.name,
-                    f"Missing dependency: {dependency}"
-                )
+                raise PluginError(metadata.name, f"Missing dependency: {dependency}")
 
     def _import_plugin_module(self, plugin_path: str):
         """动态导入插件模块"""
@@ -252,20 +242,14 @@ class PluginManager(IPluginManager):
             if os.path.exists(module_path):
                 break
         else:
-            raise PluginError(
-                os.path.basename(plugin_path),
-                "No main plugin file found"
-            )
+            raise PluginError(os.path.basename(plugin_path), "No main plugin file found")
 
         # 动态导入
         module_name = os.path.basename(plugin_path)
         spec = importlib.util.spec_from_file_location(module_name, module_path)
 
         if spec is None or spec.loader is None:
-            raise PluginError(
-                os.path.basename(plugin_path),
-                "Failed to create module spec"
-            )
+            raise PluginError(os.path.basename(plugin_path), "Failed to create module spec")
 
         module = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = module
@@ -279,17 +263,10 @@ class PluginManager(IPluginManager):
         for attr_name in dir(module):
             attr = getattr(module, attr_name)
 
-            if (
-                isinstance(attr, type) and
-                issubclass(attr, IPlugin) and
-                attr != IPlugin
-            ):
+            if isinstance(attr, type) and issubclass(attr, IPlugin) and attr != IPlugin:
                 return attr
 
-        raise PluginError(
-            plugin_name,
-            "No plugin class found that implements IPlugin interface"
-        )
+        raise PluginError(plugin_name, "No plugin class found that implements IPlugin interface")
 
     async def _initialize_plugin(self, plugin_info: PluginInfo):
         """初始化插件"""
@@ -301,7 +278,7 @@ class PluginManager(IPluginManager):
                 "container": self.container,
                 "settings": self.settings,
                 "plugin_manager": self,
-                "config": plugin_info.config
+                "config": plugin_info.config,
             }
 
             # 调用插件初始化
@@ -317,21 +294,21 @@ class PluginManager(IPluginManager):
             plugin_info.state = PluginState.ERROR
             plugin_info.error = e
             raise PluginError(
-                plugin_info.metadata.name,
-                f"Initialization failed: {str(e)}",
-                cause=e
+                plugin_info.metadata.name, f"Initialization failed: {str(e)}", cause=e
             ) from e
 
     async def _register_plugin_services(self, plugin_info: PluginInfo):
         """注册插件服务到容器"""
         # 检查插件是否提供服务
-        if hasattr(plugin_info.plugin, 'get_services'):
+        if hasattr(plugin_info.plugin, "get_services"):
             try:
                 services = plugin_info.plugin.get_services()
                 for service_type, service_impl in services.items():
                     self.container.register_singleton(service_type, service_impl)
             except Exception as e:
-                logger.warning(f"Failed to register services for plugin {plugin_info.metadata.name}: {e}")
+                logger.warning(
+                    f"Failed to register services for plugin {plugin_info.metadata.name}: {e}"
+                )
 
     async def unload_plugin(self, plugin_name: str) -> bool:
         """卸载插件"""
@@ -350,8 +327,7 @@ class PluginManager(IPluginManager):
         dependents = self._get_plugin_dependents(plugin_name)
         if dependents:
             raise PluginError(
-                plugin_name,
-                f"Cannot unload: required by plugins: {', '.join(dependents)}"
+                plugin_name, f"Cannot unload: required by plugins: {', '.join(dependents)}"
             )
 
         try:
@@ -372,11 +348,7 @@ class PluginManager(IPluginManager):
         except Exception as e:
             plugin_info.state = PluginState.ERROR
             plugin_info.error = e
-            raise PluginError(
-                plugin_name,
-                f"Unload failed: {str(e)}",
-                cause=e
-            ) from e
+            raise PluginError(plugin_name, f"Unload failed: {str(e)}", cause=e) from e
 
     def _get_plugin_dependents(self, plugin_name: str) -> List[str]:
         """获取依赖指定插件的其他插件"""
@@ -463,7 +435,7 @@ class PluginManager(IPluginManager):
             "dependencies": info.metadata.dependencies,
             "load_time": info.load_time,
             "init_time": info.init_time,
-            "error": str(info.error) if info.error else None
+            "error": str(info.error) if info.error else None,
         }
 
     async def reload_plugin(self, name: str) -> bool:

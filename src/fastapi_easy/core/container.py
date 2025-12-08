@@ -17,19 +17,21 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class LifetimeScope(Enum):
     """生命周期范围"""
+
     SINGLETON = "singleton"  # 单例，整个应用生命周期
     TRANSIENT = "transient"  # 瞬态，每次请求都创建新实例
-    SCOPED = "scoped"       # 作用域，在特定作用域内单例
+    SCOPED = "scoped"  # 作用域，在特定作用域内单例
 
 
 @dataclass
 class ServiceDescriptor:
     """服务描述符"""
+
     service_type: Type
     implementation_type: Optional[Type] = None
     factory: Optional[Callable] = None
@@ -45,7 +47,7 @@ class ServiceDescriptor:
 class ServiceScope:
     """服务作用域"""
 
-    def __init__(self, container: 'DIContainer'):
+    def __init__(self, container: "DIContainer"):
         self.container = container
         self._scoped_instances: Dict[Type, Any] = {}
         self._disposed = False
@@ -70,7 +72,7 @@ class ServiceScope:
 
         # 释放所有作用域实例
         for instance in self._scoped_instances.values():
-            if hasattr(instance, 'dispose'):
+            if hasattr(instance, "dispose"):
                 try:
                     instance.dispose()
                 except Exception as e:
@@ -102,45 +104,33 @@ class DIContainer:
         service_type: Type[T],
         implementation_type: Optional[Type[T]] = None,
         factory: Optional[Callable[[], T]] = None,
-        instance: Optional[T] = None
-    ) -> 'DIContainer':
+        instance: Optional[T] = None,
+    ) -> "DIContainer":
         """注册单例服务"""
         return self._register_service(
-            service_type,
-            implementation_type,
-            factory,
-            instance,
-            LifetimeScope.SINGLETON
+            service_type, implementation_type, factory, instance, LifetimeScope.SINGLETON
         )
 
     def register_transient(
         self,
         service_type: Type[T],
         implementation_type: Optional[Type[T]] = None,
-        factory: Optional[Callable[[], T]] = None
-    ) -> 'DIContainer':
+        factory: Optional[Callable[[], T]] = None,
+    ) -> "DIContainer":
         """注册瞬态服务"""
         return self._register_service(
-            service_type,
-            implementation_type,
-            factory,
-            None,
-            LifetimeScope.TRANSIENT
+            service_type, implementation_type, factory, None, LifetimeScope.TRANSIENT
         )
 
     def register_scoped(
         self,
         service_type: Type[T],
         implementation_type: Optional[Type[T]] = None,
-        factory: Optional[Callable[[], T]] = None
-    ) -> 'DIContainer':
+        factory: Optional[Callable[[], T]] = None,
+    ) -> "DIContainer":
         """注册作用域服务"""
         return self._register_service(
-            service_type,
-            implementation_type,
-            factory,
-            None,
-            LifetimeScope.SCOPED
+            service_type, implementation_type, factory, None, LifetimeScope.SCOPED
         )
 
     def _register_service(
@@ -149,8 +139,8 @@ class DIContainer:
         implementation_type: Optional[Type[T]],
         factory: Optional[Callable[[], T]],
         instance: Optional[T],
-        lifetime: LifetimeScope
-    ) -> 'DIContainer':
+        lifetime: LifetimeScope,
+    ) -> "DIContainer":
         """注册服务"""
         with self._lock:
             # 参数验证
@@ -161,16 +151,12 @@ class DIContainer:
 
             # 如果提供了实例，检查类型兼容性
             if instance is not None and not isinstance(instance, service_type):
-                raise ValueError(
-                    f"Instance {instance} is not an instance of {service_type}"
-                )
+                raise ValueError(f"Instance {instance} is not an instance of {service_type}")
 
             # 如果提供了实现类型，检查继承关系
             if implementation_type is not None:
                 if not issubclass(implementation_type, service_type):
-                    raise ValueError(
-                        f"{implementation_type} is not a subclass of {service_type}"
-                    )
+                    raise ValueError(f"{implementation_type} is not a subclass of {service_type}")
 
             # 分析依赖关系
             dependencies = {}
@@ -184,7 +170,7 @@ class DIContainer:
                 factory=factory,
                 instance=instance,
                 lifetime=lifetime,
-                dependencies=dependencies
+                dependencies=dependencies,
             )
 
             self._services[service_type] = descriptor
@@ -205,7 +191,7 @@ class DIContainer:
             type_hints = get_type_hints(implementation_type)
 
             for param_name, param in sig.parameters.items():
-                if param_name == 'self':
+                if param_name == "self":
                     continue
 
                 # 跳过有默认值的参数
@@ -276,12 +262,14 @@ class DIContainer:
         """检查是否可以自动注册"""
         # 只允许自动注册具体的类（非抽象类、非接口）
         return (
-            inspect.isclass(service_type) and
-            not inspect.isabstract(service_type) and
-            hasattr(service_type, '__init__')
+            inspect.isclass(service_type)
+            and not inspect.isabstract(service_type)
+            and hasattr(service_type, "__init__")
         )
 
-    def _resolve_singleton(self, descriptor: ServiceDescriptor, scope: Optional[ServiceScope]) -> Any:
+    def _resolve_singleton(
+        self, descriptor: ServiceDescriptor, scope: Optional[ServiceScope]
+    ) -> Any:
         """解析单例服务"""
         if descriptor.service_type in self._singleton_instances:
             return self._singleton_instances[descriptor.service_type]
@@ -304,7 +292,9 @@ class DIContainer:
         scope._scoped_instances[descriptor.service_type] = instance
         return instance
 
-    def _resolve_transient(self, descriptor: ServiceDescriptor, scope: Optional[ServiceScope]) -> Any:
+    def _resolve_transient(
+        self, descriptor: ServiceDescriptor, scope: Optional[ServiceScope]
+    ) -> Any:
         """解析瞬态服务"""
         return self._create_instance(descriptor, scope)
 
@@ -321,9 +311,7 @@ class DIContainer:
         # 使用实现类型创建实例
         if descriptor.implementation_type is not None:
             return self._create_instance_with_dependencies(
-                descriptor.implementation_type,
-                descriptor.dependencies,
-                scope
+                descriptor.implementation_type, descriptor.dependencies, scope
             )
 
         raise ValueError(f"Cannot create instance for {descriptor.service_type}")
@@ -332,7 +320,7 @@ class DIContainer:
         self,
         implementation_type: Type,
         dependencies: Dict[str, Type],
-        scope: Optional[ServiceScope]
+        scope: Optional[ServiceScope],
     ) -> Any:
         """创建带依赖的实例"""
         # 解析依赖
@@ -363,7 +351,7 @@ class DIContainer:
         with self._lock:
             # 释放所有单例实例
             for instance in self._singleton_instances.values():
-                if hasattr(instance, 'dispose'):
+                if hasattr(instance, "dispose"):
                     try:
                         instance.dispose()
                     except Exception as e:
@@ -416,6 +404,7 @@ def init_container(container: Optional[DIContainer] = None) -> DIContainer:
 # 装饰器支持
 def injectable(lifetime: LifetimeScope = LifetimeScope.TRANSIENT):
     """可注入服务装饰器"""
+
     def decorator(cls: Type[T]) -> Type[T]:
         container = get_container()
 
@@ -427,24 +416,30 @@ def injectable(lifetime: LifetimeScope = LifetimeScope.TRANSIENT):
             container.register_transient(cls, cls)
 
         return cls
+
     return decorator
 
 
 def inject(service_type: Type[T]) -> T:
     """依赖注入装饰器"""
+
     def decorator(func):
         def wrapper(*args, **kwargs):
             container = get_container()
             service = container.resolve(service_type)
             return func(service, *args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
 # FastAPI集成支持
 def Depends(service_type: Type[T], scope: Optional[ServiceScope] = None) -> Callable[[], T]:
     """FastAPI依赖注入支持"""
+
     def dependency():
         container = get_container()
         return container.resolve(service_type, scope)
+
     return dependency

@@ -5,9 +5,7 @@ from fastapi import Query, Depends
 from pydantic import BaseModel, ValidationError
 
 
-def QueryParams(
-    schema: Type[BaseModel]
-) -> Callable:
+def QueryParams(schema: Type[BaseModel]) -> Callable:
     """
     Decorator to convert Pydantic model dependencies into query parameters for GET requests.
 
@@ -51,15 +49,11 @@ def QueryParams(
         # Handle default value
         if field_info.default is not None and field_info.default != ...:
             # Field has a default value
-            defaults[field_name] = Query(
-                default=field_info.default,
-                description=description
-            )
+            defaults[field_name] = Query(default=field_info.default, description=description)
         elif field_info.default_factory is not None:
             # Field has a default factory
             defaults[field_name] = Query(
-                default_factory=field_info.default_factory,
-                description=description
+                default_factory=field_info.default_factory, description=description
             )
         else:
             # Required field
@@ -137,19 +131,15 @@ if __name__ == "__main__":
         city: str = "New York"
 
         model_config = {
-            "json_schema_extra": {
-                "example": {"name": "John", "age": 30, "city": "New York"}
-            }
+            "json_schema_extra": {"example": {"name": "John", "age": 30, "city": "New York"}}
         }
 
     @app.get("/users/")
-    async def get_users(
-        params: UserQuery = Depends(as_query_params(UserQuery))
-    ):
+    async def get_users(params: UserQuery = Depends(as_query_params(UserQuery))):
         """Get users with query parameters - correctly shows as query params in OpenAPI."""
         return {
             "message": f"Searching for users: {params.name}, "
-                     f"Age: {params.age}, City: {params.city}"
+            f"Age: {params.age}, City: {params.city}"
         }
 
     # This will correctly show query parameters in OpenAPI instead of request body

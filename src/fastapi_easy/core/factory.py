@@ -19,11 +19,12 @@ from .exceptions import BaseException
 from .adapters import ORMAdapter
 from .crud_router import CRUDRouter
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class ComponentType(Enum):
     """组件类型"""
+
     ROUTER = "router"
     MIDDLEWARE = "middleware"
     ADAPTER = "adapter"
@@ -34,6 +35,7 @@ class ComponentType(Enum):
 @dataclass
 class ComponentSpec:
     """组件规格"""
+
     component_type: ComponentType
     name: str
     implementation: Optional[Type] = None
@@ -68,41 +70,35 @@ class CRUDRouterFactory(ComponentFactory):
         config = spec.config
 
         # 获取必需的参数
-        schema = config.get('schema')
+        schema = config.get("schema")
         if not schema:
             raise ValueError("Schema is required for CRUD router")
 
         # 获取适配器
-        adapter = config.get('adapter')
+        adapter = config.get("adapter")
         if not adapter:
-            adapter_name = config.get('adapter_name', 'sqlalchemy')
+            adapter_name = config.get("adapter_name", "sqlalchemy")
             adapter = self._create_adapter(adapter_name, config, container)
 
         # 创建路由配置
-        router_config = config.get('router_config', {})
+        router_config = config.get("router_config", {})
 
         # 创建CRUD路由
-        router = CRUDRouter(
-            schema=schema,
-            adapter=adapter,
-            **router_config
-        )
+        router = CRUDRouter(schema=schema, adapter=adapter, **router_config)
 
         return router
 
     def _create_adapter(
-        self,
-        adapter_name: str,
-        config: Dict[str, Any],
-        container: DIContainer
+        self, adapter_name: str, config: Dict[str, Any], container: DIContainer
     ) -> ORMAdapter:
         """创建适配器"""
         # 这里可以根据适配器名称创建不同的适配器
         # 简化实现，实际应该有适配器工厂
-        if adapter_name == 'sqlalchemy':
+        if adapter_name == "sqlalchemy":
             from ..backends.sqlalchemy import SQLAlchemyAdapter
-            model_class = config.get('model_class')
-            get_db = config.get('get_db')
+
+            model_class = config.get("model_class")
+            get_db = config.get("get_db")
             return SQLAlchemyAdapter(model_class, get_db)
         else:
             raise ValueError(f"Unknown adapter: {adapter_name}")
@@ -121,17 +117,19 @@ class MiddlewareFactory(ComponentFactory):
 
         if middleware_name == "exception_handler":
             from ..middleware.exception_handler import ExceptionHandlingMiddleware
+
             return ExceptionHandlingMiddleware(
                 app=None,  # 将在应用创建时设置
-                include_traceback=config.get('include_traceback', False),
-                log_errors=config.get('log_errors', True)
+                include_traceback=config.get("include_traceback", False),
+                log_errors=config.get("log_errors", True),
             )
         elif middleware_name == "circuit_breaker":
             from ..middleware.exception_handler import CircuitBreakerMiddleware
+
             return CircuitBreakerMiddleware(
                 app=None,  # 将在应用创建时设置
-                failure_threshold=config.get('failure_threshold', 5),
-                recovery_timeout=config.get('recovery_timeout', 60)
+                failure_threshold=config.get("failure_threshold", 5),
+                recovery_timeout=config.get("recovery_timeout", 60),
             )
         else:
             raise ValueError(f"Unknown middleware: {middleware_name}")
@@ -236,15 +234,15 @@ class ApplicationFactory:
 
         # 设置FastAPI参数
         app_kwargs = {
-            'title': self.settings.app_name,
-            'version': self.settings.version,
-            'debug': self.settings.debug,
-            **fastapi_kwargs
+            "title": self.settings.app_name,
+            "version": self.settings.version,
+            "debug": self.settings.debug,
+            **fastapi_kwargs,
         }
 
         # 处理API前缀
-        if 'prefix' not in app_kwargs:
-            app_kwargs['prefix'] = self.settings.api_prefix
+        if "prefix" not in app_kwargs:
+            app_kwargs["prefix"] = self.settings.api_prefix
 
         # 创建FastAPI应用
         app = FastAPI(**app_kwargs)
@@ -283,10 +281,8 @@ class ApplicationFactory:
         @app.exception_handler(BaseException)
         async def handle_base_exception(request, exc: BaseException):
             from fastapi.responses import JSONResponse
-            return JSONResponse(
-                status_code=exc.status_code,
-                content=exc.to_dict()
-            )
+
+            return JSONResponse(status_code=exc.status_code, content=exc.to_dict())
 
     def register_crud_router(
         self,
@@ -294,21 +290,17 @@ class ApplicationFactory:
         schema: Type[BaseModel],
         adapter: Optional[ORMAdapter] = None,
         adapter_config: Optional[Dict[str, Any]] = None,
-        **router_kwargs
-    ) -> 'ApplicationFactory':
+        **router_kwargs,
+    ) -> "ApplicationFactory":
         """注册CRUD路由组件"""
         config = {
-            'schema': schema,
-            'adapter': adapter,
-            'adapter_config': adapter_config or {},
-            'router_config': router_kwargs
+            "schema": schema,
+            "adapter": adapter,
+            "adapter_config": adapter_config or {},
+            "router_config": router_kwargs,
         }
 
-        spec = ComponentSpec(
-            component_type=ComponentType.ROUTER,
-            name=name,
-            config=config
-        )
+        spec = ComponentSpec(component_type=ComponentType.ROUTER, name=name, config=config)
 
         self.component_registry.register_component(spec)
         return self
@@ -320,8 +312,8 @@ class ApplicationFactory:
         factory: Optional[Callable] = None,
         singleton: bool = True,
         dependencies: Optional[List[str]] = None,
-        **config
-    ) -> 'ApplicationFactory':
+        **config,
+    ) -> "ApplicationFactory":
         """注册服务组件"""
         spec = ComponentSpec(
             component_type=ComponentType.SERVICE,
@@ -330,23 +322,15 @@ class ApplicationFactory:
             factory=factory,
             config=config,
             dependencies=dependencies or [],
-            singleton=singleton
+            singleton=singleton,
         )
 
         self.component_registry.register_component(spec)
         return self
 
-    def register_middleware(
-        self,
-        name: str,
-        **config
-    ) -> 'ApplicationFactory':
+    def register_middleware(self, name: str, **config) -> "ApplicationFactory":
         """注册中间件组件"""
-        spec = ComponentSpec(
-            component_type=ComponentType.MIDDLEWARE,
-            name=name,
-            config=config
-        )
+        spec = ComponentSpec(component_type=ComponentType.MIDDLEWARE, name=name, config=config)
 
         self.component_registry.register_component(spec)
         return self

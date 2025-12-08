@@ -13,12 +13,13 @@ import asyncio
 
 from .exceptions import BaseException
 
-T = TypeVar('T')
-ID = TypeVar('ID')
+T = TypeVar("T")
+ID = TypeVar("ID")
 
 
 class QueryOperator(Enum):
     """查询操作符"""
+
     EQ = "eq"
     NE = "ne"
     GT = "gt"
@@ -35,6 +36,7 @@ class QueryOperator(Enum):
 
 class SortDirection(Enum):
     """排序方向"""
+
     ASC = "asc"
     DESC = "desc"
 
@@ -42,34 +44,30 @@ class SortDirection(Enum):
 @dataclass
 class QueryFilter:
     """查询过滤器"""
+
     field: str
     operator: QueryOperator
     value: Any
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
-            "field": self.field,
-            "operator": self.operator.value,
-            "value": self.value
-        }
+        return {"field": self.field, "operator": self.operator.value, "value": self.value}
 
 
 @dataclass
 class QuerySort:
     """查询排序"""
+
     field: str
     direction: SortDirection = SortDirection.ASC
 
     def to_dict(self) -> Dict[str, Any]:
-        return {
-            "field": self.field,
-            "direction": self.direction.value
-        }
+        return {"field": self.field, "direction": self.direction.value}
 
 
 @dataclass
 class QueryPagination:
     """查询分页"""
+
     skip: int = 0
     limit: int = 10
 
@@ -93,6 +91,7 @@ class QueryPagination:
 @dataclass
 class QueryOptions:
     """查询选项"""
+
     filters: List[QueryFilter] = None
     sorts: List[QuerySort] = None
     pagination: Optional[QueryPagination] = None
@@ -109,6 +108,7 @@ class QueryOptions:
 @dataclass
 class QueryResult:
     """查询结果"""
+
     items: List[T]
     total: Optional[int] = None
     has_more: bool = False
@@ -160,9 +160,7 @@ class IRepository(ABC, Type[T]):
 
     @abstractmethod
     async def update_many(
-        self,
-        updates: Dict[str, Any],
-        options: Optional[QueryOptions] = None
+        self, updates: Dict[str, Any], options: Optional[QueryOptions] = None
     ) -> int:
         """批量更新实体"""
         pass
@@ -226,12 +224,7 @@ class IEventBus(ABC):
         pass
 
     @abstractmethod
-    async def subscribe(
-        self,
-        event_name: str,
-        handler: callable,
-        **kwargs
-    ) -> str:
+    async def subscribe(self, event_name: str, handler: callable, **kwargs) -> str:
         """订阅事件"""
         pass
 
@@ -293,11 +286,7 @@ class IMapper(ABC):
         pass
 
     @abstractmethod
-    def map_collection(
-        self,
-        sources: List[Any],
-        target_type: Type[T]
-    ) -> List[T]:
+    def map_collection(self, sources: List[Any], target_type: Type[T]) -> List[T]:
         """映射对象集合"""
         pass
 
@@ -311,20 +300,12 @@ class IHook(ABC):
         pass
 
     @abstractmethod
-    async def after_execute(
-        self,
-        context: Dict[str, Any],
-        result: Any
-    ) -> Any:
+    async def after_execute(self, context: Dict[str, Any], result: Any) -> Any:
         """执行后钩子"""
         pass
 
     @abstractmethod
-    async def on_error(
-        self,
-        context: Dict[str, Any],
-        error: Exception
-    ) -> Optional[Exception]:
+    async def on_error(self, context: Dict[str, Any], error: Exception) -> Optional[Exception]:
         """错误处理钩子"""
         pass
 
@@ -333,12 +314,7 @@ class IHookRegistry(ABC):
     """钩子注册表接口"""
 
     @abstractmethod
-    def register_hook(
-        self,
-        event_name: str,
-        hook: IHook,
-        priority: int = 0
-    ) -> None:
+    def register_hook(self, event_name: str, hook: IHook, priority: int = 0) -> None:
         """注册钩子"""
         pass
 
@@ -348,11 +324,7 @@ class IHookRegistry(ABC):
         pass
 
     @abstractmethod
-    async def execute_hooks(
-        self,
-        event_name: str,
-        context: Dict[str, Any]
-    ) -> Any:
+    async def execute_hooks(self, event_name: str, context: Dict[str, Any]) -> Any:
         """执行钩子"""
         pass
 
@@ -361,7 +333,7 @@ class IUnitOfWork(ABC):
     """工作单元接口"""
 
     @abstractmethod
-    async def __aenter__(self) -> 'IUnitOfWork':
+    async def __aenter__(self) -> "IUnitOfWork":
         """进入工作单元"""
         pass
 
@@ -428,11 +400,7 @@ class IMiddleware(ABC):
     """中间件接口"""
 
     @abstractmethod
-    async def process(
-        self,
-        request: Any,
-        next_handler: callable
-    ) -> Any:
+    async def process(self, request: Any, next_handler: callable) -> Any:
         """处理请求"""
         pass
 

@@ -136,7 +136,7 @@ class DependencyChecker:
                 [sys.executable, "-m", "pip", "list", "--format=json"],
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
             packages = json.loads(result.stdout)
             return {pkg["name"].lower(): pkg["version"] for pkg in packages}
@@ -329,9 +329,7 @@ class DependencyChecker:
         # Critical vulnerabilities
         critical_vulns = [v for v in vulnerabilities if v.severity == "critical"]
         if critical_vulns:
-            recommendations.append(
-                "URGENT: Update critical vulnerable packages immediately"
-            )
+            recommendations.append("URGENT: Update critical vulnerable packages immediately")
             for vuln in critical_vulns[:3]:  # Show first 3
                 if vuln.fixed_versions:
                     recommendations.append(
@@ -353,20 +351,20 @@ class DependencyChecker:
 
         # Insecure dependencies
         if insecure_deps:
-            recommendations.append(
-                "Remove or replace insecure dependencies:"
-            )
+            recommendations.append("Remove or replace insecure dependencies:")
             for dep in insecure_deps[:5]:  # Show first 5
                 recommendations.append(f"  - {dep}")
 
         # General recommendations
         if vulnerabilities or missing_packages or insecure_deps:
-            recommendations.extend([
-                "Run 'pip audit' for comprehensive vulnerability scanning",
-                "Set up automated dependency scanning in CI/CD pipeline",
-                "Subscribe to security advisories for your dependencies",
-                "Use virtual environments to isolate dependencies",
-            ])
+            recommendations.extend(
+                [
+                    "Run 'pip audit' for comprehensive vulnerability scanning",
+                    "Set up automated dependency scanning in CI/CD pipeline",
+                    "Subscribe to security advisories for your dependencies",
+                    "Use virtual environments to isolate dependencies",
+                ]
+            )
 
         return recommendations
 
@@ -424,7 +422,7 @@ class DependencyChecker:
                 [sys.executable, "-m", "pip", "list", "--outdated", "--format=json"],
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
             )
             outdated = json.loads(result.stdout)
 
@@ -440,20 +438,18 @@ class DependencyChecker:
 
                 # Create update command
                 update_cmd = f"pip install --upgrade {package_name}=={latest_version}"
-                updates.append({
-                    "package": package_name,
-                    "current": current_version,
-                    "latest": latest_version,
-                    "command": update_cmd,
-                })
+                updates.append(
+                    {
+                        "package": package_name,
+                        "current": current_version,
+                        "latest": latest_version,
+                        "command": update_cmd,
+                    }
+                )
 
                 if not dry_run:
                     try:
-                        subprocess.run(
-                            update_cmd.split(),
-                            capture_output=True,
-                            check=True
-                        )
+                        subprocess.run(update_cmd.split(), capture_output=True, check=True)
                         logger.info(f"Updated {package_name} to {latest_version}")
                     except subprocess.CalledProcessError as e:
                         logger.error(f"Failed to update {package_name}: {e}")
@@ -474,10 +470,7 @@ class DependencyChecker:
         Returns:
             True if vulnerabilities exist
         """
-        return any(
-            vuln.package_name == package_name
-            for vuln in self.vulnerabilities
-        )
+        return any(vuln.package_name == package_name for vuln in self.vulnerabilities)
 
 
 def check_all() -> Dict:

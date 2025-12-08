@@ -13,7 +13,7 @@ import threading
 import sys
 
 # Platform-specific imports
-if os.name == 'posix':
+if os.name == "posix":
     import fcntl
 else:
     fcntl = None

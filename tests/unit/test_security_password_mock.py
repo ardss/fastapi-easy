@@ -4,15 +4,16 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 # Mock bcrypt before importing to avoid import errors
-with patch.dict('sys.modules', {'bcrypt': MagicMock()}):
+with patch.dict("sys.modules", {"bcrypt": MagicMock()}):
     # Mock the bcrypt functions
     mock_bcrypt = MagicMock()
-    mock_bcrypt.gensalt = MagicMock(return_value=b'$2b$12$salt')
-    mock_bcrypt.hashpw = MagicMock(side_effect=lambda pwd, salt: b'$2b$12$hash' + pwd[-10:])
+    mock_bcrypt.gensalt = MagicMock(return_value=b"$2b$12$salt")
+    mock_bcrypt.hashpw = MagicMock(side_effect=lambda pwd, salt: b"$2b$12$hash" + pwd[-10:])
     mock_bcrypt.checkpw = MagicMock(side_effect=lambda pwd, hashed: pwd == hashed[:-10])
 
     import sys
-    sys.modules['bcrypt'] = mock_bcrypt
+
+    sys.modules["bcrypt"] = mock_bcrypt
 
     from fastapi_easy.security import PasswordManager
 
@@ -24,8 +25,8 @@ class TestPasswordManager:
     def password_manager(self):
         """Create password manager instance"""
         # Ensure bcrypt is mocked for each test
-        with patch.dict('sys.modules', {'bcrypt': mock_bcrypt}):
-            with patch('fastapi_easy.security.password.bcrypt', mock_bcrypt):
+        with patch.dict("sys.modules", {"bcrypt": mock_bcrypt}):
+            with patch("fastapi_easy.security.password.bcrypt", mock_bcrypt):
                 return PasswordManager(rounds=10)
 
     def test_hash_password(self, password_manager):
@@ -82,10 +83,7 @@ class TestPasswordManager:
         password2 = "password_two"
 
         # Configure mock to generate different hashes
-        mock_bcrypt.hashpw.side_effect = [
-            b'$2b$12$hash_one',
-            b'$2b$12$hash_two'
-        ]
+        mock_bcrypt.hashpw.side_effect = [b"$2b$12$hash_one", b"$2b$12$hash_two"]
 
         hash1 = password_manager.hash_password(password1)
         hash2 = password_manager.hash_password(password2)
@@ -97,14 +95,8 @@ class TestPasswordManager:
         password = "test_password"
 
         # Configure mock to generate different salts
-        mock_bcrypt.gensalt.side_effect = [
-            b'$2b$12$salt1',
-            b'$2b$12$salt2'
-        ]
-        mock_bcrypt.hashpw.side_effect = [
-            b'$2b$12$hash1',
-            b'$2b$12$hash2'
-        ]
+        mock_bcrypt.gensalt.side_effect = [b"$2b$12$salt1", b"$2b$12$salt2"]
+        mock_bcrypt.hashpw.side_effect = [b"$2b$12$hash1", b"$2b$12$hash2"]
 
         hash1 = password_manager.hash_password(password)
         hash2 = password_manager.hash_password(password)
@@ -116,7 +108,7 @@ class TestPasswordManager:
         """Test needs_rehash with same rounds"""
         password = "test_password"
         # Mock hash with same rounds
-        mock_bcrypt.hashpw.return_value = b'$2b$12$hash'
+        mock_bcrypt.hashpw.return_value = b"$2b$12$hash"
         hashed = password_manager.hash_password(password)
 
         assert not password_manager.needs_rehash(hashed)
@@ -125,7 +117,7 @@ class TestPasswordManager:
         """Test needs_rehash with different rounds"""
         password = "test_password"
         # Mock hash with different rounds
-        mock_bcrypt.hashpw.return_value = b'$2b$10$hash'
+        mock_bcrypt.hashpw.return_value = b"$2b$10$hash"
         hashed = password_manager.hash_password(password)
 
         assert password_manager.needs_rehash(hashed)
@@ -136,12 +128,12 @@ class TestPasswordManager:
 
     def test_custom_rounds(self):
         """Test custom bcrypt rounds"""
-        with patch.dict('sys.modules', {'bcrypt': mock_bcrypt}):
-            with patch('fastapi_easy.security.password.bcrypt', mock_bcrypt):
+        with patch.dict("sys.modules", {"bcrypt": mock_bcrypt}):
+            with patch("fastapi_easy.security.password.bcrypt", mock_bcrypt):
                 manager = PasswordManager(rounds=8)
                 password = "test_password"
                 # Mock hash with custom rounds
-                mock_bcrypt.hashpw.return_value = b'$2b$8$hash'
+                mock_bcrypt.hashpw.return_value = b"$2b$8$hash"
                 hashed = manager.hash_password(password)
 
                 # Configure checkpw to return True
@@ -175,11 +167,13 @@ class TestPasswordManager:
         """Test that long passwords are truncated and warning is logged"""
         password = "x" * 100  # Longer than 72 bytes
 
-        with patch('fastapi_easy.security.password.logger') as mock_logger:
+        with patch("fastapi_easy.security.password.logger") as mock_logger:
             password_manager.hash_password(password)
 
             # Should log warning about truncation
-            mock_logger.warning.assert_called_with("Password exceeds bcrypt 72-byte limit, truncating")
+            mock_logger.warning.assert_called_with(
+                "Password exceeds bcrypt 72-byte limit, truncating"
+            )
 
     def test_verify_password_invalid_hash_format(self, password_manager):
         """Test verify_password handles invalid hash format gracefully"""
@@ -199,9 +193,9 @@ class TestPasswordManager:
 
         # Configure checkpw to raise ValueError and also mock dummy operations
         mock_bcrypt.checkpw.side_effect = ValueError("Invalid hash")
-        mock_bcrypt.hashpw.side_effect = [b'dummy_hash']  # For dummy operation
+        mock_bcrypt.hashpw.side_effect = [b"dummy_hash"]  # For dummy operation
 
-        with patch('fastapi_easy.security.password.logger') as mock_logger:
+        with patch("fastapi_easy.security.password.logger") as mock_logger:
             result = password_manager.verify_password(password, invalid_hash)
 
             assert result is False

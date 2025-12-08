@@ -16,12 +16,7 @@ from starlette.types import ASGIApp
 
 import logging
 
-from ..core.exceptions import (
-    BaseException,
-    exception_registry,
-    ErrorContext,
-    ErrorSeverity
-)
+from ..core.exceptions import BaseException, exception_registry, ErrorContext, ErrorSeverity
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +38,7 @@ class ExceptionHandlingMiddleware(BaseHTTPMiddleware):
         app: ASGIApp,
         include_traceback: bool = False,
         log_errors: bool = True,
-        error_context_builder: Optional[Callable[[Request], ErrorContext]] = None
+        error_context_builder: Optional[Callable[[Request], ErrorContext]] = None,
     ):
         """
         初始化异常处理中间件
@@ -96,11 +91,7 @@ class ExceptionHandlingMiddleware(BaseHTTPMiddleware):
             return error_response
 
     def _build_error_context(
-        self,
-        request: Request,
-        exception: Exception,
-        request_id: str,
-        process_time: float
+        self, request: Request, exception: Exception, request_id: str, process_time: float
     ) -> ErrorContext:
         """构建错误上下文"""
         # 基础上下文
@@ -111,13 +102,13 @@ class ExceptionHandlingMiddleware(BaseHTTPMiddleware):
                 "url": str(request.url),
                 "user_agent": request.headers.get("user-agent"),
                 "process_time": process_time,
-                "timestamp": time.time()
-            }
+                "timestamp": time.time(),
+            },
         )
 
         # 尝试获取用户信息（如果已认证）
-        if hasattr(request.state, 'user') and request.state.user:
-            context.user_id = getattr(request.state.user, 'id', None)
+        if hasattr(request.state, "user") and request.state.user:
+            context.user_id = getattr(request.state.user, "id", None)
 
         # 资源和动作信息
         context.resource = f"{request.method} {request.url.path}"
@@ -166,7 +157,7 @@ class ExceptionHandlingMiddleware(BaseHTTPMiddleware):
                     "code": "HANDLER_ERROR",
                     "message": "An error occurred while handling another error",
                     "category": "internal",
-                    "severity": "critical"
+                    "severity": "critical",
                 }
             }
 
@@ -174,15 +165,11 @@ class ExceptionHandlingMiddleware(BaseHTTPMiddleware):
         if self.include_traceback and isinstance(exception, BaseException):
             if exception.cause:
                 error_data["error"]["traceback"] = traceback.format_exception(
-                    type(exception.cause),
-                    exception.cause,
-                    exception.cause.__traceback__
+                    type(exception.cause), exception.cause, exception.cause.__traceback__
                 )
             else:
                 error_data["error"]["traceback"] = traceback.format_exception(
-                    type(exception),
-                    exception,
-                    exception.__traceback__
+                    type(exception), exception, exception.__traceback__
                 )
 
         # 确定状态码
@@ -192,15 +179,10 @@ class ExceptionHandlingMiddleware(BaseHTTPMiddleware):
         elif isinstance(exception, HTTPException):
             status_code = exception.status_code
 
-        return JSONResponse(
-            status_code=status_code,
-            content=error_data
-        )
+        return JSONResponse(status_code=status_code, content=error_data)
 
     async def _handle_http_exception(
-        self,
-        exception: HTTPException,
-        context: ErrorContext
+        self, exception: HTTPException, context: ErrorContext
     ) -> JSONResponse:
         """处理FastAPI HTTPException"""
         error_data = {
@@ -214,15 +196,13 @@ class ExceptionHandlingMiddleware(BaseHTTPMiddleware):
                     "request_id": context.request_id,
                     "resource": context.resource,
                     "action": context.action,
-                    "metadata": context.metadata
-                }
+                    "metadata": context.metadata,
+                },
             }
         }
 
         return JSONResponse(
-            status_code=exception.status_code,
-            content=error_data,
-            headers=exception.headers
+            status_code=exception.status_code, content=error_data, headers=exception.headers
         )
 
     async def _log_error(self, exception: Exception, context: ErrorContext):
@@ -233,7 +213,7 @@ class ExceptionHandlingMiddleware(BaseHTTPMiddleware):
                 ErrorSeverity.LOW: logging.INFO,
                 ErrorSeverity.MEDIUM: logging.WARNING,
                 ErrorSeverity.HIGH: logging.ERROR,
-                ErrorSeverity.CRITICAL: logging.CRITICAL
+                ErrorSeverity.CRITICAL: logging.CRITICAL,
             }.get(exception.severity, logging.ERROR)
 
             logger.log(
@@ -247,9 +227,9 @@ class ExceptionHandlingMiddleware(BaseHTTPMiddleware):
                     "user_id": context.user_id,
                     "resource": context.resource,
                     "action": context.action,
-                    "details": {**exception.details, **context.metadata}
+                    "details": {**exception.details, **context.metadata},
                 },
-                exc_info=exception if log_level >= logging.ERROR else None
+                exc_info=exception if log_level >= logging.ERROR else None,
             )
         else:
             # 未知异常
@@ -260,9 +240,9 @@ class ExceptionHandlingMiddleware(BaseHTTPMiddleware):
                     "user_id": context.user_id,
                     "resource": context.resource,
                     "action": context.action,
-                    "details": context.metadata
+                    "details": context.metadata,
                 },
-                exc_info=True
+                exc_info=True,
             )
 
 
@@ -278,7 +258,7 @@ class CircuitBreakerMiddleware(BaseHTTPMiddleware):
         app: ASGIApp,
         failure_threshold: int = 5,
         recovery_timeout: int = 60,
-        expected_exception: type = Exception
+        expected_exception: type = Exception,
     ):
         """
         初始化熔断器
@@ -311,9 +291,9 @@ class CircuitBreakerMiddleware(BaseHTTPMiddleware):
                             "code": "SERVICE_UNAVAILABLE",
                             "message": "Service temporarily unavailable",
                             "category": "external",
-                            "severity": "high"
+                            "severity": "high",
                         }
-                    }
+                    },
                 )
 
         try:

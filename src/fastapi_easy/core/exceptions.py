@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class ErrorSeverity(str, Enum):
     """错误严重程度"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -24,6 +25,7 @@ class ErrorSeverity(str, Enum):
 
 class ErrorCategory(str, Enum):
     """错误分类"""
+
     VALIDATION = "validation"
     AUTHENTICATION = "authentication"
     AUTHORIZATION = "authorization"
@@ -37,6 +39,7 @@ class ErrorCategory(str, Enum):
 @dataclass
 class ErrorContext:
     """错误上下文信息"""
+
     user_id: Optional[str] = None
     request_id: Optional[str] = None
     resource: Optional[str] = None
@@ -64,7 +67,7 @@ class BaseException(Exception):
         severity: ErrorSeverity = ErrorSeverity.MEDIUM,
         details: Dict[str, Any] = None,
         context: ErrorContext = None,
-        cause: Exception = None
+        cause: Exception = None,
     ):
         self.message = message
         self.code = code or self.__class__.__name__.upper()
@@ -91,12 +94,12 @@ class BaseException(Exception):
                     "request_id": self.context.request_id,
                     "resource": self.context.resource,
                     "action": self.context.action,
-                    "metadata": self.context.metadata
-                }
+                    "metadata": self.context.metadata,
+                },
             }
         }
 
-    def with_context(self, **kwargs) -> 'BaseException':
+    def with_context(self, **kwargs) -> "BaseException":
         """添加上下文信息"""
         for key, value in kwargs.items():
             if hasattr(self.context, key):
@@ -109,18 +112,12 @@ class BaseException(Exception):
 class ValidationError(BaseException):
     """验证错误"""
 
-    def __init__(
-        self,
-        message: str,
-        field: str = None,
-        value: Any = None,
-        **kwargs
-    ):
-        details = kwargs.pop('details', {})
+    def __init__(self, message: str, field: str = None, value: Any = None, **kwargs):
+        details = kwargs.pop("details", {})
         if field:
-            details['field'] = field
+            details["field"] = field
         if value is not None:
-            details['value'] = str(value)
+            details["value"] = str(value)
 
         super().__init__(
             message=message,
@@ -129,7 +126,7 @@ class ValidationError(BaseException):
             category=ErrorCategory.VALIDATION,
             severity=ErrorSeverity.LOW,
             details=details,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -143,7 +140,7 @@ class AuthenticationError(BaseException):
             status_code=401,
             category=ErrorCategory.AUTHENTICATION,
             severity=ErrorSeverity.MEDIUM,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -157,7 +154,7 @@ class AuthorizationError(BaseException):
             status_code=403,
             category=ErrorCategory.AUTHORIZATION,
             severity=ErrorSeverity.MEDIUM,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -169,11 +166,10 @@ class NotFoundError(BaseException):
         if identifier:
             message = f"{resource} with identifier '{identifier}' not found"
 
-        details = kwargs.pop('details', {})
-        details.update({
-            'resource_type': resource,
-            'identifier': str(identifier) if identifier else None
-        })
+        details = kwargs.pop("details", {})
+        details.update(
+            {"resource_type": resource, "identifier": str(identifier) if identifier else None}
+        )
 
         super().__init__(
             message=message,
@@ -182,7 +178,7 @@ class NotFoundError(BaseException):
             category=ErrorCategory.NOT_FOUND,
             severity=ErrorSeverity.LOW,
             details=details,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -196,7 +192,7 @@ class ConflictError(BaseException):
             status_code=409,
             category=ErrorCategory.CONFLICT,
             severity=ErrorSeverity.MEDIUM,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -204,9 +200,9 @@ class BusinessRuleError(BaseException):
     """业务规则错误"""
 
     def __init__(self, message: str, rule: str = None, **kwargs):
-        details = kwargs.pop('details', {})
+        details = kwargs.pop("details", {})
         if rule:
-            details['rule'] = rule
+            details["rule"] = rule
 
         super().__init__(
             message=message,
@@ -215,7 +211,7 @@ class BusinessRuleError(BaseException):
             category=ErrorCategory.BUSINESS,
             severity=ErrorSeverity.MEDIUM,
             details=details,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -223,8 +219,8 @@ class ExternalServiceError(BaseException):
     """外部服务错误"""
 
     def __init__(self, service: str, message: str, **kwargs):
-        details = kwargs.pop('details', {})
-        details['service'] = service
+        details = kwargs.pop("details", {})
+        details["service"] = service
 
         super().__init__(
             message=f"External service '{service}' error: {message}",
@@ -233,7 +229,7 @@ class ExternalServiceError(BaseException):
             category=ErrorCategory.EXTERNAL,
             severity=ErrorSeverity.HIGH,
             details=details,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -247,7 +243,7 @@ class InternalError(BaseException):
             status_code=500,
             category=ErrorCategory.INTERNAL,
             severity=ErrorSeverity.CRITICAL,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -294,10 +290,7 @@ class ExceptionHandlerRegistry:
         # 未知异常
         return InternalError(
             message="An unexpected error occurred",
-            details={
-                "original_error": str(exception),
-                "type": type(exception).__name__
-            }
+            details={"original_error": str(exception), "type": type(exception).__name__},
         ).to_dict()
 
 
@@ -318,22 +311,16 @@ def register_default_handlers():
                 "error_category": exc.category.value,
                 "error_severity": exc.severity.value,
                 "details": exc.details,
-                "context": exc.context.__dict__
+                "context": exc.context.__dict__,
             },
-            exc_info=exc
+            exc_info=exc,
         )
         return exc.to_dict()
 
     def handle_general_exception(exc: Exception) -> Dict[str, Any]:
         """处理通用异常"""
-        logger.error(
-            f"Unhandled exception: {type(exc).__name__} - {str(exc)}",
-            exc_info=True
-        )
-        return InternalError(
-            message="An unexpected error occurred",
-            cause=exc
-        ).to_dict()
+        logger.error(f"Unhandled exception: {type(exc).__name__} - {str(exc)}", exc_info=True)
+        return InternalError(message="An unexpected error occurred", cause=exc).to_dict()
 
     exception_registry.register(BaseException, handle_base_exception)
     exception_registry.register(Exception, handle_general_exception)
