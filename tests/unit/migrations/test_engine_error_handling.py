@@ -54,10 +54,32 @@ class TestMigrationEngineErrorHandling:
     @pytest.mark.asyncio
     async def test_migration_execution_error(self, migration_engine):
         """测试迁移执行错误"""
-        with patch.object(migration_engine, "executor") as mock_executor:
-            async def mock_execute_error(*args, **kwargs):
+        with patch.object(migration_engine, "executor") as mock_executor, \
+             patch.object(migration_engine, "detector") as mock_detector, \
+             patch.object(migration_engine, "generator") as mock_generator:
+
+            # Mock detector to return some changes
+            from fastapi_easy.migrations.types import Migration, RiskLevel
+            mock_migration = Migration(
+                version="1.0.0",
+                description="Test migration",
+                upgrade_sql="CREATE TABLE test (id INTEGER);",
+                downgrade_sql="DROP TABLE test;",
+                risk_level=RiskLevel.SAFE
+            )
+            async def mock_detect_changes():
+                return [mock_migration]
+            mock_detector.detect_changes = mock_detect_changes
+
+            # Mock generator to return a plan
+            from fastapi_easy.migrations.types import MigrationPlan
+            mock_plan = MigrationPlan(migrations=[mock_migration], status="pending")
+            mock_generator.generate_plan.return_value = mock_plan
+
+            # Mock executor to raise an exception
+            async def mock_execute_plan_error(*args, **kwargs):
                 raise Exception("SQL execution failed")
-            mock_executor.execute = mock_execute_error
+            mock_executor.execute_plan = mock_execute_plan_error
 
             with pytest.raises(Exception) as exc_info:
                 await migration_engine.auto_migrate()
