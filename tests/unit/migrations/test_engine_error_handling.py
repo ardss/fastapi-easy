@@ -10,6 +10,7 @@ import pytest
 from sqlalchemy import MetaData, create_engine
 
 from fastapi_easy.migrations.engine import MigrationEngine
+from fastapi_easy.migrations.types import Migration, RiskLevel
 
 
 @pytest.fixture
@@ -54,7 +55,9 @@ class TestMigrationEngineErrorHandling:
     async def test_migration_execution_error(self, migration_engine):
         """测试迁移执行错误"""
         with patch.object(migration_engine, "executor") as mock_executor:
-            mock_executor.execute.side_effect = Exception("SQL execution failed")
+            async def mock_execute_error(*args, **kwargs):
+                raise Exception("SQL execution failed")
+            mock_executor.execute = mock_execute_error
 
             with pytest.raises(Exception) as exc_info:
                 await migration_engine.auto_migrate()
@@ -132,15 +135,34 @@ class TestMigrationEngineExceptionRecovery:
              patch.object(migration_engine, "detector") as mock_detector:
 
             # Mock two migrations
-            from fastapi_easy.migrations.types import Migration
             migrations = [
-                Migration(id="1", description="First migration", operations=[]),
-                Migration(id="2", description="Second migration", operations=[])
+                Migration(
+                    version="1",
+                    description="First migration",
+                    risk_level=RiskLevel.SAFE,
+                    upgrade_sql="CREATE TABLE test1 (id INTEGER);",
+                    downgrade_sql="DROP TABLE test1;"
+                ),
+                Migration(
+                    version="2",
+                    description="Second migration",
+                    risk_level=RiskLevel.SAFE,
+                    upgrade_sql="CREATE TABLE test2 (id INTEGER);",
+                    downgrade_sql="DROP TABLE test2;"
+                )
             ]
             mock_detector.detect_changes.return_value = migrations
 
             # First execution succeeds, second fails
-            mock_executor.execute.side_effect = [None, Exception("Second migration failed")]
+            async def mock_execute_side_effect(*args, **kwargs):
+                if mock_execute_side_effect.call_count == 1:
+                    mock_execute_side_effect.call_count += 1
+                    return None
+                else:
+                    raise Exception("Second migration failed")
+
+            mock_execute_side_effect.call_count = 1
+            mock_executor.execute = mock_execute_side_effect
 
             with pytest.raises(Exception, match="Second migration failed"):
                 await migration_engine.auto_migrate()
@@ -155,13 +177,20 @@ class TestMigrationEngineExceptionRecovery:
              patch.object(migration_engine, "detector") as mock_detector:
 
             # Mock migrations
-            from fastapi_easy.migrations.types import Migration
             migrations = [
-                Migration(id="1", description="Test migration", operations=[])
+                Migration(
+                    version="1",
+                    description="Test migration",
+                    risk_level=RiskLevel.SAFE,
+                    upgrade_sql="CREATE TABLE test (id INTEGER);",
+                    downgrade_sql="DROP TABLE test;"
+                )
             ]
             mock_detector.detect_changes.return_value = migrations
 
-            mock_executor.execute.side_effect = Exception("Execution failed")
+            async def mock_execute_error(*args, **kwargs):
+                raise Exception("Execution failed")
+            mock_executor.execute = mock_execute_error
 
             with pytest.raises(Exception, match="Execution failed"):
                 await migration_engine.auto_migrate()
@@ -192,7 +221,9 @@ class TestMigrationEngineErrorMessages:
     async def test_error_message_includes_debug_steps(self, migration_engine):
         """测试错误消息包含调试步骤"""
         with patch.object(migration_engine, "executor") as mock_executor:
-            mock_executor.execute.side_effect = Exception("SQL syntax error")
+            async def mock_execute_syntax_error(*args, **kwargs):
+                raise Exception("SQL syntax error")
+            mock_executor.execute = mock_execute_syntax_error
 
             with pytest.raises(Exception) as exc_info:
                 await migration_engine.auto_migrate()
@@ -213,13 +244,20 @@ class TestMigrationEngineErrorContext:
              patch.object(migration_engine, "detector") as mock_detector:
 
             # Mock migration with specific ID
-            from fastapi_easy.migrations.types import Migration
             migrations = [
-                Migration(id="20240101_001", description="Test migration", operations=[])
+                Migration(
+                    version="20240101_001",
+                    description="Test migration",
+                    risk_level=RiskLevel.SAFE,
+                    upgrade_sql="CREATE TABLE test (id INTEGER);",
+                    downgrade_sql="DROP TABLE test;"
+                )
             ]
             mock_detector.detect_changes.return_value = migrations
 
-            mock_executor.execute.side_effect = Exception("Execution failed")
+            async def mock_execute_error(*args, **kwargs):
+                raise Exception("Execution failed")
+            mock_executor.execute = mock_execute_error
 
             with pytest.raises(Exception, match="Execution failed") as exc_info:
                 await migration_engine.auto_migrate()
@@ -252,7 +290,9 @@ class TestMigrationEngineErrorContext:
              patch.object(migration_engine, "detector") as mock_detector:
 
             mock_detector.detect_changes.return_value = []
-            mock_executor.execute.side_effect = Exception("Execution failed")
+            async def mock_execute_error(*args, **kwargs):
+                raise Exception("Execution failed")
+            mock_executor.execute = mock_execute_error
 
             with patch("fastapi_easy.migrations.engine.logger") as mock_logger:
                 start_time = time.time()
@@ -413,7 +453,9 @@ class TestMigrationEngineErrorRecoveryCleanup:
              patch.object(migration_engine.lock, 'release') as mock_release:
 
             mock_detector.detect_changes.return_value = []
-            mock_executor.execute.side_effect = Exception("Execution failed")
+            async def mock_execute_error(*args, **kwargs):
+                raise Exception("Execution failed")
+            mock_executor.execute = mock_execute_error
             mock_release.return_value = True
 
             with pytest.raises(Exception, match="Execution failed"):
