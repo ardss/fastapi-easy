@@ -1,6 +1,7 @@
 """End-to-end test for CRUDRouter route generation"""
 
 import pytest
+from typing import Optional
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
@@ -33,7 +34,7 @@ class ItemSchema(BaseModel):
     id: int
     name: str
     price: float
-    description: str | None = None
+    description: Optional[str] = None
 
     class Config:
         from_attributes = True

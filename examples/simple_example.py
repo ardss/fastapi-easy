@@ -5,6 +5,7 @@ This example shows how to use the fixed CRUDRouter to automatically
 generate CRUD API endpoints.
 """
 
+from typing import Optional
 from fastapi import FastAPI
 from pydantic import BaseModel
 from sqlalchemy import Column, Integer, String, Float
@@ -36,7 +37,7 @@ class ProductSchema(BaseModel):
     id: int
     name: str
     price: float
-    description: str | None = None
+    description: Optional[str] = None
     stock: int = 0
     
     class Config:
