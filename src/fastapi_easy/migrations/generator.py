@@ -59,10 +59,10 @@ class MigrationGenerator:
         Returns:
             随机字符串
         """
-        import random
+        import secrets
         import string
 
-        return "".join(random.choices(string.ascii_lowercase, k=length))
+        return "".join(secrets.choice(string.ascii_lowercase) for _ in range(length))
 
     def _generate_upgrade_sql(self, change: SchemaChange) -> str:
         if change.type == "create_table":

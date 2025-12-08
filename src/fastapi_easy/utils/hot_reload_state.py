@@ -2,7 +2,6 @@
 
 import os
 import json
-import pickle
 import hashlib
 import logging
 from typing import Any, Dict, Optional, Union, Callable
@@ -82,28 +81,28 @@ class StateManager:
         """Get the file path for a state key"""
         # Hash the key to avoid filesystem issues
         safe_key = hashlib.md5(key.encode()).hexdigest()
-        ext = "pkl" if self.use_pickle else "json"
+        ext = "json"  # Always use secure JSON serialization
         return self.state_dir / f"{safe_key}.{ext}"
 
-    def _serialize(self, data: Any) -> Union[str, bytes]:
-        """Serialize data for storage"""
-        if self.use_pickle:
-            return pickle.dumps(data)
-        else:
-            # JSON serialization with datetime handling
-            def json_serializer(obj):
-                if isinstance(obj, datetime):
-                    return obj.isoformat()
-                raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+    def _serialize(self, data: Any) -> str:
+        """Serialize data for storage using secure JSON"""
 
-            return json.dumps(data, default=json_serializer)
+        # JSON serialization with comprehensive type handling
+        def json_serializer(obj):
+            if isinstance(obj, datetime):
+                return obj.isoformat()
+            elif isinstance(obj, (set, frozenset)):
+                return list(obj)
+            elif hasattr(obj, "__dict__"):
+                # For objects with attributes, try to serialize as dict
+                return obj.__dict__
+            raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
-    def _deserialize(self, data: Union[str, bytes]) -> Any:
-        """Deserialize data from storage"""
-        if self.use_pickle:
-            return pickle.loads(data)
-        else:
-            return json.loads(data)
+        return json.dumps(data, default=json_serializer)
+
+    def _deserialize(self, data: str) -> Any:
+        """Deserialize data from storage using secure JSON"""
+        return json.loads(data)
 
     def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
         """

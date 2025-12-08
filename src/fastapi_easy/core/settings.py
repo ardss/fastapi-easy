@@ -317,8 +317,8 @@ class SecurityConfig(BaseSettings):
 
     secret_key: str = ConfigField(
         type=str,
-        default="your-secret-key-change-in-production",
-        description="JWT secret key",
+        default=None,  # Force user to set secure secret key
+        description="JWT secret key - MUST be set in production",
         env_var="FASTAPI_EASY_SECRET_KEY",
         required=True,
     )

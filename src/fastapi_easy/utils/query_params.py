@@ -1,8 +1,52 @@
 """Utility for handling Pydantic models as query parameters in GET requests."""
 
-from typing import Any, Type, get_type_hints, Callable
+import json
+from typing import Any, Type, get_type_hints, Callable, get_origin, get_args
 from fastapi import Query, Depends
 from pydantic import BaseModel, ValidationError
+
+
+def _parse_complex_type(value: Any, field_type: Type) -> Any:
+    """
+    Parse complex types (list, dict) from JSON strings when needed.
+
+    Args:
+        value: The raw value from query parameters
+        field_type: The expected field type from the model
+
+    Returns:
+        Parsed value or original value if no parsing needed
+    """
+    # If value is not a string, return as-is
+    if not isinstance(value, str):
+        return value
+
+    # Check if this is a complex type that needs JSON parsing
+    origin = get_origin(field_type)
+
+    if origin is list or field_type is list:
+        try:
+            return json.loads(value)
+        except (json.JSONDecodeError, ValueError):
+            # If JSON parsing fails, return original string
+            # Pydantic will handle the validation error
+            return value
+    elif origin is dict or field_type is dict:
+        try:
+            return json.loads(value)
+        except (json.JSONDecodeError, ValueError):
+            # If JSON parsing fails, return original string
+            # Pydantic will handle the validation error
+            return value
+    # Handle other complex types like typing.List[str]
+    elif origin is not None and origin in (list, dict):
+        try:
+            return json.loads(value)
+        except (json.JSONDecodeError, ValueError):
+            return value
+
+    # For simple types, return as-is
+    return value
 
 
 def QueryParams(schema: Type[BaseModel]) -> Callable:
@@ -29,8 +73,22 @@ def QueryParams(schema: Type[BaseModel]) -> Callable:
         try:
             return schema(**query_params)
         except ValidationError as e:
-            # FastAPI will automatically handle the validation error
-            raise e
+            # Try to parse complex types if validation fails
+            try:
+                type_hints = get_type_hints(schema)
+                parsed_params = {}
+
+                for field_name, value in query_params.items():
+                    if field_name in type_hints:
+                        field_type = type_hints[field_name]
+                        parsed_params[field_name] = _parse_complex_type(value, field_type)
+                    else:
+                        parsed_params[field_name] = value
+
+                return schema(**parsed_params)
+            except ValidationError:
+                # If still fails, raise the original error
+                raise e
 
     # Get field information from the Pydantic model
     model_fields = schema.model_fields
@@ -85,7 +143,18 @@ def as_query_params(schema: Type[BaseModel]) -> Callable:
 
     def query_dependency(**kwargs: Any) -> BaseModel:
         """Convert query parameters to Pydantic model"""
-        return schema(**kwargs)
+        # Parse complex types from JSON strings before validation
+        type_hints = get_type_hints(schema)
+        parsed_params = {}
+
+        for field_name, value in kwargs.items():
+            if field_name in type_hints:
+                field_type = type_hints[field_name]
+                parsed_params[field_name] = _parse_complex_type(value, field_type)
+            else:
+                parsed_params[field_name] = value
+
+        return schema(**parsed_params)
 
     # Get field information from the Pydantic model
     model_fields = schema.model_fields
