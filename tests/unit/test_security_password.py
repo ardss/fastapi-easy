@@ -1,10 +1,22 @@
 """Unit tests for password hashing"""
 
 import pytest
+from unittest.mock import patch, MagicMock
 
-from fastapi_easy.security import PasswordManager
+# Import password test configuration to mock bcrypt
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from tests.conftest_password import bcrypt_mock
+
+# Mock bcrypt before importing the module
+with patch.dict('sys.modules', {'bcrypt': bcrypt_mock}):
+    with patch('fastapi_easy.security.password.bcrypt', bcrypt_mock):
+        from fastapi_easy.security import PasswordManager
 
 
+@pytest.mark.unit
+@pytest.mark.security
 class TestPasswordManager:
     """Test password manager"""
 

@@ -142,6 +142,18 @@ filterwarnings = [
     "ignore::PendingDeprecationWarning",
     "ignore::FutureWarning",
 ]
+markers = [
+    "unit: mark test as unit test (fast, isolated)",
+    "integration: mark test as integration test (requires external resources)",
+    "e2e: mark test as end-to-end test (slow, full flow)",
+    "performance: mark test as performance test (benchmark, load testing)",
+    "slow: mark test as slow to run (deselect with '-m \"not slow\"')",
+    "requires_db: mark test as requiring database connection",
+    "requires_redis: mark test as requiring Redis connection",
+    "requires_auth: mark test as requiring authentication setup",
+    "security: mark test as security-related test",
+    "migration: mark test as migration-related test",
+]
 
 [tool.coverage.run]
 source = ["src/fastapi_easy"]
