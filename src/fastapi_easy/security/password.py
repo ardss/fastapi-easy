@@ -39,10 +39,17 @@ class PasswordManager:
             logger.warning("Attempt to hash empty password")
             raise ValueError("Password cannot be empty")
 
+        # bcrypt has a 72 byte limit - truncate if necessary
+        password_bytes = password.encode("utf-8")
+        if len(password_bytes) > 72:
+            logger.warning("Password exceeds bcrypt 72-byte limit, truncating")
+            password_bytes = password_bytes[:72]
+            password = password_bytes.decode("utf-8", errors="ignore")
+
         try:
             # Generate salt and hash password
             salt = bcrypt.gensalt(rounds=self.rounds)
-            hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+            hashed = bcrypt.hashpw(password_bytes, salt)
             logger.debug("Password hashed successfully")
             return hashed.decode("utf-8")
         except (ValueError, TypeError) as e:
@@ -69,10 +76,15 @@ class PasswordManager:
             logger.warning("Attempt to verify with empty password or hash")
             raise ValueError("Password and hash cannot be empty")
 
+        # bcrypt has a 72 byte limit - truncate if necessary
+        password_bytes = password.encode("utf-8")
+        if len(password_bytes) > 72:
+            password_bytes = password_bytes[:72]
+
         try:
             # bcrypt.checkpw uses constant time comparison
             result = bcrypt.checkpw(
-                password.encode("utf-8"),
+                password_bytes,
                 hashed_password.encode("utf-8"),
             )
             if result:

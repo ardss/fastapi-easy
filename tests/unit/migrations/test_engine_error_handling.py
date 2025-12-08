@@ -35,10 +35,9 @@ class TestMigrationEngineErrorHandling:
         with patch.object(migration_engine, "detector") as mock_detector:
             mock_detector.detect_changes.side_effect = Exception("Connection failed")
             # 应该捕获异常
-            try:
+            with pytest.raises(Exception) as exc_info:
                 await migration_engine.auto_migrate()
-            except Exception as _:
-                assert str(e) != ""
+            assert str(exc_info.value) == "Connection failed"
 
     @pytest.mark.asyncio
     async def test_schema_detection_timeout(self, migration_engine):
@@ -57,11 +56,10 @@ class TestMigrationEngineErrorHandling:
         with patch.object(migration_engine, "executor") as mock_executor:
             mock_executor.execute.side_effect = Exception("SQL execution failed")
 
-            try:
+            with pytest.raises(Exception) as exc_info:
                 await migration_engine.auto_migrate()
-            except Exception as _:
-                # 应该有错误信息
-                assert str(e) != ""
+            # 应该有错误信息
+            assert str(exc_info.value) == "SQL execution failed"
 
     @pytest.mark.asyncio
     async def test_lock_acquisition_error(self, migration_engine):
@@ -124,12 +122,11 @@ class TestMigrationEngineErrorMessages:
         with patch.object(migration_engine, "detector") as mock_detector:
             mock_detector.detect_changes.side_effect = Exception("Detection failed")
 
-            try:
+            with pytest.raises(Exception) as exc_info:
                 await migration_engine.auto_migrate()
-            except Exception as _:
-                error_msg = str(e)
-                # 错误消息应该包含有用的信息
-                assert len(error_msg) > 0
+            error_msg = str(exc_info.value)
+            # 错误消息应该包含有用的信息
+            assert len(error_msg) > 0
 
     @pytest.mark.asyncio
     async def test_error_message_includes_debug_steps(self, migration_engine):
@@ -137,12 +134,11 @@ class TestMigrationEngineErrorMessages:
         with patch.object(migration_engine, "executor") as mock_executor:
             mock_executor.execute.side_effect = Exception("SQL syntax error")
 
-            try:
+            with pytest.raises(Exception) as exc_info:
                 await migration_engine.auto_migrate()
-            except Exception as _:
-                error_msg = str(e)
-                # 应该有调试信息
-                assert len(error_msg) > 0
+            error_msg = str(exc_info.value)
+            # 应该有调试信息
+            assert len(error_msg) > 0
 
 
 class TestMigrationEngineErrorContext:
@@ -257,16 +253,15 @@ class TestMigrationEngineErrorPropagation:
             def raise_chained_error():
                 try:
                     raise Exception("Original error")
-                except Exception as _:
-                    raise Exception("Wrapped error") from e
+                except Exception as orig_e:
+                    raise Exception("Wrapped error") from orig_e
 
             mock_executor.execute.side_effect = raise_chained_error
 
-            try:
+            with pytest.raises(Exception) as exc_info:
                 await migration_engine.auto_migrate()
-            except Exception as _:
-                # 应该保留错误链信息
-                assert str(e) != ""
+            # 应该保留错误链信息
+            assert str(exc_info.value) != ""
 
 
 class TestMigrationEngineErrorRecoveryCleanup:

@@ -7,6 +7,7 @@ from .base import (
     MonitoringMiddleware,
     MiddlewareChain,
 )
+from .csrf import CSRFMiddleware
 
 __all__ = [
     "BaseMiddleware",
@@ -14,4 +15,5 @@ __all__ = [
     "LoggingMiddleware",
     "MonitoringMiddleware",
     "MiddlewareChain",
+    "CSRFMiddleware",
 ]
