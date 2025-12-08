@@ -2,6 +2,7 @@
 
 import logging
 import os
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
 
@@ -22,7 +23,7 @@ from .models import TokenPayload
 
 
 class JWTAuth:
-    """JWT authentication handler"""
+    """JWT authentication handler with enhanced security"""
 
     def __init__(
         self,
@@ -30,6 +31,9 @@ class JWTAuth:
         algorithm: str = "HS256",
         access_token_expire_minutes: int = 15,
         refresh_token_expire_days: int = 7,
+        issuer: Optional[str] = None,
+        audience: Optional[str] = None,
+        require_jti: bool = True,
     ):
         """Initialize JWT auth
 
