@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ConnectionConfig:
     """Configuration for connection management"""
+
     max_connections: int = 100
     connection_timeout: float = 30.0
     idle_timeout: float = 300.0  # 5 minutes
@@ -27,6 +28,7 @@ class ConnectionConfig:
 @dataclass
 class ConnectionInfo:
     """Information about a managed connection"""
+
     connection: Any
     created_at: float = field(default_factory=time.time)
     last_used: float = field(default_factory=time.time)
@@ -97,7 +99,7 @@ class ConnectionManager:
             connection = await self._create_connection_with_retry()
             self._connections[connection_id] = ConnectionInfo(
                 connection=connection,
-                task_id=asyncio.current_task().get_name() if asyncio.current_task() else None
+                task_id=asyncio.current_task().get_name() if asyncio.current_task() else None,
             )
 
             logger.debug(f"Created new connection {connection_id}")
@@ -108,24 +110,27 @@ class ConnectionManager:
         for attempt in range(self.config.retry_attempts):
             try:
                 conn = await asyncio.wait_for(
-                    self._connection_factory(),
-                    timeout=self.config.connection_timeout
+                    self._connection_factory(), timeout=self.config.connection_timeout
                 )
                 return conn
             except Exception as e:
                 if attempt == self.config.retry_attempts - 1:
-                    logger.error(f"Failed to create connection after {self.config.retry_attempts} attempts: {e}")
+                    logger.error(
+                        f"Failed to create connection after {self.config.retry_attempts} attempts: {e}"
+                    )
                     raise
-                logger.warning(f"Connection attempt {attempt + 1} failed, retrying in {self.config.retry_delay}s: {e}")
+                logger.warning(
+                    f"Connection attempt {attempt + 1} failed, retrying in {self.config.retry_delay}s: {e}"
+                )
                 await asyncio.sleep(self.config.retry_delay)
 
     def _is_connection_healthy(self, connection: Any) -> bool:
         """Check if connection is healthy"""
         try:
             # This is a basic health check - customize based on your database/library
-            if hasattr(connection, 'closed') and connection.closed:
+            if hasattr(connection, "closed") and connection.closed:
                 return False
-            if hasattr(connection, 'is_connected') and not connection.is_connected():
+            if hasattr(connection, "is_connected") and not connection.is_connected():
                 return False
             return True
         except Exception as e:
@@ -152,12 +157,12 @@ class ConnectionManager:
 
         conn_info = self._connections.pop(connection_id)
         try:
-            if hasattr(conn_info.connection, 'close'):
+            if hasattr(conn_info.connection, "close"):
                 if asyncio.iscoroutinefunction(conn_info.connection.close):
                     await conn_info.connection.close()
                 else:
                     conn_info.connection.close()
-            elif hasattr(conn_info.connection, 'disconnect'):
+            elif hasattr(conn_info.connection, "disconnect"):
                 if asyncio.iscoroutinefunction(conn_info.connection.disconnect):
                     await conn_info.connection.disconnect()
                 else:
@@ -227,8 +232,12 @@ class ConnectionManager:
                 "total_connections": len(self._connections),
                 "active_connections": sum(1 for c in self._connections.values() if c.is_active),
                 "total_usage": sum(c.usage_count for c in self._connections.values()),
-                "oldest_connection": min((c.created_at for c in self._connections.values()), default=0),
-                "newest_connection": max((c.created_at for c in self._connections.values()), default=0),
+                "oldest_connection": min(
+                    (c.created_at for c in self._connections.values()), default=0
+                ),
+                "newest_connection": max(
+                    (c.created_at for c in self._connections.values()), default=0
+                ),
             }
         return stats
 
@@ -260,8 +269,7 @@ def get_connection_manager(config: Optional[ConnectionConfig] = None) -> Connect
 
 @asynccontextmanager
 async def managed_connection(
-    connection_id: Optional[str] = None,
-    manager: Optional[ConnectionManager] = None
+    connection_id: Optional[str] = None, manager: Optional[ConnectionManager] = None
 ) -> AsyncGenerator[Any, None]:
     """
     Context manager for managing connections with automatic cleanup
@@ -280,7 +288,7 @@ async def managed_connection(
     finally:
         if connection_id and manager:
             await manager.release_connection(connection_id)
-        elif conn and hasattr(conn, 'close'):
+        elif conn and hasattr(conn, "close"):
             # Fallback cleanup
             try:
                 if asyncio.iscoroutinefunction(conn.close):
@@ -292,8 +300,7 @@ async def managed_connection(
 
 
 def with_connection_manager(
-    connection_factory: Callable[[], Awaitable[Any]],
-    config: Optional[ConnectionConfig] = None
+    connection_factory: Callable[[], Awaitable[Any]], config: Optional[ConnectionConfig] = None
 ):
     """
     Decorator to add connection management to FastAPI dependencies
@@ -304,6 +311,7 @@ def with_connection_manager(
             # Connection automatically managed
             pass
     """
+
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
@@ -320,14 +328,17 @@ def with_connection_manager(
                 pass  # Let the background task handle cleanup
 
         return wrapper
+
     return decorator
 
 
 # Example usage
 if __name__ == "__main__":
+
     async def example_connection_factory():
         """Example connection factory"""
         import asyncpg
+
         return await asyncpg.connect("postgresql://user:pass@localhost/db")
 
     async def main():

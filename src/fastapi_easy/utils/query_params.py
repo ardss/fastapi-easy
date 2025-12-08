@@ -18,6 +18,7 @@ def QueryParams(schema: Type[BaseModel]):
         async def get_users(params: UserQuery):
             return params
     """
+
     def dependency(**query_params: Any) -> schema:
         """Convert query parameters to Pydantic model"""
         try:
@@ -36,27 +37,24 @@ def QueryParams(schema: Type[BaseModel]):
         field_type = type_hints.get(field_name, Any)
 
         # Extract description from field if available
-        description = field_info.description if hasattr(field_info, 'description') else f"Query parameter: {field_name}"
+        description = (
+            field_info.description
+            if hasattr(field_info, "description")
+            else f"Query parameter: {field_name}"
+        )
 
         # Handle default value
         if field_info.default is not None and field_info.default != ...:
             # Field has a default value
-            defaults[field_name] = Query(
-                default=field_info.default,
-                description=description
-            )
+            defaults[field_name] = Query(default=field_info.default, description=description)
         elif field_info.default_factory is not None:
             # Field has a default factory
             defaults[field_name] = Query(
-                default_factory=field_info.default_factory,
-                description=description
+                default_factory=field_info.default_factory, description=description
             )
         else:
             # Required field
-            defaults[field_name] = Query(
-                ...,
-                description=description
-            )
+            defaults[field_name] = Query(..., description=description)
 
     # Update dependency function signature with proper defaults
     dependency.__defaults__ = tuple(defaults.values())
@@ -75,6 +73,7 @@ def as_query_params(schema: Type[BaseModel]):
         async def get_users(params: UserQuery = Depends(as_query_params(UserQuery))):
             return {"name": params.name, "age": params.age}
     """
+
     def query_dependency(**kwargs: Any) -> schema:
         """Convert query parameters to Pydantic model"""
         return schema(**kwargs)
@@ -86,7 +85,11 @@ def as_query_params(schema: Type[BaseModel]):
     # Add Query dependencies for each field
     for field_name, field_info in model_fields.items():
         field_type = type_hints.get(field_name, Any)
-        description = field_info.description if hasattr(field_info, 'description') else f"Query parameter: {field_name}"
+        description = (
+            field_info.description
+            if hasattr(field_info, "description")
+            else f"Query parameter: {field_name}"
+        )
 
         if field_info.default is not None and field_info.default != ...:
             query_dependency.__annotations__[field_name] = field_type
@@ -94,16 +97,12 @@ def as_query_params(schema: Type[BaseModel]):
             setattr(
                 query_dependency,
                 field_name,
-                Query(default=field_info.default, description=description)
+                Query(default=field_info.default, description=description),
             )
         else:
             query_dependency.__annotations__[field_name] = field_type
             # Set required value using Query
-            setattr(
-                query_dependency,
-                field_name,
-                Query(..., description=description)
-            )
+            setattr(query_dependency, field_name, Query(..., description=description))
 
     query_dependency.__annotations__["return"] = schema
 
@@ -123,19 +122,15 @@ if __name__ == "__main__":
         city: str = "New York"
 
         model_config = {
-            "json_schema_extra": {
-                "example": {
-                    "name": "John",
-                    "age": 30,
-                    "city": "New York"
-                }
-            }
+            "json_schema_extra": {"example": {"name": "John", "age": 30, "city": "New York"}}
         }
 
     @app.get("/users/")
     async def get_users(params: UserQuery = Depends(as_query_params(UserQuery))):
         """Get users with query parameters - correctly shows as query params in OpenAPI"""
-        return {"message": f"Searching for users: {params.name}, Age: {params.age}, City: {params.city}"}
+        return {
+            "message": f"Searching for users: {params.name}, Age: {params.age}, City: {params.city}"
+        }
 
     # This will correctly show query parameters in OpenAPI instead of request body
     if __name__ == "__main__":

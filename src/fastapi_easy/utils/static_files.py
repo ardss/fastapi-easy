@@ -45,19 +45,19 @@ class EnhancedStaticFiles(StaticFiles):
     def _init_mime_types(self):
         """Initialize additional MIME types for better web compatibility"""
         # Ensure common web file types have correct MIME types
-        mimetypes.add_type('text/css', '.css')
-        mimetypes.add_type('application/javascript', '.js')
-        mimetypes.add_type('application/json', '.json')
-        mimetypes.add_type('image/svg+xml', '.svg')
-        mimetypes.add_type('image/webp', '.webp')
-        mimetypes.add_type('font/woff', '.woff')
-        mimetypes.add_type('font/woff2', '.woff2')
-        mimetypes.add_type('font/ttf', '.ttf')
-        mimetypes.add_type('font/eot', '.eot')
-        mimetypes.add_type('application/font-woff', '.woff')
-        mimetypes.add_type('application/font-woff2', '.woff2')
-        mimetypes.add_type('text/plain', '.txt')
-        mimetypes.add_type('application/xml', '.xml')
+        mimetypes.add_type("text/css", ".css")
+        mimetypes.add_type("application/javascript", ".js")
+        mimetypes.add_type("application/json", ".json")
+        mimetypes.add_type("image/svg+xml", ".svg")
+        mimetypes.add_type("image/webp", ".webp")
+        mimetypes.add_type("font/woff", ".woff")
+        mimetypes.add_type("font/woff2", ".woff2")
+        mimetypes.add_type("font/ttf", ".ttf")
+        mimetypes.add_type("font/eot", ".eot")
+        mimetypes.add_type("application/font-woff", ".woff")
+        mimetypes.add_type("application/font-woff2", ".woff2")
+        mimetypes.add_type("text/plain", ".txt")
+        mimetypes.add_type("application/xml", ".xml")
 
     def _get_etag(self, file_path: Path) -> str:
         """Generate ETag for file based on modification time and size"""
@@ -111,10 +111,7 @@ class EnhancedStaticFiles(StaticFiles):
         cache_headers = self._get_cache_headers(full_path)
 
         if if_none_match and if_none_match == cache_headers.get("ETag"):
-            return Response(
-                status_code=304,
-                headers=cache_headers
-            )
+            return Response(status_code=304, headers=cache_headers)
 
         # Get MIME type
         mime_type, _ = mimetypes.guess_type(str(full_path))
@@ -123,27 +120,22 @@ class EnhancedStaticFiles(StaticFiles):
 
         # For small files, use FileResponse with async support
         if full_path.stat().st_size < 10 * 1024 * 1024:  # 10MB threshold
-            return FileResponse(
-                path=str(full_path),
-                media_type=mime_type,
-                headers=cache_headers
-            )
+            return FileResponse(path=str(full_path), media_type=mime_type, headers=cache_headers)
 
         # For larger files, use streaming response
         return await self._stream_file(full_path, mime_type, cache_headers)
 
-    async def _stream_file(self, file_path: Path, media_type: str, headers: Dict[str, str]) -> StreamingResponse:
+    async def _stream_file(
+        self, file_path: Path, media_type: str, headers: Dict[str, str]
+    ) -> StreamingResponse:
         """Stream large files asynchronously"""
+
         async def file_generator():
-            async with aiofiles.open(file_path, 'rb') as file:
+            async with aiofiles.open(file_path, "rb") as file:
                 while chunk := await file.read(64 * 1024):  # 64KB chunks
                     yield chunk
 
-        return StreamingResponse(
-            file_generator(),
-            media_type=media_type,
-            headers=headers
-        )
+        return StreamingResponse(file_generator(), media_type=media_type, headers=headers)
 
 
 def setup_static_files(
@@ -176,9 +168,9 @@ def setup_static_files(
             directory=directory,
             cache_control=cache_control,
             enable_cors=enable_cors,
-            html=True  # Enable HTML serving for SPA support
+            html=True,  # Enable HTML serving for SPA support
         ),
-        name=name
+        name=name,
     )
 
 
@@ -198,7 +190,7 @@ if __name__ == "__main__":
         directory="assets",
         cache_control=86400,  # 24 hours
         enable_cors=True,
-        name="assets"
+        name="assets",
     )
 
     # For development, you might want no caching and CORS enabled
@@ -209,5 +201,5 @@ if __name__ == "__main__":
             directory="static",
             cache_control=0,  # No caching in dev
             enable_cors=True,
-            name="dev-static"
+            name="dev-static",
         )

@@ -8,9 +8,15 @@ import logging
 from typing import Any, Dict, Optional, Union, Callable
 from pathlib import Path
 from datetime import datetime, timedelta
+from functools import wraps
 import threading
-import fcntl  # Unix only, will be handled gracefully on Windows
 import sys
+
+# Platform-specific imports
+if os.name == 'posix':
+    import fcntl
+else:
+    fcntl = None
 
 logger = logging.getLogger(__name__)
 
@@ -47,13 +53,13 @@ class StateManager:
     def _get_lock(self):
         """Get file lock for thread-safe operations"""
         try:
-            if os.name == 'posix':  # Unix-like systems
+            if fcntl:  # Unix-like systems
                 lock_fd = os.open(str(self._lock_file), os.O_CREAT | os.O_WRONLY)
                 fcntl.flock(lock_fd, fcntl.LOCK_EX)
                 return lock_fd
             else:
                 # Windows fallback - use thread lock
-                if not hasattr(self, '_thread_lock'):
+                if not hasattr(self, "_thread_lock"):
                     self._thread_lock = threading.Lock()
                 self._thread_lock.acquire()
                 return None
@@ -64,10 +70,10 @@ class StateManager:
     def _release_lock(self, lock_fd):
         """Release file lock"""
         try:
-            if lock_fd is not None and os.name == 'posix':
+            if lock_fd is not None and fcntl:
                 fcntl.flock(lock_fd, fcntl.LOCK_UN)
                 os.close(lock_fd)
-            elif hasattr(self, '_thread_lock'):
+            elif hasattr(self, "_thread_lock"):
                 self._thread_lock.release()
         except Exception as e:
             logger.warning(f"Could not release lock: {e}")
@@ -76,7 +82,7 @@ class StateManager:
         """Get the file path for a state key"""
         # Hash the key to avoid filesystem issues
         safe_key = hashlib.md5(key.encode()).hexdigest()
-        ext = 'pkl' if self.use_pickle else 'json'
+        ext = "pkl" if self.use_pickle else "json"
         return self.state_dir / f"{safe_key}.{ext}"
 
     def _serialize(self, data: Any) -> Union[str, bytes]:
@@ -89,6 +95,7 @@ class StateManager:
                 if isinstance(obj, datetime):
                     return obj.isoformat()
                 raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+
             return json.dumps(data, default=json_serializer)
 
     def _deserialize(self, data: Union[str, bytes]) -> Any:
@@ -116,14 +123,18 @@ class StateManager:
 
             # Prepare metadata
             metadata = {
-                'value': value,
-                'created_at': datetime.now().isoformat(),
-                'expires_at': (datetime.now() + timedelta(seconds=ttl or self.default_ttl)).isoformat() if ttl else None,
-                'ttl': ttl or self.default_ttl
+                "value": value,
+                "created_at": datetime.now().isoformat(),
+                "expires_at": (
+                    (datetime.now() + timedelta(seconds=ttl or self.default_ttl)).isoformat()
+                    if ttl
+                    else None
+                ),
+                "ttl": ttl or self.default_ttl,
             }
 
             # Write to file
-            with open(state_file, 'wb' if self.use_pickle else 'w') as f:
+            with open(state_file, "wb" if self.use_pickle else "w") as f:
                 if self.use_pickle:
                     f.write(self._serialize(metadata))
                 else:
@@ -171,20 +182,20 @@ class StateManager:
                 return default
 
             # Read from file
-            with open(state_file, 'rb' if self.use_pickle else 'r') as f:
+            with open(state_file, "rb" if self.use_pickle else "r") as f:
                 data = f.read()
 
             metadata = self._deserialize(data)
 
             # Check expiration
-            if metadata.get('expires_at'):
-                expires_at = datetime.fromisoformat(metadata['expires_at'])
+            if metadata.get("expires_at"):
+                expires_at = datetime.fromisoformat(metadata["expires_at"])
                 if datetime.now() > expires_at:
                     logger.debug(f"State miss (expired): {key}")
                     self.delete(key)
                     return default
 
-            value = metadata['value']
+            value = metadata["value"]
 
             # Update memory cache
             self._memory_cache[key] = value
@@ -231,9 +242,9 @@ class StateManager:
 
             for state_file in self.state_dir.glob("*.json"):
                 try:
-                    with open(state_file, 'r') as f:
+                    with open(state_file, "r") as f:
                         data = json.load(f)
-                    expires_at = data.get('expires_at')
+                    expires_at = data.get("expires_at")
                     if expires_at:
                         expires_at = datetime.fromisoformat(expires_at)
                         if current_time > expires_at:
@@ -260,9 +271,9 @@ class StateManager:
 
             for state_file in self.state_dir.glob("*.json"):
                 try:
-                    with open(state_file, 'r') as f:
+                    with open(state_file, "r") as f:
                         data = json.load(f)
-                    expires_at = data.get('expires_at')
+                    expires_at = data.get("expires_at")
                     if not expires_at or datetime.fromisoformat(expires_at) > current_time:
                         keys.append(state_file.stem)
                 except Exception:
@@ -298,6 +309,7 @@ def persistent_state(key: str, ttl: Optional[int] = None, manager: Optional[Stat
         def get_valid_tokens():
             return [...]
     """
+
     def decorator(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -314,7 +326,9 @@ def persistent_state(key: str, ttl: Optional[int] = None, manager: Optional[Stat
             state_mgr.set(key, result, ttl=ttl)
             logger.debug(f"Cached result for {key}")
             return result
+
         return wrapper
+
     return decorator
 
 
@@ -341,8 +355,8 @@ class TokenStore:
         """Add a token for a user"""
         tokens = self.state_manager.get(self.token_key, {})
         tokens[user_id] = {
-            'token': token,
-            'expires_at': (datetime.now() + timedelta(seconds=expires_in)).isoformat()
+            "token": token,
+            "expires_at": (datetime.now() + timedelta(seconds=expires_in)).isoformat(),
         }
         self.state_manager.set(self.token_key, tokens, ttl=expires_in)
 
@@ -355,11 +369,11 @@ class TokenStore:
             return False
 
         # Check token match
-        if user_tokens['token'] != token:
+        if user_tokens["token"] != token:
             return False
 
         # Check expiration
-        expires_at = datetime.fromisoformat(user_tokens['expires_at'])
+        expires_at = datetime.fromisoformat(user_tokens["expires_at"])
         if datetime.now() > expires_at:
             self.remove_token(user_id)
             return False
@@ -379,7 +393,7 @@ class TokenStore:
 
         expired_users = []
         for user_id, token_data in tokens.items():
-            expires_at = datetime.fromisoformat(token_data['expires_at'])
+            expires_at = datetime.fromisoformat(token_data["expires_at"])
             if current_time > expires_at:
                 expired_users.append(user_id)
 
