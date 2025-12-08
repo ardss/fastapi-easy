@@ -1,25 +1,32 @@
-"""Utility for handling Pydantic models as query parameters in GET requests"""
+"""Utility for handling Pydantic models as query parameters in GET requests."""
 
-from typing import Any, Dict, Type, Union, get_type_hints
+from typing import Any, Type, get_type_hints, Callable
 from fastapi import Query, Depends
 from pydantic import BaseModel, ValidationError
-from functools import wraps
 
 
-def QueryParams(schema: Type[BaseModel]):
+def QueryParams(
+    schema: Type[BaseModel]
+) -> Callable:
     """
     Decorator to convert Pydantic model dependencies into query parameters for GET requests.
 
-    This solves the issue where using Pydantic models with Depends() in GET endpoints
-    causes OpenAPI to incorrectly show a request body requirement.
+    This solves the issue where using Pydantic models with Depends() in GET
+    endpoints causes OpenAPI to incorrectly show a request body requirement.
 
     Usage:
         @QueryParams(UserQuery)
         async def get_users(params: UserQuery):
             return params
+
+    Args:
+        schema: Pydantic model class to convert to query parameters
+
+    Returns:
+        Dependency function that converts query parameters to the Pydantic model
     """
 
-    def dependency(**query_params: Any) -> schema:
+    def dependency(**query_params: Any) -> BaseModel:
         """Convert query parameters to Pydantic model"""
         try:
             return schema(**query_params)
@@ -34,8 +41,6 @@ def QueryParams(schema: Type[BaseModel]):
     # Create default values and descriptions for each field
     defaults = {}
     for field_name, field_info in model_fields.items():
-        field_type = type_hints.get(field_name, Any)
-
         # Extract description from field if available
         description = (
             field_info.description
@@ -46,11 +51,15 @@ def QueryParams(schema: Type[BaseModel]):
         # Handle default value
         if field_info.default is not None and field_info.default != ...:
             # Field has a default value
-            defaults[field_name] = Query(default=field_info.default, description=description)
+            defaults[field_name] = Query(
+                default=field_info.default,
+                description=description
+            )
         elif field_info.default_factory is not None:
             # Field has a default factory
             defaults[field_name] = Query(
-                default_factory=field_info.default_factory, description=description
+                default_factory=field_info.default_factory,
+                description=description
             )
         else:
             # Required field
@@ -63,18 +72,24 @@ def QueryParams(schema: Type[BaseModel]):
     return dependency
 
 
-def as_query_params(schema: Type[BaseModel]):
+def as_query_params(schema: Type[BaseModel]) -> Callable:
     """
     Alternative way to use Pydantic models as query parameters.
 
     This creates a dependency that can be used directly in FastAPI endpoints.
+
+    Args:
+        schema: Pydantic model class to convert to query parameters
+
+    Returns:
+        Dependency function that converts query parameters to the Pydantic model
 
     Example:
         async def get_users(params: UserQuery = Depends(as_query_params(UserQuery))):
             return {"name": params.name, "age": params.age}
     """
 
-    def query_dependency(**kwargs: Any) -> schema:
+    def query_dependency(**kwargs: Any) -> BaseModel:
         """Convert query parameters to Pydantic model"""
         return schema(**kwargs)
 
@@ -122,14 +137,19 @@ if __name__ == "__main__":
         city: str = "New York"
 
         model_config = {
-            "json_schema_extra": {"example": {"name": "John", "age": 30, "city": "New York"}}
+            "json_schema_extra": {
+                "example": {"name": "John", "age": 30, "city": "New York"}
+            }
         }
 
     @app.get("/users/")
-    async def get_users(params: UserQuery = Depends(as_query_params(UserQuery))):
-        """Get users with query parameters - correctly shows as query params in OpenAPI"""
+    async def get_users(
+        params: UserQuery = Depends(as_query_params(UserQuery))
+    ):
+        """Get users with query parameters - correctly shows as query params in OpenAPI."""
         return {
-            "message": f"Searching for users: {params.name}, Age: {params.age}, City: {params.city}"
+            "message": f"Searching for users: {params.name}, "
+                     f"Age: {params.age}, City: {params.city}"
         }
 
     # This will correctly show query parameters in OpenAPI instead of request body

@@ -353,8 +353,10 @@ class OptimizedSQLAlchemyAdapter:
             # This is a conservative approach that guarantees correctness
             await self.cache.clear()
             logger.debug("Cleared all caches after data modification")
+        except (ConnectionError, TimeoutError) as e:
+            logger.error(f"Cache connection error during invalidation: {str(e)}")
         except Exception as e:
-            logger.error(f"Cache invalidation failed: {str(e)}")
+            logger.error(f"Unexpected cache invalidation error: {str(e)}")
 
     def get_cache_stats(self) -> Optional[Dict[str, Any]]:
         """Get cache statistics with error handling
@@ -372,9 +374,11 @@ class OptimizedSQLAlchemyAdapter:
                 logger.warning("Cache stats returned None")
                 return None
             return stats
+        except (ConnectionError, TimeoutError) as e:
+            logger.error(f"Cache connection error getting stats: {str(e)}")
         except Exception as e:
             logger.error(
-                f"Failed to get cache stats: {str(e)}",
+                f"Unexpected error getting cache stats: {str(e)}",
                 exc_info=True,
                 extra={
                     "action": "get_cache_stats",

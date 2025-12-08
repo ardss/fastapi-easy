@@ -8,15 +8,20 @@ import click
 
 @click.group()
 @click.version_option(version="1.0.0")
-def cli():
+def cli() -> None:
     """FastAPI-Easy CLI - CRUD Router Framework for FastAPI"""
 
 
 @cli.command()
 @click.option("--name", prompt="Project name", help="Name of the project")
 @click.option("--path", default=".", help="Path to create project")
-def init(name: str, path: str):
-    """Initialize a new FastAPI-Easy project"""
+def init(name: str, path: str) -> None:
+    """Initialize a new FastAPI-Easy project
+
+    Args:
+        name: Name of the project to create
+        path: Directory path where the project will be created
+    """
     project_path = Path(path) / name
 
     try:
@@ -75,7 +80,10 @@ python src/main.py
 """
         )
 
-        click.secho(f"✅ Project '{name}' created successfully at {project_path}", fg="green")
+        click.secho(
+            f"✅ Project '{name}' created successfully at {project_path}",
+            fg="green"
+        )
 
     except Exception as e:
         click.secho(f"❌ Error creating project: {e}", fg="red")
@@ -85,8 +93,13 @@ python src/main.py
 @cli.command()
 @click.option("--model", prompt="Model name", help="Name of the model")
 @click.option("--fields", prompt="Fields (comma-separated)", help="Model fields")
-def generate(model: str, fields: str):
-    """Generate CRUD router for a model"""
+def generate(model: str, fields: str) -> None:
+    """Generate CRUD router for a model
+
+    Args:
+        model: Name of the model to generate
+        fields: Comma-separated list of model fields
+    """
     try:
         field_list = [f.strip() for f in fields.split(",")]
 
@@ -105,9 +118,9 @@ class {model}(BaseModel):
         schema_code = f"""from pydantic import BaseModel, ConfigDict
 
 class {model}Schema(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    
-    id: int
+          model_config = ConfigDict(from_attributes=True)
+
+        id: int
 """
 
         for field in field_list:
@@ -149,7 +162,7 @@ router = CRUDRouter(
 
 
 @cli.command()
-def version():
+def version() -> None:
     """Show version information"""
     click.echo("FastAPI-Easy v1.0.0")
     click.echo("CRUD Router Framework for FastAPI")
@@ -161,7 +174,7 @@ def version():
 
 
 @cli.command()
-def info():
+def info() -> None:
     """Show project information"""
     info_text = """
 FastAPI-Easy - CRUD Router Framework for FastAPI
@@ -188,8 +201,12 @@ GitHub: https://github.com/ardss/fastapi-easy
 
 @cli.command()
 @click.option("--format", type=click.Choice(["text", "json"]), default="text")
-def status(format: str):
-    """Show project status"""
+def status(format: str) -> None:
+    """Show project status
+
+    Args:
+        format: Output format (text or json)
+    """
     status_info = {
         "version": "1.0.0",
         "status": "production",

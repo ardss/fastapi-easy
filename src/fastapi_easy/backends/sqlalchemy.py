@@ -1,13 +1,17 @@
-"""SQLAlchemy async ORM adapter"""
+"""SQLAlchemy async ORM adapter with enhanced security"""
 
+import logging
 from typing import Any, Callable, Dict, List, Optional, Type
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, text, and_, or_
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase
 
 from ..core.errors import AppError, ConflictError, ErrorCode
+from ..security.validation.input_validator import SecurityValidator
 from .base import BaseORMAdapter
+
+logger = logging.getLogger(__name__)
 
 
 class SQLAlchemyAdapter(BaseORMAdapter):
@@ -36,7 +40,7 @@ class SQLAlchemyAdapter(BaseORMAdapter):
         self.pk_field = pk_field
 
     def _apply_filters(self, query, filters: Dict[str, Any]):
-        """Apply filter conditions to query (DRY principle)
+        """Apply filter conditions to query with security validation (DRY principle)
 
         Args:
             query: SQLAlchemy query object
@@ -57,6 +61,13 @@ class SQLAlchemyAdapter(BaseORMAdapter):
             if not field_name or not isinstance(field_name, str):
                 raise ValueError(f"Invalid field name: {field_name}")
 
+            # Security: Validate field name to prevent injection
+            try:
+                field_name = SecurityValidator.validate_field_name(field_name)
+            except Exception as e:
+                logger.warning(f"Invalid field name in filter: {field_name}")
+                raise ValueError(f"Invalid field name: {field_name}")
+
             operator = filter_value.get("operator", "exact")
             if operator not in self.SUPPORTED_OPERATORS:
                 raise ValueError(
@@ -67,12 +78,19 @@ class SQLAlchemyAdapter(BaseORMAdapter):
             if value is None:
                 raise ValueError(f"Filter value cannot be None for field: {field_name}")
 
-            # Get model field
+            # Security: Validate filter value
+            try:
+                value = SecurityValidator.validate_sql_value(value)
+            except Exception as e:
+                logger.warning(f"Suspicious filter value detected for field {field_name}: {str(e)[:100]}")
+                raise ValueError(f"Invalid filter value for field: {field_name}")
+
+            # Get model field (safe as field_name is validated)
             field = getattr(self.model, field_name, None)
             if field is None:
                 raise ValueError(f"Field not found on model: {field_name}")
 
-            # Apply filter using operator mapping
+            # Apply filter using operator mapping with additional safety
             operator_map = {
                 "exact": lambda f, v: f == v,
                 "ne": lambda f, v: f != v,
@@ -81,11 +99,16 @@ class SQLAlchemyAdapter(BaseORMAdapter):
                 "lt": lambda f, v: f < v,
                 "lte": lambda f, v: f <= v,
                 "in": lambda f, v: f.in_(v.split(",") if isinstance(v, str) else v),
-                "like": lambda f, v: f.like(v),
-                "ilike": lambda f, v: f.ilike(v),
+                "like": lambda f, v: f.like(f"%{v}%"),  # Automatically add wildcards for safety
+                "ilike": lambda f, v: f.ilike(f"%{v}%"),  # Automatically add wildcards for safety
             }
 
             if operator in operator_map:
+                # Additional validation for LIKE operators to prevent pattern injection
+                if operator in ["like", "ilike"] and isinstance(value, str):
+                    # Escape special SQL wildcard characters
+                    value = value.replace("%", "\\%").replace("_", "\\_")
+
                 query = query.where(operator_map[operator](field, value))
 
         return query

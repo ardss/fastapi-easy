@@ -1,8 +1,8 @@
 """CRUDRouter optimization integration"""
 
 from typing import Optional, Dict, Any, Type
-from fastapi_easy.core.crud_router import CRUDRouter
-from fastapi_easy.core.optimized_adapter import OptimizedSQLAlchemyAdapter, create_optimized_adapter
+from .core.crud_router import CRUDRouter
+from .core.optimized_adapter import OptimizedSQLAlchemyAdapter, create_optimized_adapter
 
 
 class OptimizedCRUDRouter(CRUDRouter):

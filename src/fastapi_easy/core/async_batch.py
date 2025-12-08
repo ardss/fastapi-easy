@@ -51,8 +51,11 @@ class AsyncBatchProcessor:
                 except (ValueError, TypeError) as e:
                     logger.error(f"Processor validation error for item: {e}")
                     return e
+                except (AttributeError, KeyError, IndexError) as e:
+                    logger.error(f"Processor data access error for item: {e}")
+                    return e
                 except Exception as e:
-                    logger.error(f"Processor error for item: {e}")
+                    logger.error(f"Unexpected processor error for item: {e}")
                     return e
 
         tasks = [bounded_processor(item) for item in items]
@@ -97,8 +100,11 @@ class AsyncBatchProcessor:
                 except (ValueError, TypeError) as e:
                     logger.error(f"Batch processor validation error: {e}")
                     return e
+                except (AttributeError, KeyError, IndexError) as e:
+                    logger.error(f"Batch processor data access error: {e}")
+                    return e
                 except Exception as e:
-                    logger.error(f"Batch processor error: {e}")
+                    logger.error(f"Unexpected batch processor error: {e}")
                     return e
 
         tasks = [bounded_processor(batch) for batch in batches]
