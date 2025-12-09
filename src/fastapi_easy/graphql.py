@@ -227,7 +227,7 @@ class GraphQLSchema:
 class GraphQLAdapter:
     """Adapter for GraphQL operations"""
 
-    def __init__(self, model: Type, schema: GraphQLType):
+    def __init__(self, model: Type[Any], schema: GraphQLType) -> None:
         """Initialize GraphQL adapter
 
         Args:
@@ -286,7 +286,7 @@ class GraphQLConfig:
         self.playground = playground
 
 
-def create_graphql_schema_from_model(model: Type, model_name: str) -> GraphQLSchema:
+def create_graphql_schema_from_model(model: Type[Any], model_name: str) -> GraphQLSchema:
     """Create GraphQL schema from SQLAlchemy model
 
     Args:

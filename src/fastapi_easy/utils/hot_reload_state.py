@@ -22,6 +22,10 @@ else:
     fcntl = None
     FCNTL_MODULE = None
 
+# Mock fcntl operations for Windows
+import os
+import msvcrt
+
 
 logger = logging.getLogger(__name__)
 

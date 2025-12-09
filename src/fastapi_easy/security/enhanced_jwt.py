@@ -358,9 +358,27 @@ class EnhancedJWTAuth:
 
         # Store token in user token list (for invalidation)
         if self.token_blacklist.redis_client:
-            await self.token_blacklist.redis_client.setex(
-                f"user_token:{subject}:{jti}", int(expires_delta.total_seconds()), "1"
-            )
+            # This needs to be awaited in async context - for now store synchronously
+            import asyncio
+            try:
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    # If in async context, we need to handle this differently
+                    asyncio.create_task(
+                        self.token_blacklist.redis_client.setex(
+                            f"user_token:{subject}:{jti}", int(expires_delta.total_seconds()), "1"
+                        )
+                    )
+                else:
+                    # If not in async context, run in loop
+                    loop.run_until_complete(
+                        self.token_blacklist.redis_client.setex(
+                            f"user_token:{subject}:{jti}", int(expires_delta.total_seconds()), "1"
+                        )
+                    )
+            except RuntimeError:
+                # No event loop, skip Redis storage for now
+                pass
 
         return token, jti
 

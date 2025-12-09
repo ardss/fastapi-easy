@@ -44,7 +44,7 @@ from fastapi_easy.core.async_utils import (
     AsyncRateLimiter,
     monitor_async_performance,
 )
-from fastapi_easy.pydantic import BaseModel
+from pydantic import BaseModel
 
 
 class Base(DeclarativeBase):

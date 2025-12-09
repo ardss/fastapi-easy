@@ -3,6 +3,7 @@ Test performance optimization strategies and benchmark utilities.
 """
 
 import asyncio
+import os
 import time
 import gc
 import threading
@@ -11,7 +12,6 @@ from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from typing import List, Dict, Any, Callable
 import pytest
 import psutil
-import memory_profiler
 
 from fastapi_easy.migrations.engine import MigrationEngine
 from fastapi_easy.migrations.detector import SchemaDetector
@@ -156,7 +156,8 @@ class TestQueryParamsPerformance:
         assert metrics["duration"] < 1.0  # Should complete within 1 second
         assert metrics["memory_delta"] < 50 * 1024 * 1024  # Less than 50MB memory increase
 
-    def test_query_params_concurrent_parsing(self, parallel_test_runner):
+    @pytest.mark.asyncio
+    async def test_query_params_concurrent_parsing(self, parallel_test_runner):
         """Test concurrent query parameter parsing"""
         from pydantic import BaseModel
 
