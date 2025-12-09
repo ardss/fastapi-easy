@@ -25,6 +25,10 @@ class OptimizationConfig:
         pool_size: int = 5,
         max_overflow: int = 10,
         pool_timeout: int = 30,
+        pool_recycle: int = 3600,
+        query_timeout: int = 30,
+        cache_size: int = 10000,
+        cache_ttl: int = 600,
     ):
         """Initialize optimization config
 
@@ -41,6 +45,10 @@ class OptimizationConfig:
             pool_size: Database connection pool size
             max_overflow: Max overflow connections for pool
             pool_timeout: Pool timeout in seconds
+            pool_recycle: Database connection recycle time in seconds
+            query_timeout: Database query timeout in seconds
+            cache_size: General cache size
+            cache_ttl: General cache TTL in seconds
         """
         self.enable_cache = enable_cache
         self.enable_async = enable_async
@@ -54,6 +62,10 @@ class OptimizationConfig:
         self.pool_size = pool_size
         self.max_overflow = max_overflow
         self.pool_timeout = pool_timeout
+        self.pool_recycle = pool_recycle
+        self.query_timeout = query_timeout
+        self.cache_size = cache_size
+        self.cache_ttl = cache_ttl
 
     @classmethod
     def from_env(cls) -> OptimizationConfig:

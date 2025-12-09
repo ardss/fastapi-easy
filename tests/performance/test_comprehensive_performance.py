@@ -171,13 +171,10 @@ def performance_config():
 @pytest_asyncio.fixture
 async def performance_db_engine(performance_config):
     """Create performance test database engine"""
+    # SQLite doesn't support connection pool parameters
     engine = create_async_engine(
         "sqlite+aiosqlite:///:memory:",
         echo=False,
-        pool_size=performance_config.pool_size,
-        max_overflow=performance_config.max_overflow,
-        pool_timeout=performance_config.pool_timeout,
-        pool_recycle=performance_config.pool_recycle,
         pool_pre_ping=True,
     )
 

@@ -14,7 +14,7 @@ from sqlalchemy import and_, func, select, text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.pool import QueuePool
+from sqlalchemy.pool import QueuePool, NullPool
 
 from ..core.cache import QueryCache
 from ..core.errors import AppError, ConflictError, ErrorCode
@@ -60,28 +60,43 @@ class OptimizedSQLAlchemyAdapter:
         self.optimization_config = optimization_config or OptimizationConfig()
 
         # Create async engine with optimized pooling
-        self.engine = create_async_engine(
-            database_url,
-            poolclass=QueuePool,
-            pool_size=self.optimization_config.pool_size,
-            max_overflow=self.optimization_config.max_overflow,
-            pool_timeout=self.optimization_config.pool_timeout,
-            pool_recycle=self.optimization_config.pool_recycle,
-            pool_pre_ping=True,
-            echo=False,
-            # Connection specific optimizations
-            connect_args=(
-                {
-                    "command_timeout": self.optimization_config.query_timeout,
-                    "server_settings": {
-                        "application_name": "fastapi-easy-optimized",
-                        "jit": "off",  # Disable JIT for better query planning
-                    },
-                }
-                if "postgresql" in database_url
-                else {}
-            ),
-        )
+        # Note: Async engines don't support QueuePool, use NullPool for SQLite
+        engine_kwargs = {
+            "pool_pre_ping": True,
+            "echo": False,
+        }
+
+        # Only add pool settings for non-SQLite databases
+        if not database_url.startswith("sqlite"):
+            engine_kwargs.update({
+                "pool_size": self.optimization_config.pool_size,
+                "max_overflow": self.optimization_config.max_overflow,
+                "pool_timeout": self.optimization_config.pool_timeout,
+                "pool_recycle": self.optimization_config.pool_recycle,
+            })
+        else:
+            engine_kwargs["poolclass"] = NullPool
+
+        # Connection specific optimizations
+        connect_args = {}
+        if database_url.startswith("sqlite"):
+            # SQLite specific settings
+            connect_args = {
+                "check_same_thread": False,
+            }
+        else:
+            # PostgreSQL/MySQL specific settings
+            connect_args = {
+                "command_timeout": self.optimization_config.query_timeout,
+                "server_settings": {
+                    "application_name": "fastapi-easy-optimized",
+                    "jit": "off",  # Disable JIT for better query planning
+                },
+            }
+
+        engine_kwargs["connect_args"] = connect_args
+
+        self.engine = create_async_engine(database_url, **engine_kwargs)
 
         # Create session factory with optimized settings
         self.session_factory = async_sessionmaker(
@@ -115,7 +130,7 @@ class OptimizedSQLAlchemyAdapter:
         session = None
 
         try:
-            session = await asyncio.wait_for(self.session_factory(), timeout=timeout)
+            session = self.session_factory()
             yield session
         except asyncio.TimeoutError:
             self.metrics.timeouts += 1

@@ -16,6 +16,8 @@ class ErrorCode(str, Enum):
     INTERNAL_ERROR = "INTERNAL_ERROR"
     UNAUTHORIZED = "UNAUTHORIZED"
     BAD_REQUEST = "BAD_REQUEST"
+    TIMEOUT = "TIMEOUT"
+    CONNECTION_ERROR = "CONNECTION_ERROR"
 
 
 class AppError(Exception):
