@@ -114,3 +114,10 @@ coordination/orchestration/*
 claude-flow
 # Removed Windows wrapper files per user request
 hive-mind-prompt-*.txt
+# 忽略临时报告和基准测试结果
+*.md.bak
+*.tmp
+benchmarks/*.json
+MIGRATION_TEST_FIXES_SUMMARY.md
+MYPY_FIXES_SUMMARY.md
+TEST_PERFORMANCE_ANALYSIS_REPORT.md
