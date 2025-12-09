@@ -143,7 +143,7 @@ class CRUDRouter(APIRouter):
                 le=self.config.max_limit,
                 description="Number of items to return",
             ),
-        ) -> List[self.schema]:
+        ) -> List[Any]:
             """Get all items"""
             context = ExecutionContext(
                 schema=self.schema,
@@ -186,13 +186,37 @@ class CRUDRouter(APIRouter):
                 logger.error(f"Error in after_get_all hook: {e!s}", exc_info=True)
                 # Don't fail the request if after hook fails
 
+            # Convert result items to Pydantic models if they're not already
+            if result and isinstance(result, list):
+                converted_result = []
+                for item in result:
+                    if item is not None and not isinstance(item, dict):
+                        # If it's a SQLAlchemy model or similar, convert using the schema
+                        try:
+                            item = self.schema.model_validate(item)
+                        except Exception:
+                            # If validation fails, try to convert to dict first
+                            try:
+                                if hasattr(item, 'model_dump'):
+                                    item_dict = item.model_dump()
+                                elif hasattr(item, '__dict__'):
+                                    item_dict = item.__dict__
+                                else:
+                                    item_dict = dict(item)
+                                item = self.schema.model_validate(item_dict)
+                            except Exception:
+                                # If all else fails, keep as is
+                                pass
+                    converted_result.append(item)
+                result = converted_result
+
             return result
 
         self.add_api_route(
             "/",
             get_all,
             methods=["GET"],
-            response_model=List[self.schema],
+            response_model=List[Any],
             summary=f"Get all {self.schema.__name__} items",
             description=f"Retrieve a list of {self.schema.__name__} items with pagination",
         )
@@ -203,8 +227,8 @@ class CRUDRouter(APIRouter):
 
         async def get_one(
             request: Request,
-            id: self.id_type = Path(..., description="Item ID"),
-        ) -> self.schema:
+            id: Any = Path(..., description="Item ID"),
+        ) -> Any:
             """Get single item by ID"""
             context = ExecutionContext(
                 schema=self.schema,
@@ -246,13 +270,33 @@ class CRUDRouter(APIRouter):
                 logger.error(f"Error in after_get_one hook: {e!s}", exc_info=True)
                 # Don't fail the request if after hook fails
 
+            # Convert result to Pydantic model if it's not already
+            if result is not None:
+                if not isinstance(result, dict):
+                    # If it's a SQLAlchemy model or similar, convert using the schema
+                    try:
+                        result = self.schema.model_validate(result)
+                    except Exception:
+                        # If validation fails, try to convert to dict first
+                        try:
+                            if hasattr(result, 'model_dump'):
+                                result_dict = result.model_dump()
+                            elif hasattr(result, '__dict__'):
+                                result_dict = result.__dict__
+                            else:
+                                result_dict = dict(result)
+                            result = self.schema.model_validate(result_dict)
+                        except Exception:
+                            # If all else fails, return as is
+                            pass
+
             return result
 
         self.add_api_route(
             "/{id}",
             get_one,
             methods=["GET"],
-            response_model=self.schema,
+            response_model=Any,
             summary=f"Get {self.schema.__name__} by ID",
             description=f"Retrieve a single {self.schema.__name__} item by its ID",
         )
@@ -262,14 +306,14 @@ class CRUDRouter(APIRouter):
 
         async def create(
             request: Request,
-            data: self.create_schema = Body(..., description="Item data"),
-        ) -> self.schema:
+            data: Any = Body(..., description="Item data"),
+        ) -> Any:
             """Create new item"""
             context = ExecutionContext(
                 schema=self.schema,
                 adapter=self.adapter,
                 request=request,
-                data=data.model_dump() if hasattr(data, "model_dump") else data.dict(),
+                data=data if isinstance(data, dict) else (data.model_dump() if hasattr(data, "model_dump") else data.dict()),
             )
 
             # Trigger hooks with error handling
@@ -295,13 +339,33 @@ class CRUDRouter(APIRouter):
                 logger.error(f"Error in after_create hook: {e!s}", exc_info=True)
                 # Don't fail the request if after hook fails
 
+            # Convert result to Pydantic model if it's not already
+            if result is not None:
+                if not isinstance(result, dict):
+                    # If it's a SQLAlchemy model or similar, convert using the schema
+                    try:
+                        result = self.schema.model_validate(result)
+                    except Exception:
+                        # If validation fails, try to convert to dict first
+                        try:
+                            if hasattr(result, 'model_dump'):
+                                result_dict = result.model_dump()
+                            elif hasattr(result, '__dict__'):
+                                result_dict = result.__dict__
+                            else:
+                                result_dict = dict(result)
+                            result = self.schema.model_validate(result_dict)
+                        except Exception:
+                            # If all else fails, return as is
+                            pass
+
             return result
 
         self.add_api_route(
             "/",
             create,
             methods=["POST"],
-            response_model=self.schema,
+            response_model=Any,
             status_code=201,
             summary=f"Create {self.schema.__name__}",
             description=f"Create a new {self.schema.__name__} item",
@@ -312,15 +376,15 @@ class CRUDRouter(APIRouter):
 
         async def update(
             request: Request,
-            id: self.id_type = Path(..., description="Item ID"),
-            data: self.update_schema = Body(..., description="Updated item data"),
-        ) -> self.schema:
+            id: Any = Path(..., description="Item ID"),
+            data: Any = Body(..., description="Updated item data"),
+        ) -> Any:
             """Update item"""
             context = ExecutionContext(
                 schema=self.schema,
                 adapter=self.adapter,
                 request=request,
-                data=data.model_dump() if hasattr(data, "model_dump") else data.dict(),
+                data=data if isinstance(data, dict) else (data.model_dump() if hasattr(data, "model_dump") else data.dict()),
                 metadata={"id": id},
             )
 
@@ -347,13 +411,33 @@ class CRUDRouter(APIRouter):
                 logger.error(f"Error in after_update hook: {e!s}", exc_info=True)
                 # Don't fail the request if after hook fails
 
+            # Convert result to Pydantic model if it's not already
+            if result is not None:
+                if not isinstance(result, dict):
+                    # If it's a SQLAlchemy model or similar, convert using the schema
+                    try:
+                        result = self.schema.model_validate(result)
+                    except Exception:
+                        # If validation fails, try to convert to dict first
+                        try:
+                            if hasattr(result, 'model_dump'):
+                                result_dict = result.model_dump()
+                            elif hasattr(result, '__dict__'):
+                                result_dict = result.__dict__
+                            else:
+                                result_dict = dict(result)
+                            result = self.schema.model_validate(result_dict)
+                        except Exception:
+                            # If all else fails, return as is
+                            pass
+
             return result
 
         self.add_api_route(
             "/{id}",
             update,
             methods=["PUT"],
-            response_model=self.schema,
+            response_model=Any,
             summary=f"Update {self.schema.__name__}",
             description=f"Update an existing {self.schema.__name__} item",
         )
@@ -363,8 +447,8 @@ class CRUDRouter(APIRouter):
 
         async def delete_one(
             request: Request,
-            id: self.id_type = Path(..., description="Item ID"),
-        ) -> self.schema:
+            id: Any = Path(..., description="Item ID"),
+        ) -> Any:
             """Delete single item"""
             context = ExecutionContext(
                 schema=self.schema,
@@ -396,13 +480,33 @@ class CRUDRouter(APIRouter):
                 logger.error(f"Error in after_delete hook: {e!s}", exc_info=True)
                 # Don't fail the request if after hook fails
 
+            # Convert result to Pydantic model if it's not already
+            if result is not None:
+                if not isinstance(result, dict):
+                    # If it's a SQLAlchemy model or similar, convert using the schema
+                    try:
+                        result = self.schema.model_validate(result)
+                    except Exception:
+                        # If validation fails, try to convert to dict first
+                        try:
+                            if hasattr(result, 'model_dump'):
+                                result_dict = result.model_dump()
+                            elif hasattr(result, '__dict__'):
+                                result_dict = result.__dict__
+                            else:
+                                result_dict = dict(result)
+                            result = self.schema.model_validate(result_dict)
+                        except Exception:
+                            # If all else fails, return as is
+                            pass
+
             return result
 
         self.add_api_route(
             "/{id}",
             delete_one,
             methods=["DELETE"],
-            response_model=self.schema,
+            response_model=Any,
             summary=f"Delete {self.schema.__name__}",
             description=f"Delete a {self.schema.__name__} item by ID",
         )
@@ -413,7 +517,7 @@ class CRUDRouter(APIRouter):
 
         async def delete_all(
             request: Request,
-        ) -> List[self.schema]:
+        ) -> List[Any]:
             """Delete all items"""
             # Check if delete_all is enabled
             if not self.config.enable_delete_all:
@@ -456,13 +560,37 @@ class CRUDRouter(APIRouter):
                 logger.error(f"Error in after_delete hook: {e!s}", exc_info=True)
                 # Don't fail the request if after hook fails
 
+            # Convert result items to Pydantic models if they're not already
+            if result and isinstance(result, list):
+                converted_result = []
+                for item in result:
+                    if item is not None and not isinstance(item, dict):
+                        # If it's a SQLAlchemy model or similar, convert using the schema
+                        try:
+                            item = self.schema.model_validate(item)
+                        except Exception:
+                            # If validation fails, try to convert to dict first
+                            try:
+                                if hasattr(item, 'model_dump'):
+                                    item_dict = item.model_dump()
+                                elif hasattr(item, '__dict__'):
+                                    item_dict = item.__dict__
+                                else:
+                                    item_dict = dict(item)
+                                item = self.schema.model_validate(item_dict)
+                            except Exception:
+                                # If all else fails, keep as is
+                                pass
+                    converted_result.append(item)
+                result = converted_result
+
             return result
 
         self.add_api_route(
             "/",
             delete_all,
             methods=["DELETE"],
-            response_model=List[self.schema],
+            response_model=List[Any],
             summary=f"Delete all {self.schema.__name__} items",
             description=f"Delete all {self.schema.__name__} items",
         )

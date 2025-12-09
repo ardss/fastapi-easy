@@ -104,7 +104,7 @@ async def test_create_route(app_with_crud_router):
     """Test POST /items route"""
     client = TestClient(app_with_crud_router)
 
-    item_data = {"id": 1, "name": "Test Item", "price": 19.99, "description": "A test item"}
+    item_data = {"name": "Test Item", "price": 19.99, "description": "A test item"}
 
     response = client.post("/items/", json=item_data)
     assert response.status_code == 201
@@ -118,7 +118,7 @@ async def test_get_one_route(app_with_crud_router):
     client = TestClient(app_with_crud_router)
 
     # Create an item first
-    item_data = {"id": 1, "name": "Test Item", "price": 19.99}
+    item_data = {"name": "Test Item", "price": 19.99}
     create_response = client.post("/items/", json=item_data)
     assert create_response.status_code == 201
 
@@ -135,7 +135,7 @@ async def test_update_route(app_with_crud_router):
     client = TestClient(app_with_crud_router)
 
     # Create an item first
-    item_data = {"id": 1, "name": "Original Item", "price": 19.99}
+    item_data = {"name": "Original Item", "price": 19.99}
     create_response = client.post("/items/", json=item_data)
     item_id = create_response.json()["id"]
 
@@ -153,7 +153,7 @@ async def test_delete_one_route(app_with_crud_router):
     client = TestClient(app_with_crud_router)
 
     # Create an item first
-    item_data = {"id": 1, "name": "Item to Delete", "price": 19.99}
+    item_data = {"name": "Item to Delete", "price": 19.99}
     create_response = client.post("/items/", json=item_data)
     item_id = create_response.json()["id"]
 
