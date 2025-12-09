@@ -15,12 +15,13 @@ import importlib
 import inspect
 import sys
 import time
+from types import ModuleType
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Any, Dict, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, Optional, TypeVar, Union
 
 # Lazy import registry
-_LAZY_IMPORTS: Dict[str, Dict[str, Any]] = {}
+_LAZY_IMPORTS: Dict[str, LazyLoader] = {}
 _IMPORTED_MODULES: Dict[str, float] = {}
 
 T = TypeVar("T")
@@ -42,20 +43,20 @@ class LazyLoader:
     def __init__(self, module_path: str, item_name: Optional[str] = None):
         self.module_path = module_path
         self.item_name = item_name
-        self._module = None
-        self._item = None
+        self._module: Optional[ModuleType] = None
+        self._item: Optional[Any] = None
 
     def __getattr__(self, name: str) -> Any:
         if self._item is None:
             self._load()
         return getattr(self._item, name) if self._item else getattr(self._module, name)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         if self._item is None:
             self._load()
         return self._item(*args, **kwargs) if self._item else self._module
 
-    def _load(self):
+    def _load(self) -> None:
         """Perform the actual import"""
         if self._module is None:
             start_time = time.perf_counter()

@@ -10,7 +10,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Type, TypeVar
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Generic
 
 T = TypeVar("T")
 ID = TypeVar("ID")
@@ -70,7 +70,7 @@ class QueryPagination:
     skip: int = 0
     limit: int = 10
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.skip < 0:
             raise ValueError("Skip must be non-negative")
         if self.limit <= 0:
@@ -91,13 +91,13 @@ class QueryPagination:
 class QueryOptions:
     """查询选项"""
 
-    filters: List[QueryFilter] = None
-    sorts: List[QuerySort] = None
+    filters: Optional[List[QueryFilter]] = None
+    sorts: Optional[List[QuerySort]] = None
     pagination: Optional[QueryPagination] = None
     fields: Optional[List[str]] = None  # 字段投影
     include_total: bool = False
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.filters is None:
             self.filters = []
         if self.sorts is None:
@@ -105,7 +105,7 @@ class QueryOptions:
 
 
 @dataclass
-class QueryResult:
+class QueryResult(Generic[T]):
     """查询结果"""
 
     items: List[T]
@@ -121,7 +121,7 @@ class QueryResult:
 
 
 # 基础服务接口
-class IRepository(ABC, Type[T]):
+class IRepository(ABC, Generic[T]):
     """仓储接口
 
     提供数据访问的抽象层，隐藏具体的数据访问细节。
@@ -223,7 +223,7 @@ class IEventBus(ABC):
         pass
 
     @abstractmethod
-    async def subscribe(self, event_name: str, handler: callable, **kwargs) -> str:
+    async def subscribe(self, event_name: str, handler: Callable[..., Any], **kwargs) -> str:
         """订阅事件"""
         pass
 
@@ -237,27 +237,27 @@ class ILogger(ABC):
     """日志接口"""
 
     @abstractmethod
-    def debug(self, message: str, **kwargs) -> None:
+    def debug(self, message: str, **kwargs: Any) -> None:
         """调试日志"""
         pass
 
     @abstractmethod
-    def info(self, message: str, **kwargs) -> None:
+    def info(self, message: str, **kwargs: Any) -> None:
         """信息日志"""
         pass
 
     @abstractmethod
-    def warning(self, message: str, **kwargs) -> None:
+    def warning(self, message: str, **kwargs: Any) -> None:
         """警告日志"""
         pass
 
     @abstractmethod
-    def error(self, message: str, **kwargs) -> None:
+    def error(self, message: str, **kwargs: Any) -> None:
         """错误日志"""
         pass
 
     @abstractmethod
-    def critical(self, message: str, **kwargs) -> None:
+    def critical(self, message: str, **kwargs: Any) -> None:
         """严重错误日志"""
         pass
 
@@ -337,7 +337,7 @@ class IUnitOfWork(ABC):
         pass
 
     @abstractmethod
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """退出工作单元"""
         pass
 
@@ -377,7 +377,7 @@ class IService(ABC):
         pass
 
 
-class ICommandHandler(ABC, Type[T]):
+class ICommandHandler(ABC, Generic[T]):
     """命令处理器接口"""
 
     @abstractmethod
@@ -386,7 +386,7 @@ class ICommandHandler(ABC, Type[T]):
         pass
 
 
-class IQueryHandler(ABC, Type[T]):
+class IQueryHandler(ABC, Generic[T]):
     """查询处理器接口"""
 
     @abstractmethod
@@ -399,7 +399,7 @@ class IMiddleware(ABC):
     """中间件接口"""
 
     @abstractmethod
-    async def process(self, request: Any, next_handler: callable) -> Any:
+    async def process(self, request: Any, next_handler: Callable[..., Any]) -> Any:
         """处理请求"""
         pass
 
