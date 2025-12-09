@@ -1,0 +1,189 @@
+{
+    // Python configuration with Windows/Unix support
+    "python.defaultInterpreterPath": "python",
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateInCurrentTerminal": true,
+
+    // Linting and formatting
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.mypyEnabled": true,
+    "python.linting.banditEnabled": true,
+    "python.linting.ruffEnabled": true,
+    "python.linting.ruffArgs": [
+        "--fix"
+    ],
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+        "--line-length=100"
+    ],
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+    },
+
+    // Type checking
+    "python.analysis.typeCheckingMode": "strict",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingTypeStubs": "none"
+    },
+
+    // Testing
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+        "tests",
+        "-v"
+    ],
+    "python.testing.pytestPath": "pytest",
+    "python.testing.unittestEnabled": false,
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+
+    // File exclusions
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/venv": true,
+        "**/env": true,
+        "**/.pytest_cache": true,
+        "**/.mypy_cache": true,
+        "**/.coverage": true,
+        "**/htmlcov": true,
+        "**/.ruff_cache": true,
+        "**/dist": true,
+        "**/build": true,
+        "**/*.egg-info": true,
+        "**/nul": true
+    },
+    "search.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/venv": true,
+        "**/env": true,
+        "**/.pytest_cache": true,
+        "**/.mypy_cache": true,
+        "**/.coverage": true,
+        "**/htmlcov": true,
+        "**/.ruff_cache": true,
+        "**/dist": true,
+        "**/build": true,
+        "**/*.egg-info": true
+    },
+    "files.watcherExclude": {
+        "**/__pycache__/**": true,
+        "**/venv/**": true,
+        "**/env/**": true,
+        "**/.pytest_cache/**": true,
+        "**/.mypy_cache/**": true,
+        "**/.ruff_cache/**": true
+    },
+
+    // Editor settings
+    "editor.rulers": [100],
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.wordWrap": "on",
+    "editor.minimap.enabled": true,
+    "editor.suggest.snippetsPreventQuickSuggestions": false,
+
+    // FastAPI specific
+    "python.analysis.extraPaths": [
+        "src"
+    ],
+
+    // Terminal environment
+    "terminal.integrated.env.windows": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+    },
+    "terminal.integrated.env.linux": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+    },
+    "terminal.integrated.env.osx": {
+        "PYTHONPATH": "${workspaceFolder}/src"
+    },
+
+    // Git
+    "git.enableSmartCommit": true,
+    "git.autofetch": true,
+    "git.confirmSync": false,
+
+    // Extensions
+    "extensions.autoUpdate": false,
+    "extensions.recommendations": [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.isort",
+        "ms-python.mypy-type-checker",
+        "ms-python.flake8",
+        "ms-python.bandit",
+        "charliermarsh.ruff",
+        "ms-vscode.test-adapter-converter",
+        "hbenl.vscode-test-explorer",
+        "ms-vscode.vscode-json",
+        "redhat.vscode-yaml",
+        "ms-vscode.vscode-markdown",
+        "eamodio.gitlens",
+        "ms-vscode.hexeditor",
+        "ms-vscode.remote-explorer",
+        "ms-vscode-remote.remote-containers",
+        "ms-vscode-remote.remote-wsl"
+    ],
+
+    // Additional tools
+    "python.linting.ignorePatterns": [
+        "tests/**",
+        "venv/**",
+        "env/**"
+    ],
+    "python.linting.mypyArgs": [
+        "--ignore-missing-imports",
+        "--follow-imports=silent",
+        "--warn-unused-ignores"
+    ],
+    "python.linting.banditArgs": [
+        "-c", "pyproject.toml",
+        "-f", "json",
+        "-o", "bandit-report.json"
+    ],
+
+    // Spell checker
+    "cSpell.words": [
+        "pydantic",
+        "sqlalchemy",
+        "asyncio",
+        "uvicorn",
+        "pytest",
+        "mypy",
+        "ruff",
+        "bandit",
+        "isort",
+        "fastapi",
+        "precommit",
+        "venv",
+        "orm",
+        "crud",
+        "jwt",
+        "envvar",
+        "envvars",
+        "pyproject",
+        "devdeps",
+        "urlsafe",
+        "b64decode",
+        "b64encode",
+        "alembic",
+        "aiosqlite",
+        "aioredis",
+        "websockets",
+        "httptools"
+    ],
+
+    // Markdown settings
+    "markdownlint.config": {
+        "default": true,
+        "MD007": false,
+        "MD033": {
+            "allowed_elements": ["img", "a", "br", "sub", "sup"]
+        }
+    }
+}
