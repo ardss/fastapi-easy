@@ -84,7 +84,7 @@ class CacheMonitor:
         """
         self.metrics = CacheMetrics()
         self.hit_rate_threshold = hit_rate_threshold
-        self.alerts: List[str] = []
+        self.alerts: List[Dict[str, Any]] = []
 
     def record_hit(self) -> None:
         """Record cache hit"""

@@ -19,7 +19,7 @@ from collections import defaultdict, deque
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Deque, Dict, List, Optional, Awaitable
 
 from .advanced_cache import AdvancedCacheManager
 from .memory_profiler import MemoryProfiler
@@ -91,7 +91,7 @@ class PerformanceReport:
 class AlertManager:
     """Manages performance alerts"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.alerts: Dict[str, Alert] = {}
         self.alert_rules: Dict[str, Dict[str, Any]] = {}
         self.alert_callbacks: List[Callable[[Alert], None]] = []
@@ -106,7 +106,7 @@ class AlertManager:
         title: Optional[str] = None,
         description: Optional[str] = None,
         consecutive_violations: int = 1,
-    ):
+    ) -> None:
         """Add alert rule"""
         self.alert_rules[metric_name] = {
             "threshold": threshold,
@@ -118,7 +118,7 @@ class AlertManager:
             "violation_count": 0,
         }
 
-    def check_metric(self, metric: PerformanceMetric):
+    def check_metric(self, metric: PerformanceMetric) -> None:
         """Check if metric triggers an alert"""
         if metric.name not in self.alert_rules:
             return
@@ -145,7 +145,7 @@ class AlertManager:
             rule["violation_count"] = 0
             self._resolve_alerts(metric.name)
 
-    def _trigger_alert(self, metric: PerformanceMetric, rule: Dict[str, Any]):
+    def _trigger_alert(self, metric: PerformanceMetric, rule: Dict[str, Any]) -> None:
         """Trigger a new alert"""
         alert_id = f"alert_{self._alert_id_counter}"
         self._alert_id_counter += 1
@@ -173,7 +173,7 @@ class AlertManager:
 
         logger.warning(f"Alert triggered: {alert.title} - {alert.description}")
 
-    def _resolve_alerts(self, metric_name: str):
+    def _resolve_alerts(self, metric_name: str) -> None:
         """Resolve alerts for a metric"""
         for alert in self.alerts.values():
             if alert.metric_name == metric_name and not alert.resolved:
@@ -189,7 +189,7 @@ class AlertManager:
         all_alerts = sorted(self.alerts.values(), key=lambda a: a.timestamp, reverse=True)
         return all_alerts[:limit]
 
-    def register_callback(self, callback: Callable[[Alert], None]):
+    def register_callback(self, callback: Callable[[Alert], None]) -> None:
         """Register alert callback"""
         self.alert_callbacks.append(callback)
 
@@ -199,11 +199,11 @@ class MetricsCollector:
 
     def __init__(self, max_history: int = 10000):
         self.max_history = max_history
-        self.metrics_history: Dict[str, deque] = defaultdict(lambda: deque(maxlen=max_history))
+        self.metrics_history: Dict[str, Deque[PerformanceMetric]] = defaultdict(lambda: deque(maxlen=max_history))
         self.real_time_metrics: Dict[str, float] = {}
         self.metric_callbacks: List[Callable[[PerformanceMetric], None]] = []
 
-    def add_metric(self, metric: PerformanceMetric):
+    def add_metric(self, metric: PerformanceMetric) -> None:
         """Add a metric to history"""
         self.metrics_history[metric.name].append(metric)
         self.real_time_metrics[metric.name] = metric.value
@@ -307,7 +307,7 @@ class PerformanceDashboard:
 
         # State
         self._running = False
-        self._update_task: Optional[asyncio.Task] = None
+        self._update_task: Optional[asyncio.Task[None]] = None
         self._last_update = datetime.now()
 
         # Setup default widgets and alerts
@@ -317,7 +317,7 @@ class PerformanceDashboard:
         # Register callbacks
         self.metrics_collector.register_callback(self.alert_manager.check_metric)
 
-    def _setup_default_widgets(self):
+    def _setup_default_widgets(self) -> None:
         """Setup default dashboard widgets"""
         default_widgets = [
             DashboardWidget(
@@ -370,7 +370,7 @@ class PerformanceDashboard:
         # Setup default dashboard
         self.dashboards["main"] = list(self.widgets.keys())
 
-    def _setup_default_alerts(self):
+    def _setup_default_alerts(self) -> None:
         """Setup default alert rules"""
         default_alerts = [
             ("response_time", 1000, "gt", AlertSeverity.HIGH),
@@ -385,7 +385,7 @@ class PerformanceDashboard:
                 metric_name=metric_name, threshold=threshold, operator=operator, severity=severity
             )
 
-    async def start(self):
+    async def start(self) -> None:
         """Start dashboard monitoring"""
         if self._running:
             return

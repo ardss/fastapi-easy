@@ -22,6 +22,9 @@ class OptimizationConfig:
         max_concurrent: int = 10,
         enable_monitoring: bool = True,
         hit_rate_threshold: float = 50.0,
+        pool_size: int = 5,
+        max_overflow: int = 10,
+        pool_timeout: int = 30,
     ):
         """Initialize optimization config
 
@@ -35,6 +38,9 @@ class OptimizationConfig:
             max_concurrent: Max concurrent operations
             enable_monitoring: Enable monitoring
             hit_rate_threshold: Cache hit rate threshold for alerts
+            pool_size: Database connection pool size
+            max_overflow: Max overflow connections for pool
+            pool_timeout: Pool timeout in seconds
         """
         self.enable_cache = enable_cache
         self.enable_async = enable_async
@@ -45,6 +51,9 @@ class OptimizationConfig:
         self.max_concurrent = max_concurrent
         self.enable_monitoring = enable_monitoring
         self.hit_rate_threshold = hit_rate_threshold
+        self.pool_size = pool_size
+        self.max_overflow = max_overflow
+        self.pool_timeout = pool_timeout
 
     @classmethod
     def from_env(cls) -> OptimizationConfig:
@@ -145,7 +154,7 @@ class OptimizationConfig:
 def create_optimization_config(
     enable_cache: bool = True,
     enable_async: bool = True,
-    **kwargs,
+    **kwargs: Any,
 ) -> OptimizationConfig:
     """Create optimization configuration
 

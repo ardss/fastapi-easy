@@ -32,8 +32,13 @@ from typing import (
     Set,
     Tuple,
     TypeVar,
-    WeakSet,
 )
+
+try:
+    from typing import WeakSet
+except ImportError:
+    # Python 3.13+ compatibility
+    from weakref import WeakSet
 
 import psutil
 
