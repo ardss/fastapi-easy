@@ -1,15 +1,46 @@
-"""Main CRUD router for FastAPI"""
+"""Main CRUD router for FastAPI.
+
+This module provides an automatic CRUD router generator for FastAPI applications.
+It creates complete REST endpoints for any Pydantic model, supporting filtering,
+sorting, pagination, and more with minimal configuration.
+
+The router follows REST conventions and integrates seamlessly with different
+ORM adapters (SQLAlchemy, Tortoise, MongoDB, etc.) while maintaining
+consistent behavior across all implementations.
+
+Example:
+    ```python
+    from fastapi import FastAPI
+    from fastapi_easy import CRUDRouter, SQLAlchemyAdapter
+
+    app = FastAPI()
+
+    # Auto-generate CRUD routes for User model
+    app.include_router(
+        CRUDRouter(
+            schema=UserRead,
+            adapter=SQLAlchemyAdapter(User, get_db),
+            prefix="/users"
+        )
+    )
+    ```
+"""
 
 from __future__ import annotations
 
 import logging
-from typing import Any, List, Optional, Type
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Body, HTTPException, Path, Query, Request
-from pydantic import BaseModel
 
-from .adapters import ORMAdapter
-from .config import CRUDConfig
+if TYPE_CHECKING:
+    from typing import List, Optional, Type
+
+    from pydantic import BaseModel
+
+    from .adapters import ORMAdapter
+    from .config import CRUDConfig
+
 from .exceptions import (
     DatabaseConnectionException,
     DatabaseQueryException,
@@ -23,36 +54,79 @@ logger = logging.getLogger(__name__)
 
 
 class CRUDRouter(APIRouter):
-    """CRUD Router for automatic API generation
+    """CRUD Router for automatic API generation.
 
-    Generates CRUD routes automatically with support for filtering,
-    sorting, pagination, and more.
+    Generates complete CRUD routes automatically with support for filtering,
+    sorting, pagination, soft deletion, and more. This router follows REST
+    conventions and integrates seamlessly with different ORM adapters.
+
+    The router automatically creates the following endpoints:
+    - GET /prefix/ - List all resources with filtering, sorting, and pagination
+    - GET /prefix/{id} - Get a single resource by ID
+    - POST /prefix/ - Create a new resource
+    - PUT /prefix/{id} - Update a resource (full or partial)
+    - DELETE /prefix/{id} - Delete a resource (soft or hard)
+    - DELETE /prefix/ - Batch delete resources (optional)
+
+    Attributes:
+        schema: Pydantic schema for reading/serializing resources
+        create_schema: Schema for creating resources
+        update_schema: Schema for updating resources
+        adapter: ORM adapter for database operations
+        config: CRUD configuration settings
+        hooks: Hook registry for extending functionality
+
+    Example:
+        ```python
+        router = CRUDRouter(
+            schema=UserRead,
+            create_schema=UserCreate,
+            update_schema=UserUpdate,
+            adapter=SQLAlchemyAdapter(User, get_db),
+            prefix="/api/v1/users",
+            tags=["Users"]
+        )
+
+        # The router now provides these endpoints:
+        # GET /api/v1/users
+        # GET /api/v1/users/{id}
+        # POST /api/v1/users
+        # PUT /api/v1/users/{id}
+        # DELETE /api/v1/users/{id}
+        ```
     """
 
     def __init__(
         self,
-        schema: Type[BaseModel],
-        adapter: Optional[ORMAdapter] = None,
-        config: Optional[CRUDConfig] = None,
-        prefix: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        id_type: Type = int,
-        create_schema: Optional[Type[BaseModel]] = None,
-        update_schema: Optional[Type[BaseModel]] = None,
+        schema: type["BaseModel"],
+        adapter: "ORMAdapter" | None = None,
+        config: "CRUDConfig" | None = None,
+        prefix: str | None = None,
+        tags: list[str] | None = None,
+        id_type: type = int,
+        create_schema: type["BaseModel"] | None = None,
+        update_schema: type["BaseModel"] | None = None,
         **kwargs: Any,
     ):
-        """Initialize CRUD Router
+        """Initialize CRUD Router.
 
         Args:
-            schema: Pydantic schema for the resource (used for reading)
-            adapter: ORM adapter instance
-            config: CRUD configuration
-            prefix: API prefix (default: lowercase schema name)
-            tags: OpenAPI tags
+            schema: Pydantic schema for the resource (used for reading responses)
+            adapter: ORM adapter instance for database operations
+            config: CRUD configuration with customization options
+            prefix: URL prefix for all routes (default: lowercase schema name)
+            tags: OpenAPI tags for documentation grouping
             id_type: Type of the ID field (default: int)
-            create_schema: Schema for creation (default: same as schema)
-            update_schema: Schema for updates (default: same as schema)
+            create_schema: Schema for creation requests (default: same as schema)
+            update_schema: Schema for update requests (default: same as schema)
             **kwargs: Additional arguments passed to APIRouter
+
+        Raises:
+            ValueError: If schema is not provided
+
+        Note:
+            The adapter is optional but required for actual database operations.
+            Without an adapter, routes will return empty results.
         """
         # Initialize configuration
         self.schema = schema

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional, Protocol
+from typing import Any, Dict, Optional, Protocol
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ class ResourcePermissionChecker(Protocol):
 class StaticResourceChecker:
     """Check resource permissions from static configuration"""
 
-    def __init__(self, resources_map: dict):
+    def __init__(self, resources_map: Dict[str, Any]):
         """Initialize static resource checker
 
         Args:
@@ -71,7 +71,7 @@ class StaticResourceChecker:
             return False
 
         owner_id = resource.get("owner_id")
-        is_owner = owner_id == user_id
+        is_owner = str(owner_id) == user_id if owner_id is not None else False
 
         logger.debug(f"Owner check for user {user_id} on resource {resource_id}: {is_owner}")
 
@@ -120,7 +120,7 @@ class StaticResourceChecker:
 class DatabaseResourceChecker:
     """Check resource permissions from database (placeholder)"""
 
-    def __init__(self, db_session=None):
+    def __init__(self, db_session: Optional[Any] = None) -> None:
         """Initialize database resource checker
 
         Args:
@@ -189,8 +189,8 @@ class CachedResourceChecker:
 
         self.base_checker = base_checker
         self.cache_ttl = cache_ttl
-        self.cache: dict = {}
-        self.cache_times: dict = {}
+        self.cache: Dict[str, bool] = {}
+        self.cache_times: Dict[str, float] = {}
         self.hits = 0
         self.misses = 0
 
@@ -272,7 +272,7 @@ class CachedResourceChecker:
 
         return result
 
-    def get_cache_stats(self) -> dict:
+    def get_cache_stats(self) -> Dict[str, Any]:
         """Get cache statistics
 
         Returns:

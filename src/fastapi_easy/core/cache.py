@@ -56,7 +56,7 @@ class QueryCache:
         # Sort kwargs for consistent key generation
         sorted_items = sorted(kwargs.items())
         key_str = f"{prefix}:{json.dumps(sorted_items, sort_keys=True, default=str)}"
-        return hashlib.md5(key_str.encode()).hexdigest()
+        return hashlib.sha256(key_str.encode()).hexdigest()
 
     async def get(self, key: str) -> Optional[Any]:
         """Get value from cache

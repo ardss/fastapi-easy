@@ -55,7 +55,7 @@ class FileSchemaCacheProvider(SchemaCacheProvider):
     def _get_cache_file(self, key: str) -> Path:
         """获取缓存文件路径"""
         # 使用哈希避免文件名过长
-        hashed_key = hashlib.md5(key.encode()).hexdigest()
+        hashed_key = hashlib.sha256(key.encode()).hexdigest()
         return self.cache_dir / f"{hashed_key}.json"
 
     async def get(self, key: str) -> Optional[Dict[str, Any]]:
@@ -249,7 +249,7 @@ class SchemaHashCalculator:
     def create_cache_key(database_url: str, schema_name: str) -> str:
         """创建缓存键"""
         key = f"{database_url}:{schema_name}"
-        return hashlib.md5(key.encode()).hexdigest()
+        return hashlib.sha256(key.encode()).hexdigest()
 
 
 class SchemaCacheManager:

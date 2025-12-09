@@ -5,7 +5,7 @@ from __future__ import annotations
 import html
 import logging
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 from urllib.parse import unquote
 
 logger = logging.getLogger(__name__)
@@ -191,10 +191,10 @@ class SecurityValidator:
             # Sanitize string values
             if isinstance(value, str):
                 sanitized[safe_key] = cls.sanitize_string(value)
-            elif isinstance(value, (list, dict)):
-                sanitized[safe_key] = cls.validate_and_sanitize_input(
-                    value if isinstance(value, dict) else {str(i): v for i, v in enumerate(value)}
-                )
+            elif isinstance(value, dict):
+                sanitized[safe_key] = cls.validate_and_sanitize_input(value)
+            elif isinstance(value, list):
+                sanitized[safe_key] = cls.validate_and_sanitize_input({str(i): v for i, v in enumerate(value)})
             else:
                 sanitized[safe_key] = cls.validate_sql_value(value)
 
@@ -367,10 +367,10 @@ class SecurityValidator:
 
 
 # Pydantic validators for easy integration
-def sanitize_string_validator(max_length: int = 1000):
+def sanitize_string_validator(max_length: int = 1000) -> Callable[[Any], str]:
     """Pydantic validator for string sanitization"""
 
-    def validator_func(v):
+    def validator_func(v: Any) -> str:
         if not isinstance(v, str):
             raise ValueError("Must be a string")
         return SecurityValidator.sanitize_string(v, max_length)
@@ -378,10 +378,10 @@ def sanitize_string_validator(max_length: int = 1000):
     return validator_func
 
 
-def validate_field_name_validator():
+def validate_field_name_validator() -> Callable[[Any], str]:
     """Pydantic validator for field names"""
 
-    def validator_func(v):
+    def validator_func(v: Any) -> str:
         if not isinstance(v, str):
             raise ValueError("Must be a string")
         return SecurityValidator.validate_field_name(v)
@@ -389,10 +389,10 @@ def validate_field_name_validator():
     return validator_func
 
 
-def validate_email_validator():
+def validate_email_validator() -> Callable[[Any], str]:
     """Enhanced email validator"""
 
-    def validator_func(v):
+    def validator_func(v: Any) -> str:
         if not isinstance(v, str):
             raise ValueError("Must be a string")
 
@@ -402,7 +402,7 @@ def validate_email_validator():
             raise ValueError("Invalid email format")
 
         # Check for dangerous patterns
-        if SecurityValidator.check_xss(v) or SecurityValidator.check_sql_injection(v):
+        if SecurityValidator.check_xss(v) or check_sql_injection(v):
             raise ValueError("Suspicious email detected")
 
         return v.lower().strip()
@@ -410,10 +410,10 @@ def validate_email_validator():
     return validator_func
 
 
-def validate_password_validator():
+def validate_password_validator() -> Callable[[Any], str]:
     """Enhanced password validator"""
 
-    def validator_func(v):
+    def validator_func(v: Any) -> str:
         if not isinstance(v, str):
             raise ValueError("Must be a string")
 

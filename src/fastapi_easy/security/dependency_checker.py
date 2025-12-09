@@ -49,7 +49,7 @@ class Vulnerability:
         self.fixed_versions = fixed_versions or []
         self.references = references or []
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> Dict[str, Any]:
         """Convert vulnerability to dictionary"""
         return {
             "package": self.package_name,
@@ -126,7 +126,7 @@ class DependencyChecker:
         """
         self.requirements_path = requirements_path or "requirements.txt"
         self.installed_packages = self._get_installed_packages()
-        self.vulnerabilities = []
+        self.vulnerabilities: List[SecurityVulnerability] = []
 
     def _get_installed_packages(self) -> Dict[str, str]:
         """Get list of installed packages with versions
@@ -173,7 +173,7 @@ class DependencyChecker:
                             advisory_id=advisory.get("cve", "ADVISORY"),
                             severity=advisory["severity"],
                             summary=f"Security vulnerability in {package_name}",
-                            fixed_versions=[advisory.get("fixed")],
+                            fixed_versions=[advisory.get("fixed")] if advisory.get("fixed") else [],
                         )
                         vulnerabilities.append(vulnerability)
 
@@ -225,8 +225,8 @@ class DependencyChecker:
         Returns:
             Tuple of (warnings, errors)
         """
-        warnings = []
-        errors = []
+        warnings: List[str] = []
+        errors: List[str] = []
 
         requirements_path = Path(self.requirements_path)
         if not requirements_path.exists():
@@ -256,7 +256,7 @@ class DependencyChecker:
 
         return warnings, errors
 
-    def generate_report(self) -> Dict:
+    def generate_report(self) -> Dict[str, Any]:
         """Generate comprehensive security report
 
         Returns:
@@ -417,7 +417,7 @@ class DependencyChecker:
         Returns:
             List of update commands
         """
-        updates = []
+        updates: List[Dict[str, Any]] = []
 
         # Get outdated packages
         try:

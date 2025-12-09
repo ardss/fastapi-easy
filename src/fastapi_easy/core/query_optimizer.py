@@ -178,7 +178,7 @@ class JSONOptimizer:
             return self._parse_common(json_str)
 
         if use_cache:
-            cache_key = hashlib.md5(json_str.encode()).hexdigest()
+            cache_key = hashlib.sha256(json_str.encode()).hexdigest()
 
             with self._lock:
                 if cache_key in self._parse_cache:
@@ -230,11 +230,11 @@ class JSONOptimizer:
                 # Create stable cache key
                 if isinstance(obj, dict):
                     sorted_items = tuple(sorted(obj.items()))
-                    cache_key = hashlib.md5(str(sorted_items).encode()).hexdigest()
+                    cache_key = hashlib.sha256(str(sorted_items).encode()).hexdigest()
                 elif isinstance(obj, list):
-                    cache_key = hashlib.md5(str(tuple(obj)).encode()).hexdigest()
+                    cache_key = hashlib.sha256(str(tuple(obj)).encode()).hexdigest()
                 else:
-                    cache_key = hashlib.md5(str(obj).encode()).hexdigest()
+                    cache_key = hashlib.sha256(str(obj).encode()).hexdigest()
 
                 with self._lock:
                     if cache_key in self._stringify_cache:
@@ -315,7 +315,7 @@ class ValidationCache:
                 validator.__name__ if hasattr(validator, "__name__") else str(validator)
             )
             return (
-                f"{type_name}:{validator_name}:{hashlib.md5(value_repr.encode()).hexdigest()[:8]}"
+                f"{type_name}:{validator_name}:{hashlib.sha256(value_repr.encode()).hexdigest()[:8]}"
             )
         except Exception:
             return f"{type(value).__name__}:{id(validator)}"

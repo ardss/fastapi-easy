@@ -13,16 +13,20 @@ from __future__ import annotations
 
 import importlib
 import inspect
+import logging
 import sys
 import time
+import asyncio
 from types import ModuleType
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Any, Callable, Dict, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 
 # Lazy import registry
-_LAZY_IMPORTS: Dict[str, LazyLoader] = {}
+_LAZY_IMPORTS: Dict[str, "LazyLoader"] = {}
 _IMPORTED_MODULES: Dict[str, float] = {}
+
+logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
@@ -143,7 +147,7 @@ def get_import_path(obj: Any) -> str:
     return str(obj)
 
 
-def conditional_import(condition: bool, module_path: str, item_name: Optional[str] = None):
+def conditional_import(condition: bool, module_path: str, item_name: Optional[str] = None) -> Optional[Union[ModuleType, Any]]:
     """
     Conditionally import a module/item.
 
@@ -163,7 +167,7 @@ def conditional_import(condition: bool, module_path: str, item_name: Optional[st
     return None
 
 
-def try_import(module_path: str, item_name: Optional[str] = None, default: Any = None):
+def try_import(module_path: str, item_name: Optional[str] = None, default: Any = None) -> Any:
     """
     Try to import a module/item, return default on failure.
 
@@ -187,7 +191,7 @@ def try_import(module_path: str, item_name: Optional[str] = None, default: Any =
 class ImportProfiler:
     """Profile import performance"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.imports: Dict[str, ImportStats] = {}
 
     def profile_import(self, module_path: str) -> ImportStats:
@@ -328,7 +332,7 @@ preinitialize()
 
 
 # Compatibility layer for older Python versions
-def ensure_future(coro) -> Any:
+def ensure_future(coro: Any) -> Any:
     """Ensure compatibility with different asyncio implementations"""
     try:
         return asyncio.ensure_future(coro)
@@ -337,7 +341,7 @@ def ensure_future(coro) -> Any:
 
 
 # Optional imports with graceful fallback
-def import_or_dummy(module_path: str, dummy_value: Any = None):
+def import_or_dummy(module_path: str, dummy_value: Any = None) -> Any:
     """
     Import module or return dummy value.
 
@@ -355,7 +359,7 @@ def import_or_dummy(module_path: str, dummy_value: Any = None):
 
 
 # Specialized import helpers
-def import_database_backend(backend_type: str):
+def import_database_backend(backend_type: str) -> Any:
     """
     Import the appropriate database backend.
 
@@ -380,7 +384,7 @@ def import_database_backend(backend_type: str):
     return getattr(module, f"{backend_type.title()}Adapter")
 
 
-def import_migration_engine(migration_type: str):
+def import_migration_engine(migration_type: str) -> Any:
     """
     Import the appropriate migration engine.
 
@@ -391,7 +395,7 @@ def import_migration_engine(migration_type: str):
         Migration engine class
     """
     # Implementation would depend on available migration engines
-    pass
+    return None
 
 
 # Cache for imported items
@@ -414,7 +418,7 @@ class ImportCache:
         """Set item in cache"""
         if len(self._cache) >= self.max_size:
             # Remove least recently used
-            lru_key = min(self._access_times, key=self._access_times.get)
+            lru_key = min(self._access_times.keys(), key=lambda k: self._access_times.get(k, 0))
             del self._cache[lru_key]
             del self._access_times[lru_key]
 

@@ -100,8 +100,8 @@ class TestMigrationEngineErrorHandling:
 
             result = await migration_engine.auto_migrate()
 
-            # Should return a plan with "locked" status
-            assert result.status == "locked"
+            # Should return a plan with "skipped" status
+            assert result.status == "skipped"
             assert len(result.migrations) == 0
 
     @pytest.mark.asyncio

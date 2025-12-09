@@ -1,8 +1,25 @@
-"""
-核心模块统一接口定义
+"""Core module unified interface definitions.
 
-定义清晰的服务接口，实现模块间的松耦合。
-遵循依赖倒置原则，高层模块不依赖低层模块的具体实现。
+Defines clear service interfaces to achieve loose coupling between modules.
+Follows the Dependency Inversion Principle - high-level modules don't depend
+on low-level module implementations.
+
+This module provides the foundation for the FastAPI-Easy framework's
+architecture, defining contracts for repositories, services, caches,
+events, and more. Each interface is designed to be generic and extensible,
+supporting multiple implementations while maintaining consistency.
+
+Example:
+    ```python
+    class UserRepository(IRepository[User]):
+        async def get_by_id(self, id: int) -> Optional[User]:
+            # Implementation
+            pass
+
+    # Usage with dependency injection
+    repo = UserRepository()
+    user = await repo.get_by_id(1)
+    ```
 """
 
 from __future__ import annotations
@@ -10,14 +27,33 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Generic
+from typing import Any, Callable, Dict, Generic, List, Optional, Type, TypeVar
 
 T = TypeVar("T")
 ID = TypeVar("ID")
 
 
 class QueryOperator(Enum):
-    """查询操作符"""
+    """Query operators for filtering data.
+
+    These operators define how values should be compared in filter conditions.
+    They map directly to database query operations and are used throughout
+    the framework for consistent filtering semantics.
+
+    Attributes:
+        EQ: Equality comparison (=)
+        NE: Not equal comparison (!=)
+        GT: Greater than (>)
+        GTE: Greater than or equal (>=)
+        LT: Less than (<)
+        LTE: Less than or equal (<=)
+        IN: Value in list (IN)
+        NIN: Value not in list (NOT IN)
+        LIKE: Pattern matching with wildcards (LIKE)
+        ILIKE: Case-insensitive pattern matching (ILIKE)
+        IS_NULL: Check if value is NULL
+        IS_NOT_NULL: Check if value is not NULL
+    """
 
     EQ = "eq"
     NE = "ne"
@@ -34,7 +70,15 @@ class QueryOperator(Enum):
 
 
 class SortDirection(Enum):
-    """排序方向"""
+    """Sorting direction for query results.
+
+    Defines the order in which records should be returned when sorting
+    by a specific field.
+
+    Attributes:
+        ASC: Ascending order (A-Z, 0-9)
+        DESC: Descending order (Z-A, 9-0)
+    """
 
     ASC = "asc"
     DESC = "desc"
@@ -42,35 +86,109 @@ class SortDirection(Enum):
 
 @dataclass
 class QueryFilter:
-    """查询过滤器"""
+    """Query filter for data filtering operations.
+
+    Represents a single filter condition that can be applied to queries.
+    Each filter combines a field name, an operator, and a value to compare
+    against.
+
+    Attributes:
+        field: The field name to filter on
+        operator: The comparison operator to use
+        value: The value to compare against
+
+    Example:
+        ```python
+        # Find users with name "John"
+        filter1 = QueryFilter(field="name", operator=QueryOperator.EQ, value="John")
+
+        # Find users older than 30
+        filter2 = QueryFilter(field="age", operator=QueryOperator.GT, value=30)
+
+        # Find users in specific cities
+        filter3 = QueryFilter(field="city", operator=QueryOperator.IN,
+                             value=["New York", "London"])
+        ```
+    """
 
     field: str
     operator: QueryOperator
     value: Any
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
+        """Convert filter to dictionary representation.
+
+        Returns:
+            Dictionary with field, operator, and value keys
+        """
         return {"field": self.field, "operator": self.operator.value, "value": self.value}
 
 
 @dataclass
 class QuerySort:
-    """查询排序"""
+    """Query sorting configuration.
+
+    Defines how query results should be sorted by specifying a field
+    and sorting direction.
+
+    Attributes:
+        field: Field name to sort by
+        direction: Sort direction (ascending or descending)
+
+    Example:
+        ```python
+        # Sort by name in ascending order
+        sort1 = QuerySort(field="name")
+
+        # Sort by age in descending order
+        sort2 = QuerySort(field="age", direction=SortDirection.DESC)
+        ```
+    """
 
     field: str
     direction: SortDirection = SortDirection.ASC
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
+        """Convert sort to dictionary representation.
+
+        Returns:
+            Dictionary with field and direction keys
+        """
         return {"field": self.field, "direction": self.direction.value}
 
 
 @dataclass
 class QueryPagination:
-    """查询分页"""
+    """Query pagination configuration.
+
+    Controls which subset of results to return by specifying skip and limit
+    values. Provides helper properties for page-based navigation.
+
+    Attributes:
+        skip: Number of records to skip (default: 0)
+        limit: Maximum number of records to return (default: 10)
+
+    Raises:
+        ValueError: If skip is negative or limit is not positive
+
+    Example:
+        ```python
+        # Get first page with 20 items
+        page1 = QueryPagination(skip=0, limit=20)
+
+        # Get second page with 20 items
+        page2 = QueryPagination(skip=20, limit=20)
+
+        # Calculate page number
+        print(f"Current page: {page2.page}")  # Output: 2
+        ```
+    """
 
     skip: int = 0
     limit: int = 10
 
     def __post_init__(self) -> None:
+        """Validate pagination parameters."""
         if self.skip < 0:
             raise ValueError("Skip must be non-negative")
         if self.limit <= 0:
@@ -78,26 +196,64 @@ class QueryPagination:
 
     @property
     def page(self) -> int:
-        """页码（从1开始）"""
+        """Current page number (1-based index).
+
+        Returns:
+            The page number corresponding to the current skip/limit values
+        """
         return (self.skip // self.limit) + 1
 
     @property
     def total_pages(self, total: int) -> int:
-        """总页数"""
+        """Calculate total pages needed for given total records.
+
+        Args:
+            total: Total number of records
+
+        Returns:
+            Total number of pages required
+        """
         return (total + self.limit - 1) // self.limit
 
 
 @dataclass
 class QueryOptions:
-    """查询选项"""
+    """Comprehensive query configuration options.
 
-    filters: Optional[List[QueryFilter]] = None
-    sorts: Optional[List[QuerySort]] = None
-    pagination: Optional[QueryPagination] = None
-    fields: Optional[List[str]] = None  # 字段投影
+    Combines filtering, sorting, pagination, and field selection into
+    a single configuration object for database queries.
+
+    Attributes:
+        filters: List of filter conditions (default: empty list)
+        sorts: List of sort configurations (default: empty list)
+        pagination: Pagination settings (optional)
+        fields: List of fields to include in projection (optional)
+        include_total: Whether to include total count in results
+
+    Example:
+        ```python
+        # Complex query with filters, sorting, and pagination
+        options = QueryOptions(
+            filters=[
+                QueryFilter(field="status", operator=QueryOperator.EQ, value="active"),
+                QueryFilter(field="age", operator=QueryOperator.GT, value=18)
+            ],
+            sorts=[QuerySort(field="created_at", direction=SortDirection.DESC)],
+            pagination=QueryPagination(skip=0, limit=10),
+            fields=["id", "name", "email", "created_at"],
+            include_total=True
+        )
+        ```
+    """
+
+    filters: list[QueryFilter] | None = None
+    sorts: list[QuerySort] | None = None
+    pagination: QueryPagination | None = None
+    fields: list[str] | None = None  # Field projection
     include_total: bool = False
 
     def __post_init__(self) -> None:
+        """Initialize default values for optional fields."""
         if self.filters is None:
             self.filters = []
         if self.sorts is None:
@@ -106,130 +262,515 @@ class QueryOptions:
 
 @dataclass
 class QueryResult(Generic[T]):
-    """查询结果"""
+    """Container for query results with pagination metadata.
 
-    items: List[T]
-    total: Optional[int] = None
+    Wraps query results with additional metadata about pagination,
+    total counts, and whether more results are available.
+
+    Attributes:
+        items: List of query results
+        total: Total number of records matching query (optional)
+        has_more: Whether more records are available
+        page: Current page number (optional)
+        total_pages: Total number of pages (optional)
+
+    Example:
+        ```python
+        # Create a paginated result
+        result = QueryResult[User](
+            items=[user1, user2, user3],
+            total=100,
+            has_more=True,
+            page=1,
+            total_pages=10
+        )
+
+        print(f"Showing {result.count} of {result.total} users")
+        print(f"Page {result.page} of {result.total_pages}")
+        ```
+    """
+
+    items: list[T]
+    total: int | None = None
     has_more: bool = False
-    page: Optional[int] = None
-    total_pages: Optional[int] = None
+    page: int | None = None
+    total_pages: int | None = None
 
     @property
     def count(self) -> int:
-        """项目数量"""
+        """Number of items in the result.
+
+        Returns:
+            The count of items in the items list
+        """
         return len(self.items)
 
 
-# 基础服务接口
+# Repository interfaces
 class IRepository(ABC, Generic[T]):
-    """仓储接口
+    """Generic repository interface for data access operations.
 
-    提供数据访问的抽象层，隐藏具体的数据访问细节。
+    Provides a standardized interface for CRUD (Create, Read, Update, Delete)
+    operations and advanced querying capabilities. This interface abstracts
+    the underlying data storage mechanism, allowing different implementations
+    (SQL, NoSQL, in-memory, etc.) while maintaining consistent behavior.
+
+    Type Parameters:
+        T: The entity type this repository manages
+
+    Example:
+        ```python
+        class UserRepository(IRepository[User]):
+            async def get_by_id(self, id: int) -> Optional[User]:
+                # SQL implementation
+                return await self.db.query(User).filter(User.id == id).first()
+
+        # Usage
+        repo = UserRepository()
+        user = await repo.get_by_id(1)
+        ```
     """
 
     @abstractmethod
-    async def get_by_id(self, id: ID) -> Optional[T]:
-        """根据ID获取实体"""
+    async def get_by_id(self, id: ID) -> T | None:
+        """Retrieve an entity by its unique identifier.
+
+        Args:
+            id: The unique identifier of the entity
+
+        Returns:
+            The entity if found, None otherwise
+
+        Example:
+            ```python
+            user = await repository.get_by_id(123)
+            if user:
+                print(f"Found user: {user.name}")
+            ```
+        """
         pass
 
     @abstractmethod
-    async def get_one(self, options: QueryOptions) -> Optional[T]:
-        """获取单个实体"""
+    async def get_one(self, options: QueryOptions) -> T | None:
+        """Retrieve a single entity based on query options.
+
+        Args:
+            options: Query configuration including filters, sorts, etc.
+
+        Returns:
+            The first matching entity if found, None otherwise
+
+        Example:
+            ```python
+            options = QueryOptions(
+                filters=[QueryFilter(field="email", operator=QueryOperator.EQ,
+                                   value="user@example.com")]
+            )
+            user = await repository.get_one(options)
+            ```
+        """
         pass
 
     @abstractmethod
     async def get_many(self, options: QueryOptions) -> QueryResult[T]:
-        """获取多个实体"""
+        """Retrieve multiple entities based on query options.
+
+        Args:
+            options: Query configuration including filters, sorts, pagination
+
+        Returns:
+            QueryResult containing matching entities and metadata
+
+        Example:
+            ```python
+            options = QueryOptions(
+                filters=[QueryFilter(field="status", operator=QueryOperator.EQ,
+                                   value="active")],
+                pagination=QueryPagination(skip=0, limit=10),
+                include_total=True
+            )
+            result = await repository.get_many(options)
+            print(f"Found {result.total} active users")
+            ```
+        """
         pass
 
     @abstractmethod
     async def create(self, entity: T) -> T:
-        """创建实体"""
+        """Create a new entity.
+
+        Args:
+            entity: The entity to create
+
+        Returns:
+            The created entity (possibly with generated fields like ID)
+
+        Example:
+            ```python
+            user = User(name="John", email="john@example.com")
+            created_user = await repository.create(user)
+            print(f"Created user with ID: {created_user.id}")
+            ```
+        """
         pass
 
     @abstractmethod
-    async def create_many(self, entities: List[T]) -> List[T]:
-        """批量创建实体"""
+    async def create_many(self, entities: list[T]) -> list[T]:
+        """Create multiple entities in a single operation.
+
+        Args:
+            entities: List of entities to create
+
+        Returns:
+            List of created entities (possibly with generated fields)
+
+        Example:
+            ```python
+            users = [
+                User(name="John", email="john@example.com"),
+                User(name="Jane", email="jane@example.com"),
+            ]
+            created_users = await repository.create_many(users)
+            ```
+        """
         pass
 
     @abstractmethod
-    async def update(self, id: ID, updates: Dict[str, Any]) -> Optional[T]:
-        """更新实体"""
+    async def update(self, id: ID, updates: dict[str, Any]) -> T | None:
+        """Update an entity by ID.
+
+        Args:
+            id: The unique identifier of the entity to update
+            updates: Dictionary of fields to update and their new values
+
+        Returns:
+            The updated entity if found and updated, None otherwise
+
+        Example:
+            ```python
+            updates = {"name": "John Doe", "status": "active"}
+            updated_user = await repository.update(123, updates)
+            ```
+        """
         pass
 
     @abstractmethod
     async def update_many(
-        self, updates: Dict[str, Any], options: Optional[QueryOptions] = None
+        self, updates: dict[str, Any], options: QueryOptions | None = None
     ) -> int:
-        """批量更新实体"""
+        """Update multiple entities based on filter criteria.
+
+        Args:
+            updates: Dictionary of fields to update and their new values
+            options: Query options to filter which entities to update
+
+        Returns:
+            Number of entities that were updated
+
+        Example:
+            ```python
+            updates = {"status": "inactive"}
+            options = QueryOptions(
+                filters=[QueryFilter(field="last_login", operator=QueryOperator.LT,
+                                   value=datetime.now() - timedelta(days=30))]
+            )
+            count = await repository.update_many(updates, options)
+            print(f"Deactivated {count} inactive users")
+            ```
+        """
         pass
 
     @abstractmethod
     async def delete(self, id: ID) -> bool:
-        """删除实体"""
+        """Delete an entity by ID.
+
+        Args:
+            id: The unique identifier of the entity to delete
+
+        Returns:
+            True if the entity was deleted, False if not found
+
+        Example:
+            ```python
+            deleted = await repository.delete(123)
+            if deleted:
+                print("User deleted successfully")
+            else:
+                print("User not found")
+            ```
+        """
         pass
 
     @abstractmethod
     async def delete_many(self, options: QueryOptions) -> int:
-        """批量删除实体"""
+        """Delete multiple entities based on filter criteria.
+
+        Args:
+            options: Query options to filter which entities to delete
+
+        Returns:
+            Number of entities that were deleted
+
+        Example:
+            ```python
+            options = QueryOptions(
+                filters=[QueryFilter(field="status", operator=QueryOperator.EQ,
+                                   value="deleted")]
+            )
+            count = await repository.delete_many(options)
+            print(f"Permanently deleted {count} records")
+            ```
+        """
         pass
 
     @abstractmethod
     async def count(self, options: QueryOptions) -> int:
-        """统计实体数量"""
+        """Count entities matching the given criteria.
+
+        Args:
+            options: Query options to filter which entities to count
+
+        Returns:
+            The number of matching entities
+
+        Example:
+            ```python
+            options = QueryOptions(
+                filters=[QueryFilter(field="status", operator=QueryOperator.EQ,
+                                   value="active")]
+            )
+            active_count = await repository.count(options)
+            print(f"Active users: {active_count}")
+            ```
+        """
         pass
 
     @abstractmethod
     async def exists(self, options: QueryOptions) -> bool:
-        """检查实体是否存在"""
+        """Check if any entities match the given criteria.
+
+        More efficient than count() when you only need to know existence.
+
+        Args:
+            options: Query options to filter entities
+
+        Returns:
+            True if at least one matching entity exists, False otherwise
+
+        Example:
+            ```python
+            options = QueryOptions(
+                filters=[QueryFilter(field="email", operator=QueryOperator.EQ,
+                                   value="admin@example.com")]
+            )
+            if await repository.exists(options):
+                print("Admin user exists")
+            ```
+        """
         pass
 
 
 class ICacheService(ABC):
-    """缓存服务接口"""
+    """Generic cache service interface.
+
+    Provides a standardized interface for caching operations with support
+    for TTL (Time To Live), pattern-based clearing, and existence checks.
+    This interface abstracts the underlying caching mechanism (Redis,
+    Memcached, in-memory, etc.) while maintaining consistent behavior.
+
+    Example:
+        ```python
+        class RedisCacheService(ICacheService):
+            async def get(self, key: str) -> Optional[Any]:
+                return await self.redis.get(key)
+
+        # Usage
+        cache = RedisCacheService()
+        await cache.set("user:123", user_data, ttl=3600)
+        user = await cache.get("user:123")
+        ```
+    """
 
     @abstractmethod
-    async def get(self, key: str) -> Optional[Any]:
-        """获取缓存值"""
+    async def get(self, key: str) -> Any | None:
+        """Retrieve a value from cache.
+
+        Args:
+            key: The cache key
+
+        Returns:
+            The cached value if found, None otherwise
+
+        Example:
+            ```python
+            user_data = await cache.get(f"user:{user_id}")
+            if user_data:
+                return User(**user_data)
+            ```
+        """
         pass
 
     @abstractmethod
-    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
-        """设置缓存值"""
+    async def set(self, key: str, value: Any, ttl: int | None = None) -> None:
+        """Store a value in cache.
+
+        Args:
+            key: The cache key
+            value: The value to cache
+            ttl: Time to live in seconds (optional)
+
+        Example:
+            ```python
+            # Cache for 1 hour
+            await cache.set("session:abc123", session_data, ttl=3600)
+
+            # Cache indefinitely
+            await cache.set("config:app", config_data)
+            ```
+        """
         pass
 
     @abstractmethod
     async def delete(self, key: str) -> bool:
-        """删除缓存"""
+        """Remove a value from cache.
+
+        Args:
+            key: The cache key to delete
+
+        Returns:
+            True if the key was deleted, False if it didn't exist
+
+        Example:
+            ```python
+            if await cache.delete(f"user:{user_id}"):
+                print("User cache cleared")
+            ```
+        """
         pass
 
     @abstractmethod
-    async def clear(self, pattern: Optional[str] = None) -> int:
-        """清空缓存"""
+    async def clear(self, pattern: str | None = None) -> int:
+        """Clear cache entries.
+
+        Args:
+            pattern: Pattern to match keys (optional). If None, clears all.
+
+        Returns:
+            Number of keys that were cleared
+
+        Example:
+            ```python
+            # Clear all user cache entries
+            await cache.clear("user:*")
+
+            # Clear all cache
+            await cache.clear()
+            ```
+        """
         pass
 
     @abstractmethod
     async def exists(self, key: str) -> bool:
-        """检查缓存是否存在"""
+        """Check if a key exists in cache.
+
+        Args:
+            key: The cache key to check
+
+        Returns:
+            True if the key exists, False otherwise
+
+        Example:
+            ```python
+            if not await cache.exists(f"stats:{date}"):
+                await generate_daily_stats(date)
+            ```
+        """
         pass
 
 
 class IEventBus(ABC):
-    """事件总线接口"""
+    """Event bus interface for pub-sub communication.
+
+    Provides a decoupled way for components to communicate through events.
+    Components can publish events without knowing who subscribes to them,
+    and subscribers can react to events without knowing the publisher.
+
+    Example:
+        ```python
+        # Publisher
+        await event_bus.publish("user.created", {"user_id": 123})
+
+        # Subscriber
+        async def handle_user_created(data):
+            await send_welcome_email(data["user_id"])
+
+        await event_bus.subscribe("user.created", handle_user_created)
+        ```
+    """
 
     @abstractmethod
     async def publish(self, event_name: str, data: Any, **kwargs) -> None:
-        """发布事件"""
+        """Publish an event to all subscribers.
+
+        Args:
+            event_name: Name of the event
+            data: Event payload data
+            **kwargs: Additional event metadata
+
+        Example:
+            ```python
+            await event_bus.publish(
+                "order.placed",
+                {"order_id": 123, "amount": 99.99},
+                user_id=user.id,
+                timestamp=datetime.now().isoformat()
+            )
+            ```
+        """
         pass
 
     @abstractmethod
     async def subscribe(self, event_name: str, handler: Callable[..., Any], **kwargs) -> str:
-        """订阅事件"""
+        """Subscribe to an event with a handler function.
+
+        Args:
+            event_name: Name of the event to subscribe to
+            handler: Function to handle the event
+            **kwargs: Additional subscription options
+
+        Returns:
+            Subscription ID that can be used to unsubscribe
+
+        Example:
+            ```python
+            async def handle_order_placed(data, user_id=None):
+                print(f"Order {data['order_id']} placed by user {user_id}")
+
+            sub_id = await event_bus.subscribe(
+                "order.placed",
+                handle_order_placed,
+                priority="high"
+            )
+            ```
+        """
         pass
 
     @abstractmethod
     async def unsubscribe(self, subscription_id: str) -> bool:
-        """取消订阅"""
+        """Unsubscribe from an event.
+
+        Args:
+            subscription_id: The subscription ID returned by subscribe()
+
+        Returns:
+            True if unsubscribed successfully, False otherwise
+
+        Example:
+            ```python
+            if await event_bus.unsubscribe(subscription_id):
+                print("Successfully unsubscribed")
+            ```
+        """
         pass
 
 

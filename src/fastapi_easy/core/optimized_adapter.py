@@ -106,7 +106,7 @@ class OptimizedSQLAlchemyAdapter:
     def _get_cache_key(self, operation: str, **kwargs) -> str:
         """Generate cache key for operation
 
-        Uses secure MD5-based key generation to prevent collisions.
+        Uses secure SHA-256-based key generation to prevent collisions.
 
         Args:
             operation: Operation name (get_all, get_one, etc.)

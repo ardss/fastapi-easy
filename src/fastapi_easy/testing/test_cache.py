@@ -83,14 +83,14 @@ class TestCache(Generic[T]):
         elif callable(key):
             # Use function name and source for key
             func_source = f"{key.__module__}.{key.__name__}"
-            return hashlib.md5(func_source.encode()).hexdigest()
+            return hashlib.sha256(func_source.encode()).hexdigest()
         elif isinstance(key, tuple):
             # Generate key from tuple of values
             serialized = json.dumps(key, sort_keys=True, default=str)
-            return hashlib.md5(serialized.encode()).hexdigest()
+            return hashlib.sha256(serialized.encode()).hexdigest()
         else:
             # Convert to string and hash
-            return hashlib.md5(str(key).encode()).hexdigest()
+            return hashlib.sha256(str(key).encode()).hexdigest()
 
     def _get_cache_path(self, key: str) -> Path:
         """Get file path for disk cache"""
@@ -400,12 +400,12 @@ class DatabaseCache:
     def cache_query_result(self, query: str, params: tuple, result: Any,
                           ttl: float = 1800):  # 30 minutes TTL
         """Cache database query result"""
-        cache_key = f"query:{hashlib.md5(f'{query}{params}'.encode()).hexdigest()}"
+        cache_key = f"query:{hashlib.sha256(f'{query}{params}'.encode()).hexdigest()}"
         self.cache.set(cache_key, result, ttl=ttl)
 
     def get_cached_query(self, query: str, params: tuple) -> Optional[Any]:
         """Get cached query result"""
-        cache_key = f"query:{hashlib.md5(f'{query}{params}'.encode()).hexdigest()}"
+        cache_key = f"query:{hashlib.sha256(f'{query}{params}'.encode()).hexdigest()}"
         return self.cache.get(cache_key)
 
 

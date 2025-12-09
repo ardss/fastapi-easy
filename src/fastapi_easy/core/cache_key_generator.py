@@ -1,7 +1,7 @@
 """Cache key generation with collision prevention
 
 This module provides secure cache key generation using JSON serialization
-and MD5 hashing to prevent key collisions.
+and SHA-256 hashing to prevent key collisions.
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ class CacheKeyGenerator:
         """Generate a cache key from operation and parameters
 
         Uses JSON serialization with sorted keys to ensure consistency,
-        then applies MD5 hashing for compact representation.
+        then applies SHA-256 hashing for compact representation.
 
         Args:
             operation: Operation name (e.g., 'get_one', 'get_all')
@@ -74,8 +74,8 @@ class CacheKeyGenerator:
         # Build key string with operation and params
         key_str = f"{operation}:{params_json}"
 
-        # Generate MD5 hash for compact key
-        key_hash = hashlib.md5(key_str.encode()).hexdigest()
+        # Generate SHA-256 hash for compact key
+        key_hash = hashlib.sha256(key_str.encode()).hexdigest()
 
         # Return prefixed key for debugging
         return f"{operation}:{key_hash}"

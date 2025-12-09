@@ -97,11 +97,11 @@ AnyDict = Dict[str, Any]
 StringList = List[str]
 AnyList = List[Any]
 
-# Optional type helpers
-def optional_list(t: type) -> Optional[List[Any]]:
-    """Helper for optional list types"""
-    return Optional[List[t]]
+# Optional type constructors
+def make_optional_list(item_type: Type[Any]) -> Type[Any]:
+    """Create an optional list type"""
+    return Optional[List[item_type]]
 
-def optional_dict(k: type, v: type) -> Optional[Dict[Any, Any]]:
-    """Helper for optional dict types"""
-    return Optional[Dict[k, v]]
+def make_optional_dict(key_type: Type[Any], value_type: Type[Any]) -> Type[Any]:
+    """Create an optional dict type"""
+    return Optional[Dict[key_type, value_type]]

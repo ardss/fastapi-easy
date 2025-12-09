@@ -47,9 +47,10 @@ class MigrationEngine:
 
         # 1. Acquire Lock
         logger.info("Acquiring migration lock...")
-        if not await self.lock.acquire():
-            logger.warning("Unable to acquire lock, assuming another instance is migrating")
-            return MigrationPlan(migrations=[], status="locked")
+        lock_acquired = await self.lock.acquire()
+        if not lock_acquired:
+            logger.warning("Unable to acquire lock, another instance may be migrating")
+            return MigrationPlan(migrations=[], status="skipped")
 
         try:
             # 2. Execute BEFORE_DDL Hook
@@ -112,18 +113,23 @@ class MigrationEngine:
             )
             raise
         finally:
-            # 7. Release Lock with retry
+            # 7. Release Lock with retry and improved cleanup
             logger.info("释放迁移锁...")
             max_retries = 3
+            lock_released = False
+
             for attempt in range(max_retries):
                 try:
-                    await self.lock.release()
-                    logger.info("迁移锁已释放")
-                    break
+                    lock_released = await self.lock.release()
+                    if lock_released:
+                        logger.info("迁移锁已释放")
+                        break
+                    else:
+                        logger.warning(f"锁释放返回 False (尝试 {attempt + 1}/{max_retries})")
                 except Exception as e:
                     if attempt < max_retries - 1:
                         logger.warning(
-                            f"锁释放失败 (尝试 {attempt + 1}/{max_retries}), " f"重试中..."
+                            f"锁释放失败 (尝试 {attempt + 1}/{max_retries}), " f"重试中: {e}"
                         )
                         await asyncio.sleep(1)
                     else:
@@ -136,6 +142,13 @@ class MigrationEngine:
                             f"  3. 重新运行迁移",
                             exc_info=True,
                         )
+
+            # Additional cleanup for file-based locks
+            if hasattr(self.lock, 'cleanup_test_locks'):
+                try:
+                    self.lock.cleanup_test_locks()
+                except Exception as e:
+                    logger.debug(f"测试锁清理失败: {e}")
 
     def get_history(self, max_items: int = 10):
         """Get migration history
@@ -180,9 +193,10 @@ class MigrationEngine:
 
         # 获取锁
         logger.info("🔒 获取迁移锁...")
-        if not await self.lock.acquire():
-            logger.warning("⏳ 无法获取锁，假设另一个实例正在迁移")
-            result.add_error("无法获取迁移锁")
+        lock_acquired = await self.lock.acquire()
+        if not lock_acquired:
+            logger.warning("⏳ 无法获取锁，另一个实例可能正在执行迁移操作")
+            result.add_error("无法获取迁移锁 - 另一个进程可能正在执行迁移")
             return result
 
         try:
@@ -259,16 +273,28 @@ class MigrationEngine:
             # 释放锁 (带重试机制)
             logger.info("释放迁移锁...")
             max_retries = 3
+            lock_released = False
+
             for attempt in range(max_retries):
                 try:
-                    await self.lock.release()
-                    logger.info("迁移锁已释放")
-                    break
+                    lock_released = await self.lock.release()
+                    if lock_released:
+                        logger.info("迁移锁已释放")
+                        break
+                    else:
+                        logger.warning(f"锁释放返回 False (尝试 {attempt + 1}/{max_retries})")
                 except Exception as e:
                     if attempt < max_retries - 1:
                         logger.warning(
-                            f"锁释放失败 (尝试 {attempt + 1}/{max_retries}), " f"重试中..."
+                            f"锁释放失败 (尝试 {attempt + 1}/{max_retries}), " f"重试中: {e}"
                         )
                         await asyncio.sleep(1)
                     else:
                         logger.error(f"锁释放失败: {e}")
+
+            # Additional cleanup for file-based locks
+            if hasattr(self.lock, 'cleanup_test_locks'):
+                try:
+                    self.lock.cleanup_test_locks()
+                except Exception as e:
+                    logger.debug(f"测试锁清理失败: {e}")

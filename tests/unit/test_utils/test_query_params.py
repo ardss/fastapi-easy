@@ -1,7 +1,7 @@
 """Tests for query_params utility"""
 
 import pytest
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from fastapi import FastAPI, Depends, Query
 from fastapi.testclient import TestClient
 from pydantic import BaseModel, ValidationError
@@ -13,7 +13,7 @@ class UserQuery(BaseModel):
     """Test query model"""
 
     name: str
-    age: int = None
+    age: Optional[int] = None
     city: str = "New York"
 
 
@@ -100,6 +100,21 @@ def test_query_params_with_complex_types():
 
     result = dependency(items='["a", "b"]', metadata='{"key": "value"}', count="5")
     assert isinstance(result, ComplexQuery)
+    assert result.items == ["a", "b"]
+    assert result.metadata == {"key": "value"}
+    assert result.count == 5
+
+    # Test with as_query_params as well
+    dependency2 = as_query_params(ComplexQuery)
+    result2 = dependency2(items='["x", "y", "z"]', metadata='{"nested": {"data": "test"}}', count="10")
+    assert isinstance(result2, ComplexQuery)
+    assert result2.items == ["x", "y", "z"]
+    assert result2.metadata == {"nested": {"data": "test"}}
+    assert result2.count == 10
+
+    # Test with invalid JSON that should fail validation
+    with pytest.raises(ValidationError):
+        dependency(items="", metadata="", count="")  # Empty strings can't be converted to list/dict/int
 
 
 def test_query_params_fastapi_integration():

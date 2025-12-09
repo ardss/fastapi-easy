@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class PermissionCheckMetrics:
     """Metrics for permission checks"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize metrics"""
         self.total_checks = 0
         self.successful_checks = 0
@@ -101,7 +101,7 @@ class PermissionCheckMetrics:
 class MonitoredPermissionEngine:
     """Permission engine with performance monitoring"""
 
-    def __init__(self, base_engine):
+    def __init__(self, base_engine: Any) -> None:
         """Initialize monitored permission engine
 
         Args:

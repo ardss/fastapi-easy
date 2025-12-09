@@ -157,7 +157,7 @@ class OptimizedSQLAlchemyAdapter:
 
         key_data = {"operation": operation, "model": self.model.__name__, **kwargs}
         key_str = json.dumps(key_data, sort_keys=True, default=str)
-        return hashlib.md5(key_str.encode()).hexdigest()
+        return hashlib.sha256(key_str.encode()).hexdigest()
 
     def _build_filter_query(self, filters: Dict[str, Any]) -> Any:
         """Build optimized filter query with caching"""

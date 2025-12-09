@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Protocol
+from typing import Any, Dict, List, Optional, Protocol
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class AuditStorage(Protocol):
         """
         ...
 
-    async def query(self, **filters) -> List[Dict[str, Any]]:
+    async def query(self, **filters: Any) -> List[Dict[str, Any]]:
         """Query audit logs
 
         Args:
@@ -36,7 +36,7 @@ class AuditStorage(Protocol):
         """
         ...
 
-    async def delete(self, **filters) -> int:
+    async def delete(self, **filters: Any) -> int:
         """Delete audit logs
 
         Args:
@@ -88,7 +88,7 @@ class MemoryAuditStorage:
 
         logger.debug(f"Saved audit log, total: {len(self.logs)}")
 
-    async def query(self, **filters) -> List[Dict[str, Any]]:
+    async def query(self, **filters: Any) -> List[Dict[str, Any]]:
         """Query audit logs from memory
 
         Args:
@@ -113,7 +113,7 @@ class MemoryAuditStorage:
         logger.debug(f"Queried {len(result)} logs with filters: {filters}")
         return result
 
-    async def delete(self, **filters) -> int:
+    async def delete(self, **filters: Any) -> int:
         """Delete audit logs from memory
 
         Args:
@@ -156,7 +156,7 @@ class MemoryAuditStorage:
 class DatabaseAuditStorage:
     """Database audit log storage (placeholder)"""
 
-    def __init__(self, db_session=None):
+    def __init__(self, db_session: Optional[Any] = None) -> None:
         """Initialize database storage
 
         Args:
@@ -177,7 +177,7 @@ class DatabaseAuditStorage:
         # Placeholder: In real implementation, save to database
         logger.debug(f"Saved audit log to database: {log}")
 
-    async def query(self, **filters) -> List[Dict[str, Any]]:
+    async def query(self, **filters: Any) -> List[Dict[str, Any]]:
         """Query audit logs from database
 
         Args:
@@ -190,7 +190,7 @@ class DatabaseAuditStorage:
         logger.debug(f"Queried logs from database with filters: {filters}")
         return []
 
-    async def delete(self, **filters) -> int:
+    async def delete(self, **filters: Any) -> int:
         """Delete audit logs from database
 
         Args:

@@ -63,18 +63,33 @@ def QueryParams(schema: Type[BaseModel]) -> Callable:
     Returns:
         Dependency function that converts query parameters to the Pydantic model
     """
+    # Get field information from the Pydantic model
+    model_fields = schema.model_fields
+    type_hints = get_type_hints(schema)
+
+    # Create dependency with explicit parameters
+    import inspect
 
     def dependency(**query_params: Any) -> BaseModel:
         """Convert query parameters to Pydantic model"""
+        # Filter out None values for fields that have None as default
+        filtered_params = {}
+        for field_name, value in query_params.items():
+            if field_name in model_fields:
+                field_info = model_fields[field_name]
+                # Skip None values for fields with None default
+                if value is None and field_info.default is None:
+                    continue
+            filtered_params[field_name] = value
+
         try:
-            return schema(**query_params)
+            return schema(**filtered_params)
         except ValidationError as e:
             # Try to parse complex types if validation fails
             try:
-                type_hints = get_type_hints(schema)
                 parsed_params = {}
 
-                for field_name, value in query_params.items():
+                for field_name, value in filtered_params.items():
                     if field_name in type_hints:
                         field_type = type_hints[field_name]
                         parsed_params[field_name] = _parse_complex_type(value, field_type)
@@ -86,13 +101,17 @@ def QueryParams(schema: Type[BaseModel]) -> Callable:
                 # If still fails, raise the original error
                 raise e
 
-    # Get field information from the Pydantic model
-    model_fields = schema.model_fields
-    type_hints = get_type_hints(schema)
+    # Set proper function signature for FastAPI
+    sig_parameters = []
+    annotations_dict = {}
 
-    # Create default values and descriptions for each field
-    defaults = {}
+    # Separate required and optional fields to ensure correct signature order
+    required_fields = []
+    optional_fields = []
+
     for field_name, field_info in model_fields.items():
+        field_type = type_hints.get(field_name, Any)
+
         # Extract description from field if available
         description = (
             field_info.description
@@ -100,22 +119,43 @@ def QueryParams(schema: Type[BaseModel]) -> Callable:
             else f"Query parameter: {field_name}"
         )
 
-        # Handle default value
-        if field_info.default is not None and field_info.default != ...:
-            # Field has a default value
-            defaults[field_name] = Query(default=field_info.default, description=description)
+        # Create Query object based on field properties
+        if field_info.default is not ...:
+            # Field has a default value (including None)
+            query_obj = Query(default=field_info.default, description=description)
+            has_default = True
         elif field_info.default_factory is not None:
             # Field has a default factory
-            defaults[field_name] = Query(
+            query_obj = Query(
                 default_factory=field_info.default_factory, description=description
             )
+            has_default = True
         else:
-            # Required field
-            defaults[field_name] = Query(..., description=description)
+            # Required field (only when default is Ellipsis ...)
+            query_obj = Query(..., description=description)
+            has_default = False
 
-    # Update dependency function signature with proper defaults
-    dependency.__defaults__ = tuple(defaults.values())
-    dependency.__annotations__ = {**type_hints, "return": schema}
+        # Create parameter for signature
+        param = inspect.Parameter(
+            name=field_name,
+            kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            default=query_obj if has_default else inspect.Parameter.empty,
+            annotation=field_type
+        )
+
+        if has_default:
+            optional_fields.append((field_name, param, field_type))
+        else:
+            required_fields.append((field_name, param, field_type))
+
+    # Add required fields first, then optional fields (Python signature requirement)
+    for field_name, param, field_type in required_fields + optional_fields:
+        sig_parameters.append(param)
+        annotations_dict[field_name] = field_type
+
+    # Update function signature and annotations
+    dependency.__signature__ = inspect.Signature(sig_parameters)
+    dependency.__annotations__ = {**annotations_dict, "return": schema}
 
     return dependency
 
@@ -136,14 +176,29 @@ def as_query_params(schema: Type[BaseModel]) -> Callable:
         async def get_users(params: UserQuery = Depends(as_query_params(UserQuery))):
             return {"name": params.name, "age": params.age}
     """
+    # Get field information from the Pydantic model
+    model_fields = schema.model_fields
+    type_hints = get_type_hints(schema)
+
+    # Create dependency with explicit parameters
+    import inspect
 
     def query_dependency(**kwargs: Any) -> BaseModel:
         """Convert query parameters to Pydantic model"""
+        # Filter out None values for fields that have None as default
+        filtered_params = {}
+        for field_name, value in kwargs.items():
+            if field_name in model_fields:
+                field_info = model_fields[field_name]
+                # Skip None values for fields with None default
+                if value is None and field_info.default is None:
+                    continue
+            filtered_params[field_name] = value
+
         # Parse complex types from JSON strings before validation
-        type_hints = get_type_hints(schema)
         parsed_params = {}
 
-        for field_name, value in kwargs.items():
+        for field_name, value in filtered_params.items():
             if field_name in type_hints:
                 field_type = type_hints[field_name]
                 parsed_params[field_name] = _parse_complex_type(value, field_type)
@@ -152,33 +207,61 @@ def as_query_params(schema: Type[BaseModel]) -> Callable:
 
         return schema(**parsed_params)
 
-    # Get field information from the Pydantic model
-    model_fields = schema.model_fields
-    type_hints = get_type_hints(schema)
+    # Set proper function signature for FastAPI
+    sig_parameters = []
+    annotations_dict = {}
 
-    # Add Query dependencies for each field
+    # Separate required and optional fields to ensure correct signature order
+    required_fields = []
+    optional_fields = []
+
     for field_name, field_info in model_fields.items():
         field_type = type_hints.get(field_name, Any)
+
+        # Extract description from field if available
         description = (
             field_info.description
             if hasattr(field_info, "description")
             else f"Query parameter: {field_name}"
         )
 
-        if field_info.default is not None and field_info.default != ...:
-            query_dependency.__annotations__[field_name] = field_type
-            # Set default value using Query
-            setattr(
-                query_dependency,
-                field_name,
-                Query(default=field_info.default, description=description),
+        # Create Query object based on field properties
+        if field_info.default is not ...:
+            # Field has a default value (including None)
+            query_obj = Query(default=field_info.default, description=description)
+            has_default = True
+        elif field_info.default_factory is not None:
+            # Field has a default factory
+            query_obj = Query(
+                default_factory=field_info.default_factory, description=description
             )
+            has_default = True
         else:
-            query_dependency.__annotations__[field_name] = field_type
-            # Set required value using Query
-            setattr(query_dependency, field_name, Query(..., description=description))
+            # Required field (only when default is Ellipsis ...)
+            query_obj = Query(..., description=description)
+            has_default = False
 
-    query_dependency.__annotations__["return"] = schema
+        # Create parameter for signature
+        param = inspect.Parameter(
+            name=field_name,
+            kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            default=query_obj if has_default else inspect.Parameter.empty,
+            annotation=field_type
+        )
+
+        if has_default:
+            optional_fields.append((field_name, param, field_type))
+        else:
+            required_fields.append((field_name, param, field_type))
+
+    # Add required fields first, then optional fields (Python signature requirement)
+    for field_name, param, field_type in required_fields + optional_fields:
+        sig_parameters.append(param)
+        annotations_dict[field_name] = field_type
+
+    # Update function signature and annotations
+    query_dependency.__signature__ = inspect.Signature(sig_parameters)
+    query_dependency.__annotations__ = {**annotations_dict, "return": schema}
 
     return query_dependency
 

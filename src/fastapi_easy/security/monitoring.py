@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class PermissionCheckMetrics:
     """Metrics for permission checks"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize metrics"""
         self.total_checks = 0
         self.successful_checks = 0
@@ -101,7 +101,7 @@ class PermissionCheckMetrics:
 class MonitoredPermissionEngine:
     """Permission engine with performance monitoring"""
 
-    def __init__(self, base_engine):
+    def __init__(self, base_engine: Any) -> None:
         """Initialize monitored permission engine
 
         Args:
@@ -173,7 +173,7 @@ class MonitoredPermissionEngine:
                 f"cache_hit={cache_hit}, success={success}"
             )
 
-    async def check_all_permissions(self, user_id: str, permissions: list) -> bool:
+    async def check_all_permissions(self, user_id: str, permissions: List[str]) -> bool:
         """Check all permissions with monitoring
 
         Args:
@@ -204,7 +204,7 @@ class MonitoredPermissionEngine:
                 cache_hit=False,
             )
 
-    async def check_any_permission(self, user_id: str, permissions: list) -> bool:
+    async def check_any_permission(self, user_id: str, permissions: List[str]) -> bool:
         """Check any permission with monitoring
 
         Args:

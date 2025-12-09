@@ -1,15 +1,64 @@
-"""Optimization configuration management"""
+"""Optimization configuration management.
+
+This module provides comprehensive configuration management for performance
+optimization features in FastAPI-Easy. It supports environment variable
+configuration, JSON file loading, and runtime configuration updates.
+
+The configuration controls:
+- Cache settings (L1/L2 cache sizes and TTL)
+- Async operation limits
+- Database connection pooling
+- Performance monitoring thresholds
+- Memory optimization parameters
+
+Example:
+    ```python
+    # Load from environment variables
+    config = OptimizationConfig.from_env()
+
+    # Or create with custom settings
+    config = OptimizationConfig(
+        enable_cache=True,
+        l1_size=5000,
+        l1_ttl=300,
+        hit_rate_threshold=80.0
+    )
+    ```
+"""
 
 from __future__ import annotations
 
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 
 class OptimizationConfig:
-    """Configuration for performance optimizations"""
+    """Configuration for performance optimizations.
+
+    Centralizes all performance-related configuration options in a single
+    class for easy management and validation. Supports initialization from
+    environment variables, JSON files, or direct parameter setting.
+
+    Attributes:
+        enable_cache: Enable caching system
+        enable_async: Enable async optimizations
+        l1_size: L1 (in-memory) cache size
+        l1_ttl: L1 cache TTL in seconds
+        l2_size: L2 (distributed) cache size
+        l2_ttl: L2 cache TTL in seconds
+        max_concurrent: Maximum concurrent async operations
+        enable_monitoring: Enable performance monitoring
+        hit_rate_threshold: Cache hit rate threshold for alerts
+        pool_size: Database connection pool size
+        max_overflow: Maximum overflow connections
+        pool_timeout: Pool acquisition timeout in seconds
+        pool_recycle: Connection recycle time in seconds
+        query_timeout: Query execution timeout in seconds
+        cache_size: General cache size (legacy)
+        cache_ttl: General cache TTL in seconds (legacy)
+    """
 
     def __init__(
         self,
@@ -119,12 +168,12 @@ class OptimizationConfig:
         if not config_path.exists():
             raise FileNotFoundError(f"Configuration file not found: {path}")
 
-        with open(config_path) as f:
+        with config_path.open() as f:
             config_dict = json.load(f)
 
         return cls(**config_dict)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert configuration to dictionary
 
         Returns:
@@ -159,7 +208,7 @@ class OptimizationConfig:
         config_path = Path(path)
         config_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(config_path, "w") as f:
+        with config_path.open("w") as f:
             f.write(self.to_json())
 
 

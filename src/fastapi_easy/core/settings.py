@@ -14,9 +14,13 @@ from abc import ABC
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union, get_type_hints
+from typing import Any, Callable, Dict, List, Optional, Type, TypeVar, Union, get_type_hints
 
-import yaml
+try:
+    import yaml
+except ImportError:
+    yaml = None
+    # yaml is optional - if not available, YAML config files won't be supported
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +41,7 @@ class ConfigField:
     """配置字段定义"""
 
     name: Optional[str] = None  # Will be set automatically when used in dataclasses
-    type: Optional[Type] = None  # Will be inferred from type hint
+    type: Optional[Type[Any]] = None  # Will be inferred from type hint
     default: Any = None
     required: bool = True
     description: str = ""
@@ -45,7 +49,7 @@ class ConfigField:
     choices: Optional[List[Any]] = None
     min_value: Optional[Union[int, float]] = None
     max_value: Optional[Union[int, float]] = None
-    validator: Optional[callable] = None
+    validator: Optional[Callable[[Any], bool]] = None
 
 
 class BaseSettings(ABC):
@@ -55,12 +59,12 @@ class BaseSettings(ABC):
     提供配置加载、验证和类型转换功能。
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         """初始化配置"""
         self._config_data: Dict[str, Any] = {}
         self._load_config(**kwargs)
 
-    def _load_config(self, **kwargs):
+    def _load_config(self, **kwargs: Any) -> None:
         """加载配置"""
         # 1. 加载默认值
         self._load_defaults()
@@ -77,13 +81,13 @@ class BaseSettings(ABC):
         # 5. 验证配置
         self._validate_config()
 
-    def _load_defaults(self):
+    def _load_defaults(self) -> None:
         """加载默认值"""
         for field_info in self._get_config_fields():
             if field_info.default is not None:
                 self._config_data[field_info.name] = field_info.default
 
-    def _load_from_file(self):
+    def _load_from_file(self) -> None:
         """从配置文件加载"""
         config_file = os.environ.get("FASTAPI_EASY_CONFIG_FILE")
         if not config_file:

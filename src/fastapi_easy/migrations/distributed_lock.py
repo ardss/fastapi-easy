@@ -383,7 +383,13 @@ class FileLockProvider(LockProvider):
 
     def __init__(self, lock_file: Optional[str] = None):
         if lock_file is None:
-            lock_file = ".fastapi_easy_migration.lock"
+            # 在测试环境中使用唯一锁文件名，避免测试间冲突
+            if is_test_environment():
+                import uuid
+                unique_id = str(uuid.uuid4())[:8]
+                lock_file = f".fastapi_easy_migration_test_{unique_id}.lock"
+            else:
+                lock_file = ".fastapi_easy_migration.lock"
         self.lock_file = lock_file
         self.acquired = False
         self._pid = None
@@ -395,6 +401,39 @@ class FileLockProvider(LockProvider):
     def _cleanup_stale_test_locks(self):
         """在测试环境中清理陈旧的锁文件"""
         try:
+            # 在测试环境中，清理所有测试相关的锁文件
+            if is_test_environment():
+                import glob
+                test_lock_files = glob.glob(".fastapi_easy_migration_test_*.lock")
+                for lock_file in test_lock_files:
+                    try:
+                        if os.path.exists(lock_file):
+                            with open(lock_file) as f:
+                                content = f.read()
+                                if ":" in content:
+                                    pid, timestamp = content.split(":")
+                                    lock_age = time.time() - float(timestamp)
+
+                                    # 在测试环境中，任何超过1秒的锁都被认为是陈旧的
+                                    if lock_age > 1:
+                                        try:
+                                            os.kill(int(pid), 0)
+                                            logger.debug(f"测试环境锁文件进程 {pid} 仍在运行，保留锁文件: {lock_file}")
+                                        except (ProcessLookupError, ValueError, OSError):
+                                            # 使用 DEBUG 级别避免测试输出污染
+                                            logger.debug(f"测试环境清理陈旧锁文件 PID {pid} (age: {lock_age:.1f}s): {lock_file}")
+                                            os.remove(lock_file)
+                                    else:
+                                        logger.debug(f"测试环境锁文件仍然新鲜 (age: {lock_age:.1f}s): {lock_file}")
+                                else:
+                                    logger.debug(f"测试环境清理格式错误的锁文件: {lock_file}")
+                                    os.remove(lock_file)
+                    except (OSError, ValueError) as e:
+                        # 静默处理错误，避免测试输出污染
+                        logger.debug(f"清理测试锁文件失败 {lock_file}: {e}")
+                        continue
+
+            # Also clean up the specific lock file for this instance
             if os.path.exists(self.lock_file):
                 with open(self.lock_file) as f:
                     content = f.read()
@@ -568,10 +607,41 @@ class FileLockProvider(LockProvider):
             return
 
         try:
+            # 清理当前实例的锁文件
             if os.path.exists(self.lock_file):
                 # 强制删除测试环境的锁文件
                 os.remove(self.lock_file)
                 logger.debug(f"测试环境强制清理锁文件: {self.lock_file}")
+
+            # 清理所有测试相关的陈旧锁文件
+            import glob
+            test_lock_files = glob.glob(".fastapi_easy_migration_test_*.lock")
+            for lock_file in test_lock_files:
+                try:
+                    if os.path.exists(lock_file):
+                        # 检查锁文件年龄，清理超过5秒的锁文件
+                        try:
+                            with open(lock_file) as f:
+                                content = f.read()
+                                if ":" in content:
+                                    pid, timestamp = content.split(":")
+                                    lock_age = time.time() - float(timestamp)
+                                    if lock_age > 5:  # 清理超过5秒的锁文件
+                                        os.remove(lock_file)
+                                        logger.debug(f"测试环境清理陈旧锁文件 (age: {lock_age:.1f}s): {lock_file}")
+                                else:
+                                    # 格式错误的锁文件直接删除
+                                    os.remove(lock_file)
+                                    logger.debug(f"测试环境清理格式错误的锁文件: {lock_file}")
+                        except (OSError, ValueError):
+                            # 读取失败的锁文件直接删除
+                            try:
+                                os.remove(lock_file)
+                                logger.debug(f"测试环境清理无法读取的锁文件: {lock_file}")
+                            except OSError:
+                                pass
+                except OSError:
+                    pass
         except OSError:
             # 静默处理，避免测试输出污染
             pass

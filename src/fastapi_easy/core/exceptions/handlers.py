@@ -62,9 +62,9 @@ class RetryConfig:
 class FallbackConfig:
     """Configuration for fallback logic."""
 
-    fallback_func: Callable
-    fallback_args: tuple = field(default_factory=tuple)
-    fallback_kwargs: dict = field(default_factory=dict)
+    fallback_func: Callable[..., Any]
+    fallback_args: tuple[Any, ...] = field(default_factory=tuple)
+    fallback_kwargs: dict[str, Any] = field(default_factory=dict)
     execute_on: List[Type[Exception]] = field(
         default_factory=lambda: [
             DatabaseException,
@@ -111,7 +111,7 @@ class ErrorHandler:
         # Error handling configurations
         self.retry_configs: Dict[Type[Exception], RetryConfig] = {}
         self.fallback_configs: Dict[Type[Exception], FallbackConfig] = {}
-        self.error_handlers: Dict[Type[Exception], Callable] = {}
+        self.error_handlers: Dict[Type[Exception], Callable[..., Any]] = {}
 
         # Metrics tracking
         self.metrics = ErrorMetrics()
@@ -121,7 +121,7 @@ class ErrorHandler:
         self,
         exception_type: Type[Exception],
         config: RetryConfig,
-    ):
+    ) -> None:
         """Configure retry logic for a specific exception type."""
         self.retry_configs[exception_type] = config
 
@@ -129,7 +129,7 @@ class ErrorHandler:
         self,
         exception_type: Type[Exception],
         config: FallbackConfig,
-    ):
+    ) -> None:
         """Configure fallback logic for a specific exception type."""
         self.fallback_configs[exception_type] = config
 
@@ -137,7 +137,7 @@ class ErrorHandler:
         self,
         exception_type: Type[Exception],
         handler: Callable[[Exception], Any],
-    ):
+    ) -> None:
         """Register a custom error handler."""
         self.error_handlers[exception_type] = handler
 
@@ -384,7 +384,7 @@ class ErrorHandler:
                     raise exception
         return None
 
-    def _update_metrics(self, exception: Exception):
+    def _update_metrics(self, exception: Exception) -> None:
         """Update error metrics."""
         self.metrics.total_errors += 1
         self.metrics.last_error_time = datetime.utcnow()
@@ -400,7 +400,7 @@ class ErrorHandler:
                 self.metrics.errors_by_category.get(exception.category.value, 0) + 1
             )
 
-    def _log_error(self, exception: Exception):
+    def _log_error(self, exception: Exception) -> None:
         """Log the error with appropriate level."""
         if isinstance(exception, FastAPIEasyException):
             if exception.severity == ErrorSeverity.CRITICAL:
@@ -414,7 +414,7 @@ class ErrorHandler:
         else:
             logger.error(f"Unhandled exception: {exception}", exc_info=exception)
 
-    def _escalate_error(self, exception: Exception):
+    def _escalate_error(self, exception: Exception) -> None:
         """Escalate error to higher level monitoring/alerting."""
         # In a real implementation, this might:
         # - Send alerts to monitoring systems
@@ -444,7 +444,7 @@ class ErrorHandler:
             "custom_handlers": len(self.error_handlers),
         }
 
-    def reset_metrics(self):
+    def reset_metrics(self) -> None:
         """Reset error metrics."""
         self.metrics = ErrorMetrics()
         self._error_times = []

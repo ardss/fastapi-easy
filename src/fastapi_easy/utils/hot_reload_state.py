@@ -16,7 +16,7 @@ from typing import Any, Callable, Dict, List, Optional
 if os.name == "posix":
     import fcntl
 
-    FCNTL_MODULE = fcntl
+    FCNTL_MODULE: Optional[Any] = fcntl
 else:
     # Windows compatibility - fcntl not available
     fcntl = None
@@ -25,6 +25,13 @@ else:
 # Mock fcntl operations for Windows
 import os
 import msvcrt
+import types
+
+# Create a mock fcntl module for Windows compatibility
+if fcntl is None:
+    fcntl = types.ModuleType("fcntl")
+    fcntl.LOCK_EX = 2  # Exclusive lock
+    fcntl.LOCK_UN = 8  # Unlock
 
 
 logger = logging.getLogger(__name__)
@@ -90,7 +97,7 @@ class StateManager:
     def _get_state_file(self, key: str) -> Path:
         """Get the file path for a state key"""
         # Hash the key to avoid filesystem issues
-        safe_key = hashlib.md5(key.encode()).hexdigest()
+        safe_key = hashlib.sha256(key.encode()).hexdigest()
         ext = "json"  # Always use secure JSON serialization
         return self.state_dir / f"{safe_key}.{ext}"
 
@@ -98,7 +105,7 @@ class StateManager:
         """Serialize data for storage using secure JSON"""
 
         # JSON serialization with comprehensive type handling
-        def json_serializer(obj):
+        def json_serializer(obj: Any) -> Any:
             if isinstance(obj, datetime):
                 return obj.isoformat()
             elif isinstance(obj, (set, frozenset)):
@@ -309,13 +316,13 @@ def get_state_manager(**kwargs: Any) -> StateManager:
     return _global_state_manager
 
 
-def persistent_state(key: str, ttl: Optional[int] = None, manager: Optional[StateManager] = None):
+def persistent_state(key: str, ttl: Optional[int] = None, manager: Optional[StateManager] = None) -> Callable:
     """
     Decorator to persist function return values across hot reloads
 
     Usage:
         @persistent_state("user_tokens", ttl=3600)
-        def get_valid_tokens():
+        def get_valid_tokens() -> List[str]:
             return [...]
     """
 
@@ -356,7 +363,7 @@ class TokenStore:
             # Token is valid
     """
 
-    def __init__(self, state_manager: Optional[StateManager] = None):
+    def __init__(self, state_manager: Optional[StateManager] = None) -> None:
         self.state_manager = state_manager or get_state_manager()
         self.token_key = "fastapi_tokens"
 
@@ -432,7 +439,7 @@ if __name__ == "__main__":
 
     # Test persistence decorator
     @persistent_state("api_response", ttl=30)
-    def expensive_api_call():
+    def expensive_api_call() -> Dict[str, str]:
         logger.debug("Making expensive API call...")
         return {"data": "expensive_result"}
 

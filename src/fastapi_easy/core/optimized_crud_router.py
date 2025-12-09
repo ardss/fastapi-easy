@@ -26,7 +26,10 @@ from typing import (
     Tuple,
     Type,
     TypeVar,
+    Union,
+    Sequence,
 )
+from typing_extensions import ParamSpec
 
 from fastapi import (
     APIRouter,
@@ -38,6 +41,8 @@ from fastapi import (
     Request,
     status,
 )
+from fastapi.routing import APIRoute as FastAPIRoute
+from enum import Enum
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, create_model
 from sqlalchemy import Select, and_, asc, desc, func, or_
@@ -102,7 +107,7 @@ class OptimizedCRUDRouter(APIRouter):
         db_manager: Optional[Any] = None,
         prefix: Optional[str] = None,
         tags: Optional[List[str]] = None,
-        id_type: Type = int,
+        id_type: Type[Any] = int,
         id_field: str = "id",
         create_schema: Optional[Type[SchemaType]] = None,
         update_schema: Optional[Type[SchemaType]] = None,
@@ -161,14 +166,17 @@ class OptimizedCRUDRouter(APIRouter):
 
     def _create_update_schema(self) -> Type[BaseModel]:
         """Create partial update schema"""
-        return create_model(
-            f"{self.schema.__name__}Update",
-            **{
-                name: (field_info.annotation, Field(None, **field_info.kwargs))
-                for name, field_info in self.schema.model_fields.items()
-                if name != self.id_field
-            },
-        )
+        from pydantic.fields import FieldInfo
+
+        field_definitions = {}
+        for name, field_info in self.schema.model_fields.items():
+            if name != self.id_field:
+                if isinstance(field_info, FieldInfo):
+                    field_definitions[name] = (field_info.annotation, Field(None, **(field_info.kwargs or {})))
+                else:
+                    field_definitions[name] = (field_info, Field(None))
+
+        return create_model(f"{self.schema.__name__}Update", **field_definitions)
 
     def _create_response_schema(self) -> Type[BaseModel]:
         """Create response schema with additional fields"""
@@ -215,7 +223,7 @@ class OptimizedCRUDRouter(APIRouter):
         offset = (page - 1) * page_size
 
         # Build base query
-        base_query = Select(self.model)
+        base_query: Select[T] = Select(self.model)
 
         # Apply filters
         base_query = self._apply_filters(base_query, query_params.filters)
@@ -232,7 +240,7 @@ class OptimizedCRUDRouter(APIRouter):
         base_query = self._apply_sorting(base_query, query_params.sorts)
 
         # Get total count
-        count_query = Select(func.count()).select_from(base_query.subquery())
+        count_query: Select = Select(func.count()).select_from(base_query.subquery())
         total_count = await session.scalar(count_query)
 
         # Apply pagination and fetch
@@ -242,7 +250,7 @@ class OptimizedCRUDRouter(APIRouter):
 
         return list(items), total_count
 
-    def _apply_filters(self, query: Select, filters: Dict[str, Any]) -> Select:
+    def _apply_filters(self, query: Select[T], filters: Dict[str, Any]) -> Select[T]:
         """Apply filters to query"""
         if not filters:
             return query
@@ -295,7 +303,7 @@ class OptimizedCRUDRouter(APIRouter):
 
         return query
 
-    def _apply_sorting(self, query: Select, sorts: Dict[str, str]) -> Select:
+    def _apply_sorting(self, query: Select[T], sorts: Dict[str, Union[str, Literal["asc", "desc"]]]) -> Select[T]:
         """Apply sorting to query"""
         if not sorts:
             # Apply default sorting by ID
@@ -325,7 +333,7 @@ class OptimizedCRUDRouter(APIRouter):
             search: str = Query(None, description="Search term"),
             include: str = Query(None, description="Fields to include"),
             exclude: str = Query(None, description="Fields to exclude"),
-        ):
+        ) -> dict[str, Any]:
             # Parse parameters
             query_params = QueryParams()
             if filters:
@@ -401,7 +409,7 @@ class OptimizedCRUDRouter(APIRouter):
             request: Request,
             item_id: self.id_type = Path(..., description=f"{self.schema.__name__} ID"),
             include: str = Query(None, description="Fields to include"),
-        ):
+        ) -> Union[T, dict[str, Any]]:
             cache_key = self._get_cache_key("get_one", {"id": item_id})
 
             # Check cache
@@ -412,7 +420,7 @@ class OptimizedCRUDRouter(APIRouter):
 
             db_manager = self.db_manager or await get_db_manager()
             async with db_manager.get_session() as session:
-                query = Select(self.model).where(getattr(self.model, self.id_field) == item_id)
+                query: Select[T] = Select(self.model).where(getattr(self.model, self.id_field) == item_id)
 
                 if self.enable_soft_delete:
                     query = query.where(getattr(self.model, self.soft_delete_field).is_(None))
@@ -449,7 +457,7 @@ class OptimizedCRUDRouter(APIRouter):
         async def route(
             request: Request,
             item_data: self.create_schema = Body(..., description=f"{self.schema.__name__} data"),
-        ):
+        ) -> T:
             db_manager = self.db_manager or await get_db_manager()
             async with db_manager.get_session() as session:
                 # Create model instance
@@ -462,7 +470,7 @@ class OptimizedCRUDRouter(APIRouter):
 
                     # Invalidate relevant cache
                     if self.cache:
-                        await self.cache.invalidate_pattern("get_all")
+                        await self.cache.clear("get_all")
 
                     # Refresh and serialize
                     await session.refresh(db_item)
@@ -497,11 +505,11 @@ class OptimizedCRUDRouter(APIRouter):
             item_data: self.update_schema = Body(
                 ..., description=f"{self.schema.__name__} update data"
             ),
-        ):
+        ) -> Union[T, dict[str, Any]]:
             db_manager = self.db_manager or await get_db_manager()
             async with db_manager.get_session() as session:
                 # Get existing item
-                query = Select(self.model).where(getattr(self.model, self.id_field) == item_id)
+                query: Select[T] = Select(self.model).where(getattr(self.model, self.id_field) == item_id)
 
                 if self.enable_soft_delete:
                     query = query.where(getattr(self.model, self.soft_delete_field).is_(None))
@@ -526,8 +534,8 @@ class OptimizedCRUDRouter(APIRouter):
 
                     # Invalidate cache
                     if self.cache:
-                        await self.cache.invalidate_pattern(f"get_one:{item_id}")
-                        await self.cache.invalidate_pattern("get_all")
+                        await self.cache.clear(f"get_one:{item_id}")
+                        await self.cache.clear("get_all")
 
                     # Refresh and serialize
                     await session.refresh(item)
@@ -557,11 +565,11 @@ class OptimizedCRUDRouter(APIRouter):
             soft: bool = Query(
                 self.enable_soft_delete, description="Perform soft delete if supported"
             ),
-        ):
+        ) -> dict[str, Any]:
             db_manager = self.db_manager or await get_db_manager()
             async with db_manager.get_session() as session:
                 # Get existing item
-                query = Select(self.model).where(getattr(self.model, self.id_field) == item_id)
+                query: Select[T] = Select(self.model).where(getattr(self.model, self.id_field) == item_id)
 
                 if self.enable_soft_delete and not soft:
                     query = query.where(getattr(self.model, self.soft_delete_field).is_(None))
@@ -588,8 +596,8 @@ class OptimizedCRUDRouter(APIRouter):
 
                     # Invalidate cache
                     if self.cache:
-                        await self.cache.invalidate_pattern(f"get_one:{item_id}")
-                        await self.cache.invalidate_pattern("get_all")
+                        await self.cache.clear(f"get_one:{item_id}")
+                        await self.cache.clear("get_all")
 
                     if self.enable_soft_delete and soft:
                         return {"message": f"{self.schema.__name__} soft deleted successfully"}
@@ -652,7 +660,7 @@ class OptimizedCRUDRouter(APIRouter):
 
                     # Invalidate cache
                     if self.cache:
-                        await self.cache.invalidate_pattern("get_all")
+                        await self.cache.clear("get_all")
 
                     # Serialize results
                     serialized_items = [
@@ -689,7 +697,7 @@ class OptimizedCRUDRouter(APIRouter):
                             raise ValueError("Missing 'id' field")
 
                         # Get existing item
-                        query = Select(self.model).where(
+                        query: Select[T] = Select(self.model).where(
                             getattr(self.model, self.id_field) == item_id
                         )
                         if self.enable_soft_delete:
@@ -723,7 +731,7 @@ class OptimizedCRUDRouter(APIRouter):
 
                     # Invalidate cache
                     if self.cache:
-                        await self.cache.invalidate_pattern("get_all")
+                        await self.cache.clear("get_all")
 
                     # Serialize results
                     serialized_items = [
@@ -754,7 +762,7 @@ class OptimizedCRUDRouter(APIRouter):
 
                 for i, item_id in enumerate(batch_data.ids):
                     try:
-                        query = Select(self.model).where(
+                        query: Select[T] = Select(self.model).where(
                             getattr(self.model, self.id_field) == item_id
                         )
                         if self.enable_soft_delete and not soft:
@@ -789,7 +797,7 @@ class OptimizedCRUDRouter(APIRouter):
 
                     # Invalidate cache
                     if self.cache:
-                        await self.cache.invalidate_pattern("get_all")
+                        await self.cache.clear("get_all")
 
                     response = {
                         "deleted_count": deleted_count,
@@ -854,7 +862,7 @@ class OptimizedCRUDRouter(APIRouter):
             # Build search query
             db_manager = self.db_manager or await get_db_manager()
             async with db_manager.get_session() as session:
-                base_query = Select(self.model)
+                base_query: Select[T] = Select(self.model)
 
                 if fuzzy:
                     # Implement fuzzy search (using LIKE with wildcards)
@@ -884,7 +892,7 @@ class OptimizedCRUDRouter(APIRouter):
                     )
 
                 # Get count and paginated results
-                count_query = Select(func.count()).select_from(base_query.subquery())
+                count_query: Select = Select(func.count()).select_from(base_query.subquery())
                 total_count = await session.scalar(count_query)
 
                 offset = (page - 1) * page_size
@@ -959,7 +967,7 @@ class OptimizedCRUDRouter(APIRouter):
                         status_code=400, detail=f"Field '{group_by}' not found in model"
                     )
 
-                base_query = Select(self.model)
+                base_query: Select[T] = Select(self.model)
                 base_query = self._apply_filters(base_query, parsed_filters)
 
                 if self.enable_soft_delete:
@@ -991,7 +999,7 @@ class OptimizedCRUDRouter(APIRouter):
                         raise HTTPException(status_code=400, detail=f"Field '{field}' not found")
                     agg_func = func.max(agg_field)
 
-                query = Select(group_field, agg_func.label("value")).select_from(base_query)
+                query = base_query.with_only_columns(group_field, agg_func.label("value"))
                 query = query.group_by(group_field)
 
                 # Execute query
@@ -1038,7 +1046,7 @@ class OptimizedCRUDRouter(APIRouter):
             db_manager = self.db_manager or await get_db_manager()
             async with db_manager.get_session() as session:
                 # Build count query
-                base_query = Select(self.model)
+                base_query: Select[T] = Select(self.model)
                 base_query = self._apply_filters(base_query, parsed_filters)
 
                 if self.enable_soft_delete:
@@ -1046,7 +1054,7 @@ class OptimizedCRUDRouter(APIRouter):
                         getattr(self.model, self.soft_delete_field).is_(None)
                     )
 
-                count_query = Select(func.count()).select_from(base_query.subquery())
+                count_query: Select = Select(func.count()).select_from(base_query.subquery())
                 total_count = await session.scalar(count_query)
 
                 return {"count": total_count, "filters": parsed_filters}

@@ -30,7 +30,7 @@ class LRUCache:
 
         self.max_size = max_size
         self.ttl = ttl
-        self.cache: OrderedDict = OrderedDict()
+        self.cache: "OrderedDict[str, Any]" = OrderedDict()
         self.cache_times: Dict[str, float] = {}
         self.hits = 0
         self.misses = 0

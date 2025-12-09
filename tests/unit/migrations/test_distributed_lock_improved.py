@@ -245,9 +245,9 @@ class TestDistributedLockEdgeCases:
 
         migration_engine.lock.acquire = mock_acquire
 
-        # Should return locked status
+        # Should return skipped status
         result = await migration_engine.auto_migrate()
-        assert result.status == "locked"
+        assert result.status == "skipped"
         assert len(result.migrations) == 0
 
     @pytest.mark.asyncio
@@ -400,8 +400,8 @@ class TestMigrationEngineWithImprovedLocking:
         # Run migration
         result = await migration_engine.auto_migrate()
 
-        # Should return locked status
-        assert result.status == "locked"
+        # Should return skipped status
+        assert result.status == "skipped"
 
         # Lock acquire should be called, but not release
         mock_lock.acquire.assert_called_once()

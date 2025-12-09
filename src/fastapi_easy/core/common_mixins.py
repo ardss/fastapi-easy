@@ -343,7 +343,7 @@ class CacheMixin:
         import hashlib
 
         key_data = f"{prefix}:{json.dumps(kwargs, sort_keys=True)}"
-        return hashlib.md5(key_data.encode()).hexdigest()
+        return hashlib.sha256(key_data.encode()).hexdigest()
 
     async def get_from_cache(self, cache_key: str) -> Optional[Any]:
         """Get value from cache (to be implemented)"""
